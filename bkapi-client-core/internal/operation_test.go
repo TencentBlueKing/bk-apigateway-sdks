@@ -57,7 +57,7 @@ var _ = Describe("operation", func() {
 
 		It("should fail on apply", func() {
 			option := dmock.NewMockOperationOption(ctrl)
-			option.EXPECT().ApplyTo(gomock.Any()).Return(errors.New("test"))
+			option.EXPECT().ApplyToOperation(gomock.Any()).Return(errors.New("test"))
 
 			_, err := operation.
 				Apply(option).
@@ -185,7 +185,7 @@ var _ = Describe("operation", func() {
 			var mockOperation dmock.MockOperation
 
 			opt := internal.NewOperationOption(nil)
-			err := opt.ApplyTo(&mockOperation)
+			err := opt.ApplyToOperation(&mockOperation)
 
 			Expect(errors.Cause(err)).To(Equal(define.ErrTypeNotMatch))
 		})
@@ -199,7 +199,7 @@ var _ = Describe("operation", func() {
 				return err
 			})
 
-			Expect(opt.ApplyTo(&operation)).To(Equal(err))
+			Expect(opt.ApplyToOperation(&operation)).To(Equal(err))
 		})
 
 		It("should apply timeout plugin", func() {

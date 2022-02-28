@@ -205,16 +205,16 @@ func (m *MockOperationOption) EXPECT() *MockOperationOptionMockRecorder {
 	return m.recorder
 }
 
-// ApplyTo mocks base method.
-func (m *MockOperationOption) ApplyTo(operation define.Operation) error {
+// ApplyToOperation mocks base method.
+func (m *MockOperationOption) ApplyToOperation(operation define.Operation) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ApplyTo", operation)
+	ret := m.ctrl.Call(m, "ApplyToOperation", operation)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// ApplyTo indicates an expected call of ApplyTo.
-func (mr *MockOperationOptionMockRecorder) ApplyTo(operation interface{}) *gomock.Call {
+// ApplyToOperation indicates an expected call of ApplyToOperation.
+func (mr *MockOperationOptionMockRecorder) ApplyToOperation(operation interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ApplyTo", reflect.TypeOf((*MockOperationOption)(nil).ApplyTo), operation)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ApplyToOperation", reflect.TypeOf((*MockOperationOption)(nil).ApplyToOperation), operation)
 }

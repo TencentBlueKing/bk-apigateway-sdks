@@ -25,7 +25,7 @@ func (cli *BkApiClient) Name() string {
 // Apply method applies the given options to the client.
 func (cli *BkApiClient) Apply(opts ...define.BkApiClientOption) error {
 	for _, opt := range opts {
-		err := opt.ApplyTo(cli)
+		err := opt.ApplyToClient(cli)
 		if err != nil {
 			return errors.WithMessagef(
 				err, "failed to apply option %v to client %s", opt, cli.Name(),
@@ -74,8 +74,8 @@ type BkApiClientOption struct {
 	fn func(client *BkApiClient) error
 }
 
-// ApplyTo will check if the given client is a BkApiClient and apply the option to it.
-func (o *BkApiClientOption) ApplyTo(cli define.BkApiClient) error {
+// ApplyToClient will check if the given client is a BkApiClient and apply the option to it.
+func (o *BkApiClientOption) ApplyToClient(cli define.BkApiClient) error {
 	client, ok := cli.(*BkApiClient)
 	if !ok {
 		return errors.WithMessagef(
