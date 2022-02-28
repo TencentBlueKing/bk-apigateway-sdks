@@ -126,7 +126,7 @@ func (op *Operation) callBodyProvider() error {
 	return nil
 }
 
-func (op *Operation) callResultDecoder(response *http.Response) error {
+func (op *Operation) callResultProvider(response *http.Response) error {
 	if op.resultProvider == nil {
 		return nil
 	}
@@ -162,7 +162,7 @@ func (op *Operation) Request() (*http.Response, error) {
 
 	rawResponse := response.RawResponse
 
-	err = op.callResultDecoder(rawResponse)
+	err = op.callResultProvider(rawResponse)
 	if err != nil {
 		return nil, err
 	}
