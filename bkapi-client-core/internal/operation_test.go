@@ -160,14 +160,18 @@ var _ = Describe("operation", func() {
 		It("should decode response body", func() {
 			mockTransportRoundTrip()
 
-			result := make(map[string]interface{})
-			_, err := operation.
-				SetResult(&result).
-				SetResultProvider(func(_ *http.Response, _ interface{}) error {
-					result["foo"] = "bar"
+			provider := dmock.NewMockResultProvider(ctrl)
+			provider.EXPECT().ProvideResult(gomock.Any(), gomock.Any()).DoAndReturn(func(response *http.Response, r interface{}) error {
+				result := r.(map[string]interface{})
+				result["foo"] = "bar"
 
-					return nil
-				}).
+				return nil
+			})
+			result := make(map[string]interface{})
+
+			_, err := operation.
+				SetResult(result).
+				SetResultProvider(provider).
 				Request()
 
 			Expect(err).To(BeNil())

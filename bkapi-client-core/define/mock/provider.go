@@ -5,6 +5,7 @@
 package mock
 
 import (
+	http "net/http"
 	reflect "reflect"
 
 	define "github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define"
@@ -46,4 +47,41 @@ func (m *MockBodyProvider) ProvideBody(operation define.Operation, data interfac
 func (mr *MockBodyProviderMockRecorder) ProvideBody(operation, data interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ProvideBody", reflect.TypeOf((*MockBodyProvider)(nil).ProvideBody), operation, data)
+}
+
+// MockResultProvider is a mock of ResultProvider interface.
+type MockResultProvider struct {
+	ctrl     *gomock.Controller
+	recorder *MockResultProviderMockRecorder
+}
+
+// MockResultProviderMockRecorder is the mock recorder for MockResultProvider.
+type MockResultProviderMockRecorder struct {
+	mock *MockResultProvider
+}
+
+// NewMockResultProvider creates a new mock instance.
+func NewMockResultProvider(ctrl *gomock.Controller) *MockResultProvider {
+	mock := &MockResultProvider{ctrl: ctrl}
+	mock.recorder = &MockResultProviderMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockResultProvider) EXPECT() *MockResultProviderMockRecorder {
+	return m.recorder
+}
+
+// ProvideResult mocks base method.
+func (m *MockResultProvider) ProvideResult(response *http.Response, result interface{}) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ProvideResult", response, result)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ProvideResult indicates an expected call of ProvideResult.
+func (mr *MockResultProviderMockRecorder) ProvideResult(response, result interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ProvideResult", reflect.TypeOf((*MockResultProvider)(nil).ProvideResult), response, result)
 }

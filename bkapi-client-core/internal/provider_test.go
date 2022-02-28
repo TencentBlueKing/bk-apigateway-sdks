@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net/http"
+	"strings"
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define/mock"
@@ -15,13 +17,11 @@ import (
 
 var _ = Describe("Provider", func() {
 	var (
-		ctrl      *gomock.Controller
-		operation *mock.MockOperation
+		ctrl *gomock.Controller
 	)
 
 	BeforeEach(func() {
 		ctrl = gomock.NewController(GinkgoT())
-		operation = mock.NewMockOperation(ctrl)
 	})
 
 	AfterEach(func() {
@@ -29,6 +29,12 @@ var _ = Describe("Provider", func() {
 	})
 
 	Context("MarshalBodyProvider", func() {
+		var operation *mock.MockOperation
+
+		BeforeEach(func() {
+			operation = mock.NewMockOperation(ctrl)
+		})
+
 		It("should marshal the data", func() {
 			result := "hello world"
 
@@ -65,6 +71,39 @@ var _ = Describe("Provider", func() {
 			Expect(provider.ProvideBody(operation, map[string]string{
 				"hello": "world",
 			})).To(BeNil())
+		})
+	})
+
+	Context("UnmarshalResultProvider", func() {
+		It("should unmarshal the result", func() {
+			var reader io.Reader
+
+			provider := internal.NewUnmarshalResultProvider(func(body io.Reader, v interface{}) error {
+				*v.(*io.Reader) = body
+
+				return nil
+			})
+
+			Expect(provider.ProvideResult(&http.Response{
+				Body: ioutil.NopCloser(strings.NewReader("hello world")),
+			}, &reader)).To(BeNil())
+
+			result, err := ioutil.ReadAll(reader)
+			Expect(err).To(BeNil())
+			Expect(string(result)).To(Equal("hello world"))
+		})
+
+		It("should marshal the data from json", func() {
+			var result map[string]interface{}
+
+			provider := internal.NewJsonResultProvider()
+			Expect(provider.ProvideResult(&http.Response{
+				Body: ioutil.NopCloser(strings.NewReader(`{"hello":"world"}`)),
+			}, &result)).To(BeNil())
+
+			Expect(result).To(Equal(map[string]interface{}{
+				"hello": "world",
+			}))
 		})
 	})
 })

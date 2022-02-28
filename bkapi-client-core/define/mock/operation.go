@@ -85,17 +85,17 @@ func (mr *MockOperationMockRecorder) SetBody(data interface{}) *gomock.Call {
 }
 
 // SetBodyProvider mocks base method.
-func (m *MockOperation) SetBodyProvider(bodyProvider define.BodyProvider) define.Operation {
+func (m *MockOperation) SetBodyProvider(provider define.BodyProvider) define.Operation {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetBodyProvider", bodyProvider)
+	ret := m.ctrl.Call(m, "SetBodyProvider", provider)
 	ret0, _ := ret[0].(define.Operation)
 	return ret0
 }
 
 // SetBodyProvider indicates an expected call of SetBodyProvider.
-func (mr *MockOperationMockRecorder) SetBodyProvider(bodyProvider interface{}) *gomock.Call {
+func (mr *MockOperationMockRecorder) SetBodyProvider(provider interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetBodyProvider", reflect.TypeOf((*MockOperation)(nil).SetBodyProvider), bodyProvider)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetBodyProvider", reflect.TypeOf((*MockOperation)(nil).SetBodyProvider), provider)
 }
 
 // SetBodyReader mocks base method.
@@ -211,7 +211,7 @@ func (mr *MockOperationMockRecorder) SetResult(result interface{}) *gomock.Call 
 }
 
 // SetResultProvider mocks base method.
-func (m *MockOperation) SetResultProvider(provider func(*http.Response, interface{}) error) define.Operation {
+func (m *MockOperation) SetResultProvider(provider define.ResultProvider) define.Operation {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SetResultProvider", provider)
 	ret0, _ := ret[0].(define.Operation)

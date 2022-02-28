@@ -12,3 +12,11 @@ func OptJsonBodyProvider() *OperationOption {
 		return nil
 	})
 }
+
+// OptJsonResultProvider is a option for json result provider.
+func OptJsonResultProvider() *OperationOption {
+	return NewOperationOption(func(operation define.Operation) error {
+		operation.SetResultProvider(internal.NewJsonResultProvider())
+		return nil
+	})
+}
