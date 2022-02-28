@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define"
 	dmock "github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define/mock"
@@ -16,6 +17,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
 	"gopkg.in/h2non/gentleman.v2"
+	"gopkg.in/h2non/gentleman.v2/plugins/timeout"
 	"gopkg.in/h2non/gentleman.v2/plugins/transport"
 )
 
@@ -198,6 +200,18 @@ var _ = Describe("operation", func() {
 			})
 
 			Expect(opt.ApplyTo(&operation)).To(Equal(err))
+		})
+
+		It("should apply timeout plugin", func() {
+			plugin := timeout.Request(time.Second)
+			client := gentleman.New()
+			request := client.Request()
+			rawStack := request.Middleware.GetStack()
+
+			internal.NewOperation("test", request).
+				Apply(internal.NewOperationPluginOption(plugin))
+
+			Expect(request.Middleware.GetStack()).To(HaveLen(len(rawStack) + 1))
 		})
 	})
 })

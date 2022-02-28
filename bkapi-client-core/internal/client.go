@@ -4,15 +4,17 @@ import (
 	"fmt"
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define"
+	"github.com/pkg/errors"
 	"gopkg.in/h2non/gentleman.v2"
 	"gopkg.in/h2non/gentleman.v2/plugin"
 )
 
 // BkApiClient is a base client for define.
 type BkApiClient struct {
-	name                string
-	client              *gentleman.Client
-	commonOperationOpts []define.OperationOption
+	name             string
+	client           *gentleman.Client
+	operationOptions []define.OperationOption
+	operationFactory func(name string, request *gentleman.Request) define.Operation
 }
 
 // Name returns the client name.
@@ -20,55 +22,93 @@ func (cli *BkApiClient) Name() string {
 	return cli.name
 }
 
+// Apply method applies the given options to the client.
+func (cli *BkApiClient) Apply(opts ...define.BkApiClientOption) error {
+	for _, opt := range opts {
+		err := opt.ApplyTo(cli)
+		if err != nil {
+			return errors.WithMessagef(
+				err, "failed to apply option %v to client %s", opt, cli.Name(),
+			)
+		}
+	}
+
+	return nil
+}
+
 // NewOperation will create a new operation dynamically and apply the given options.
 func (cli *BkApiClient) NewOperation(config define.OperationConfig, opts ...define.OperationOption) define.Operation {
-	operation := NewOperation(
-		fmt.Sprintf("%s.%s", cli.Name(), config.Name),
-		cli.client.Request().Method(config.Method).Path(config.Path),
-	)
+	request := cli.client.Request().
+		Method(config.Method).
+		Path(config.Path)
 
-	operation.Apply(cli.commonOperationOpts...)
-	operation.Apply(opts...)
+	operation := cli.operationFactory(fmt.Sprintf("%s.%s", cli.Name(), config.Name), request)
+
+	for _, o := range [][]define.OperationOption{
+		cli.operationOptions, opts,
+	} {
+		if len(o) > 0 {
+			operation.Apply(opts...)
+		}
+	}
 
 	return operation
 }
 
-// Apply method applies the given options to the client.
-func (cli *BkApiClient) Apply(opts ...define.BkApiClientOption) {
-	for _, opt := range opts {
-		opt.ApplyTo(cli)
-	}
-}
-
 // NewBkApiClient creates a new BkApiClient.
-func NewBkApiClient(name string) *BkApiClient {
+func NewBkApiClient(
+	name string,
+	client *gentleman.Client,
+	factory func(name string, request *gentleman.Request) define.Operation,
+) *BkApiClient {
 	return &BkApiClient{
-		name:                name,
-		client:              gentleman.New(),
-		commonOperationOpts: make([]define.OperationOption, 0),
+		name:             name,
+		client:           client,
+		operationOptions: make([]define.OperationOption, 0),
+		operationFactory: factory,
 	}
 }
 
-// GentlemanClientPluginOption is wrapper for gentleman plugin
-type GentlemanClientPluginOption struct {
-	plugins []plugin.Plugin
+// BkApiClientOption is a wrapper for a client option.
+type BkApiClientOption struct {
+	fn func(client *BkApiClient) error
 }
 
-// ApplyTo applies the given options to the gentleman client.
-func (opt *GentlemanClientPluginOption) ApplyTo(cli define.BkApiClient) {
+// ApplyTo will check if the given client is a BkApiClient and apply the option to it.
+func (o *BkApiClientOption) ApplyTo(cli define.BkApiClient) error {
 	client, ok := cli.(*BkApiClient)
 	if !ok {
-		return
+		return errors.WithMessagef(
+			define.ErrTypeNotMatch, "expected type *BkApiClient, got %T", cli,
+		)
 	}
 
-	for _, p := range opt.plugins {
-		client.client.Use(p)
+	return o.fn(client)
+}
+
+// NewBkApiClientOption creates a new client option.
+func NewBkApiClientOption(fn func(client *BkApiClient) error) define.BkApiClientOption {
+	return &BkApiClientOption{
+		fn: fn,
 	}
 }
 
-// NewGentlemanClientPluginOption creates a new gentleman client plugin option.
-func NewGentlemanClientPluginOption(plugins ...plugin.Plugin) *GentlemanClientPluginOption {
-	return &GentlemanClientPluginOption{
-		plugins: plugins,
-	}
+// NewClientPluginOption creates a new gentleman client plugin option.
+func NewClientPluginOption(plugins ...plugin.Plugin) define.BkApiClientOption {
+	return NewBkApiClientOption(func(cli *BkApiClient) error {
+		for _, plugin := range plugins {
+			cli.client.Use(plugin)
+		}
+
+		return nil
+	})
+}
+
+// NewClientCommonOption creates a new common client option.
+func NewClientCommonOption(options ...define.OperationOption) define.BkApiClientOption {
+	return NewBkApiClientOption(func(cli *BkApiClient) error {
+		cli.operationOptions = append(cli.operationOptions, options...)
+		return nil
+	})
+
 }
