@@ -1,0 +1,104 @@
+package bkapi
+
+import (
+	"crypto/tls"
+	"net/http"
+	"time"
+
+	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/internal"
+	"gopkg.in/h2non/gentleman.v2/plugins/auth"
+	"gopkg.in/h2non/gentleman.v2/plugins/cookies"
+	"gopkg.in/h2non/gentleman.v2/plugins/headers"
+	"gopkg.in/h2non/gentleman.v2/plugins/proxy"
+	"gopkg.in/h2non/gentleman.v2/plugins/query"
+	"gopkg.in/h2non/gentleman.v2/plugins/redirect"
+	"gopkg.in/h2non/gentleman.v2/plugins/timeout"
+	tlsplugin "gopkg.in/h2non/gentleman.v2/plugins/tls"
+	"gopkg.in/h2non/gentleman.v2/plugins/transport"
+)
+
+// OptTimeout defines the maximum amount of time a whole request process
+// (including dial / request / redirect) can take.
+func OptTimeout(duration time.Duration) *internal.PluginOption {
+	return internal.NewPluginOption(timeout.Request(duration))
+}
+
+// OptDialTimeout defines the maximum amount of time waiting for network dialing
+func OptDialTimeout(duration, keepAlive time.Duration) *internal.PluginOption {
+	return internal.NewPluginOption(timeout.Dial(duration, keepAlive))
+}
+
+// OptTLShandshakeTimeout defines the maximum amount of time waiting for a TLS handshake
+func OptTLShandshakeTimeout(duration time.Duration) *internal.PluginOption {
+	return internal.NewPluginOption(timeout.TLS(duration))
+}
+
+// OptBasicAuth defines an authorization basic header in the outgoing request
+func OptBasicAuth(username, password string) *internal.PluginOption {
+	return internal.NewPluginOption(auth.Basic(username, password))
+}
+
+// OptBearerAuth defines an authorization bearer token header in the outgoing request
+func OptBearerAuth(token string) *internal.PluginOption {
+	return internal.NewPluginOption(auth.Bearer(token))
+}
+
+// OptAddCookie adds a cookie to the request. Per RFC 6265 section 5.4, AddCookie does not
+// attach more than one Cookie header field.
+// That means all cookies, if any, are written into the same line, separated by semicolon.
+func OptAddCookie(cookie *http.Cookie) *internal.PluginOption {
+	return internal.NewPluginOption(cookies.Add(cookie))
+}
+
+// OptDelAllCookies deletes all the cookies by deleting the Cookie header field.
+func OptDelAllCookies() *internal.PluginOption {
+	return internal.NewPluginOption(cookies.DelAll())
+}
+
+// OptSetHeader sets the header entries associated with key to the single element value.
+// It replaces any existing values associated with key.
+func OptSetHeader(key string, value string) *internal.PluginOption {
+	return internal.NewPluginOption(headers.Set(key, value))
+}
+
+// OptDelHeader deletes the header fields associated with key.
+func OptDelHeader(key string) *internal.PluginOption {
+	return internal.NewPluginOption(headers.Del(key))
+}
+
+// OptProxies defines the proxy servers to be used based on the transport scheme
+func OptProxies(servers map[string]string) *internal.PluginOption {
+	return internal.NewPluginOption(proxy.Set(servers))
+}
+
+// OptSetQueryParam ets the query param key and value.
+// It replaces any existing values.
+func OptSetQueryParam(key string, value string) *internal.PluginOption {
+	return internal.NewPluginOption(query.Set(key, value))
+}
+
+// OptAddQueryParam adds the query param value to key.
+// It appends to any existing values associated with key.
+func OptAddQueryParam(key string, value string) *internal.PluginOption {
+	return internal.NewPluginOption(query.Add(key, value))
+}
+
+// OptDelQueryParam deletes the query param values associated with key.
+func OptDelQueryParam(key string) *internal.PluginOption {
+	return internal.NewPluginOption(query.Del(key))
+}
+
+// OptLimitRedirect defines in the maximum number of redirects that http.Client should follow.
+func OptLimitRedirect(limit int) *internal.PluginOption {
+	return internal.NewPluginOption(redirect.Limit(limit))
+}
+
+// OptTransport sets a new HTTP transport for the outgoing request
+func OptTransport(roundTripper http.RoundTripper) *internal.PluginOption {
+	return internal.NewPluginOption(transport.Set(roundTripper))
+}
+
+// OptTLS defines the request TLS connection config
+func OptTLS(config *tls.Config) *internal.PluginOption {
+	return internal.NewPluginOption(tlsplugin.Config(config))
+}

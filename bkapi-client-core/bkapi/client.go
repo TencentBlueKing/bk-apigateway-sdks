@@ -3,6 +3,7 @@ package bkapi
 import (
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/internal"
+	"github.com/pkg/errors"
 	"gopkg.in/h2non/gentleman.v2"
 )
 
@@ -14,15 +15,23 @@ type Config struct {
 	Stage     string
 }
 
-// NewBkApiClient :
-func NewBkApiClient(name string, config Config, opts ...define.BkApiClientOption) define.BkApiClient {
+// NewBkApiClient creates a new BkApiClient.
+func NewBkApiClient(name string, config Config, opts ...define.BkApiClientOption) (*internal.BkApiClient, error) {
 	gentlemanClient := gentleman.New().
 		URL(config.Endpoint)
 
 	client := internal.NewBkApiClient(name, gentlemanClient, func(name string, request *gentleman.Request) define.Operation {
 		return internal.NewOperation(name, request)
 	})
-	client.Apply(opts...)
 
-	return client
+	if len(opts) == 0 {
+		return client, nil
+	}
+
+	err := client.Apply(opts...)
+	if err != nil {
+		return nil, errors.WithMessagef(err, "failed to apply options to client %s", name)
+	}
+
+	return client, nil
 }
