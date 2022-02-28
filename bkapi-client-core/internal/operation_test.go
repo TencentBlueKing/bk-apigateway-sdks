@@ -129,16 +129,18 @@ var _ = Describe("operation", func() {
 
 		It("should set request body with json", func() {
 			mockTransportRoundTrip()
+			json := `{"foo":"bar"}`
 
 			response, err := operation.
 				SetBodyProvider(func(op define.Operation, data interface{}) error {
-					op.SetBodyReader(strings.NewReader(`{"foo":"bar"}`))
+					op.SetBodyReader(strings.NewReader(data.(string)))
 					op.SetHeaders(map[string]string{
 						"Content-Type": "application/json",
 					})
 
 					return nil
 				}).
+				SetBody(json).
 				Request()
 
 			Expect(err).To(BeNil())
