@@ -18,7 +18,7 @@ type Operation struct {
 	name           string
 	err            error
 	bodyData       interface{}
-	bodyProvider   func(define.Operation, interface{}) error
+	bodyProvider   define.BodyProvider
 	result         interface{}
 	resultProvider func(response *http.Response, result interface{}) error
 	request        *gentleman.Request
@@ -86,7 +86,7 @@ func (op *Operation) SetBody(body interface{}) define.Operation {
 }
 
 // SetBodyProvider used to set the operation body provider.
-func (op *Operation) SetBodyProvider(bodyProvider func(operation define.Operation, data interface{}) error) define.Operation {
+func (op *Operation) SetBodyProvider(bodyProvider define.BodyProvider) define.Operation {
 	op.bodyProvider = bodyProvider
 
 	return op
@@ -113,12 +113,26 @@ func (op *Operation) SetContext(ctx context.Context) define.Operation {
 	return op
 }
 
+// SetContentType used to set the request content type.
+func (op *Operation) SetContentType(contentType string) define.Operation {
+	op.request.SetHeader("Content-Type", contentType)
+
+	return op
+}
+
+// SetContentLength used to set the request content length.
+func (op *Operation) SetContentLength(length int64) define.Operation {
+	op.request.Context.Request.ContentLength = length
+
+	return op
+}
+
 func (op *Operation) callBodyProvider() error {
 	if op.bodyProvider == nil {
 		return nil
 	}
 
-	err := op.bodyProvider(op, op.bodyData)
+	err := op.bodyProvider.ProvideBody(op, op.bodyData)
 	if err != nil {
 		return errors.WithMessagef(err, "failed to set body for operation %s", op)
 	}
