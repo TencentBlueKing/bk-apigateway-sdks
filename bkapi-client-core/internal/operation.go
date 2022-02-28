@@ -15,13 +15,13 @@ import (
 // Operation is a wrapper for a request, it allows to set the request options
 // and send the request.
 type Operation struct {
-	name          string
-	err           error
-	bodyData      interface{}
-	bodyProvider  func(define.Operation, interface{}) error
-	result        interface{}
-	resultDecoder func(response *http.Response, result interface{}) error
-	request       *gentleman.Request
+	name           string
+	err            error
+	bodyData       interface{}
+	bodyProvider   func(define.Operation, interface{}) error
+	result         interface{}
+	resultProvider func(response *http.Response, result interface{}) error
+	request        *gentleman.Request
 }
 
 // String returns the operation name.
@@ -99,9 +99,9 @@ func (op *Operation) SetResult(result interface{}) define.Operation {
 	return op
 }
 
-// SetResultDecoder used to set the operation result decoder.
-func (op *Operation) SetResultDecoder(decoder func(response *http.Response, result interface{}) error) define.Operation {
-	op.resultDecoder = decoder
+// SetResultProvider used to set the operation result provider.
+func (op *Operation) SetResultProvider(provider func(response *http.Response, result interface{}) error) define.Operation {
+	op.resultProvider = provider
 
 	return op
 }
@@ -127,11 +127,11 @@ func (op *Operation) callBodyProvider() error {
 }
 
 func (op *Operation) callResultDecoder(response *http.Response) error {
-	if op.resultDecoder == nil {
+	if op.resultProvider == nil {
 		return nil
 	}
 
-	err := op.resultDecoder(response, op.result)
+	err := op.resultProvider(response, op.result)
 	if err != nil {
 		return errors.WithMessagef(err, "failed to decode result for operation %s", op)
 	}

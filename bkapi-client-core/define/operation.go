@@ -37,10 +37,10 @@ type Operation interface {
 	// SetResult method sets the operation result.
 	SetResult(result interface{}) Operation
 
-	// SetResultDecoder method sets the operation result decoder.
+	// SetResultProvider method sets the operation result provider.
 	// You can combine multiple decoders into one function,
 	// choose the right one by the response status code or content type.
-	SetResultDecoder(decoder func(response *http.Response, result interface{}) error) Operation
+	SetResultProvider(provider func(response *http.Response, result interface{}) error) Operation
 
 	// SetContext method sets the request context.
 	SetContext(ctx context.Context) Operation
