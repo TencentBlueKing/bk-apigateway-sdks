@@ -30,7 +30,7 @@ func (op *Operation) String() string {
 // Apply method applies the given options to the operation.
 func (op *Operation) Apply(opts ...define.OperationOption) define.Operation {
 	for _, opt := range opts {
-		err := opt.ApplyTo(op)
+		err := opt.ApplyToOperation(op)
 		if err != nil {
 			op.err = errors.WithMessagef(err, "failed to apply option %s", opt)
 		}
@@ -137,8 +137,8 @@ type OperationOption struct {
 	fn func(operation *Operation) error
 }
 
-// ApplyTo will check if the operation is valid and apply the option to the operation.
-func (o *OperationOption) ApplyTo(op define.Operation) error {
+// ApplyToOperation will check if the operation is valid and apply the option to the operation.
+func (o *OperationOption) ApplyToOperation(op define.Operation) error {
 	operation, ok := op.(*Operation)
 	if !ok {
 		return errors.WithMessagef(

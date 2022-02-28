@@ -94,16 +94,16 @@ func (m *MockBkApiClientOption) EXPECT() *MockBkApiClientOptionMockRecorder {
 	return m.recorder
 }
 
-// ApplyTo mocks base method.
-func (m *MockBkApiClientOption) ApplyTo(client define.BkApiClient) error {
+// ApplyToClient mocks base method.
+func (m *MockBkApiClientOption) ApplyToClient(client define.BkApiClient) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ApplyTo", client)
+	ret := m.ctrl.Call(m, "ApplyToClient", client)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// ApplyTo indicates an expected call of ApplyTo.
-func (mr *MockBkApiClientOptionMockRecorder) ApplyTo(client interface{}) *gomock.Call {
+// ApplyToClient indicates an expected call of ApplyToClient.
+func (mr *MockBkApiClientOptionMockRecorder) ApplyToClient(client interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ApplyTo", reflect.TypeOf((*MockBkApiClientOption)(nil).ApplyTo), client)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ApplyToClient", reflect.TypeOf((*MockBkApiClientOption)(nil).ApplyToClient), client)
 }

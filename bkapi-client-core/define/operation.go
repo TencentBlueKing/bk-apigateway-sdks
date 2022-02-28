@@ -48,8 +48,8 @@ type Operation interface {
 
 // OperationOption defines the option of the operation.
 type OperationOption interface {
-	// ApplyTo method applies the option to the operation.
-	ApplyTo(operation Operation) error
+	// ApplyToOperation method applies the option to the operation.
+	ApplyToOperation(operation Operation) error
 }
 
 // OperationConfig used to configure the operation.

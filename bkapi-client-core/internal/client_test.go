@@ -66,13 +66,13 @@ var _ = Describe("Client", func() {
 		It("should fail on apply", func() {
 			option := dmock.NewMockBkApiClientOption(ctrl)
 
-			option.EXPECT().ApplyTo(gomock.Any()).Return(errors.New("test"))
+			option.EXPECT().ApplyToClient(gomock.Any()).Return(errors.New("test"))
 			Expect(client.Apply(option)).NotTo(BeNil())
 		})
 
 		It("should apply an option", func() {
 			option := dmock.NewMockBkApiClientOption(ctrl)
-			option.EXPECT().ApplyTo(client).Return(nil)
+			option.EXPECT().ApplyToClient(client).Return(nil)
 
 			Expect(client.Apply(option)).To(BeNil())
 		})
@@ -110,7 +110,7 @@ var _ = Describe("Client", func() {
 			var client dmock.MockBkApiClient
 
 			opt := internal.NewBkApiClientOption(nil)
-			err := opt.ApplyTo(&client)
+			err := opt.ApplyToClient(&client)
 
 			Expect(errors.Cause(err)).To(Equal(define.ErrTypeNotMatch))
 		})
@@ -124,7 +124,7 @@ var _ = Describe("Client", func() {
 				return err
 			})
 
-			Expect(opt.ApplyTo(&client)).To(Equal(err))
+			Expect(opt.ApplyToClient(&client)).To(Equal(err))
 		})
 
 		It("should apply timeout plugin", func() {

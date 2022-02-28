@@ -13,6 +13,6 @@ type BkApiClient interface {
 
 // BkApiClientOption defines the interface of BkApi client option.
 type BkApiClientOption interface {
-	// ApplyTo method applies the option to the client.
-	ApplyTo(client BkApiClient) error
+	// ApplyToClient method applies the option to the client.
+	ApplyToClient(client BkApiClient) error
 }
