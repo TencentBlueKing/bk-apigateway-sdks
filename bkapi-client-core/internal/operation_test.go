@@ -155,7 +155,7 @@ var _ = Describe("operation", func() {
 			result := make(map[string]interface{})
 			_, err := operation.
 				SetResult(&result).
-				SetResultDecoder(func(_ *http.Response, _ interface{}) error {
+				SetResultProvider(func(_ *http.Response, _ interface{}) error {
 					result["foo"] = "bar"
 
 					return nil

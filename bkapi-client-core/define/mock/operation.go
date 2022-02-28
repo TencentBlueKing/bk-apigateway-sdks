@@ -182,18 +182,18 @@ func (mr *MockOperationMockRecorder) SetResult(result interface{}) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetResult", reflect.TypeOf((*MockOperation)(nil).SetResult), result)
 }
 
-// SetResultDecoder mocks base method.
-func (m *MockOperation) SetResultDecoder(decoder func(*http.Response, interface{}) error) define.Operation {
+// SetResultProvider mocks base method.
+func (m *MockOperation) SetResultProvider(provider func(*http.Response, interface{}) error) define.Operation {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetResultDecoder", decoder)
+	ret := m.ctrl.Call(m, "SetResultProvider", provider)
 	ret0, _ := ret[0].(define.Operation)
 	return ret0
 }
 
-// SetResultDecoder indicates an expected call of SetResultDecoder.
-func (mr *MockOperationMockRecorder) SetResultDecoder(decoder interface{}) *gomock.Call {
+// SetResultProvider indicates an expected call of SetResultProvider.
+func (mr *MockOperationMockRecorder) SetResultProvider(provider interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetResultDecoder", reflect.TypeOf((*MockOperation)(nil).SetResultDecoder), decoder)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetResultProvider", reflect.TypeOf((*MockOperation)(nil).SetResultProvider), provider)
 }
 
 // MockOperationOption is a mock of OperationOption interface.
