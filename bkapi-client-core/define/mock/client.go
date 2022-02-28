@@ -34,6 +34,24 @@ func (m *MockBkApiClient) EXPECT() *MockBkApiClientMockRecorder {
 	return m.recorder
 }
 
+// Apply mocks base method.
+func (m *MockBkApiClient) Apply(opts ...define.BkApiClientOption) error {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Apply", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Apply indicates an expected call of Apply.
+func (mr *MockBkApiClientMockRecorder) Apply(opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Apply", reflect.TypeOf((*MockBkApiClient)(nil).Apply), opts...)
+}
+
 // NewOperation mocks base method.
 func (m *MockBkApiClient) NewOperation(config define.OperationConfig, opts ...define.OperationOption) define.Operation {
 	m.ctrl.T.Helper()
@@ -77,13 +95,15 @@ func (m *MockBkApiClientOption) EXPECT() *MockBkApiClientOptionMockRecorder {
 }
 
 // ApplyTo mocks base method.
-func (m *MockBkApiClientOption) ApplyTo(arg0 define.BkApiClient) {
+func (m *MockBkApiClientOption) ApplyTo(client define.BkApiClient) error {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "ApplyTo", arg0)
+	ret := m.ctrl.Call(m, "ApplyTo", client)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // ApplyTo indicates an expected call of ApplyTo.
-func (mr *MockBkApiClientOptionMockRecorder) ApplyTo(arg0 interface{}) *gomock.Call {
+func (mr *MockBkApiClientOptionMockRecorder) ApplyTo(client interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ApplyTo", reflect.TypeOf((*MockBkApiClientOption)(nil).ApplyTo), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ApplyTo", reflect.TypeOf((*MockBkApiClientOption)(nil).ApplyTo), client)
 }

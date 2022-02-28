@@ -155,3 +155,14 @@ func NewOperationOption(fn func(operation *Operation) error) define.OperationOpt
 		fn: fn,
 	}
 }
+
+// NewOperationPluginOption creates a new operation plugin option.
+func NewOperationPluginOption(plugins ...plugin.Plugin) define.OperationOption {
+	return NewOperationOption(func(operation *Operation) error {
+		for _, plugin := range plugins {
+			operation.request.Use(plugin)
+		}
+
+		return nil
+	})
+}
