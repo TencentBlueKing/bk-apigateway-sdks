@@ -85,7 +85,7 @@ func (mr *MockOperationMockRecorder) SetBody(data interface{}) *gomock.Call {
 }
 
 // SetBodyProvider mocks base method.
-func (m *MockOperation) SetBodyProvider(bodyProvider func(define.Operation, interface{}) error) define.Operation {
+func (m *MockOperation) SetBodyProvider(bodyProvider define.BodyProvider) define.Operation {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SetBodyProvider", bodyProvider)
 	ret0, _ := ret[0].(define.Operation)
@@ -110,6 +110,34 @@ func (m *MockOperation) SetBodyReader(body io.Reader) define.Operation {
 func (mr *MockOperationMockRecorder) SetBodyReader(body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetBodyReader", reflect.TypeOf((*MockOperation)(nil).SetBodyReader), body)
+}
+
+// SetContentLength mocks base method.
+func (m *MockOperation) SetContentLength(contentLength int64) define.Operation {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetContentLength", contentLength)
+	ret0, _ := ret[0].(define.Operation)
+	return ret0
+}
+
+// SetContentLength indicates an expected call of SetContentLength.
+func (mr *MockOperationMockRecorder) SetContentLength(contentLength interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetContentLength", reflect.TypeOf((*MockOperation)(nil).SetContentLength), contentLength)
+}
+
+// SetContentType mocks base method.
+func (m *MockOperation) SetContentType(contentType string) define.Operation {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetContentType", contentType)
+	ret0, _ := ret[0].(define.Operation)
+	return ret0
+}
+
+// SetContentType indicates an expected call of SetContentType.
+func (mr *MockOperationMockRecorder) SetContentType(contentType interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetContentType", reflect.TypeOf((*MockOperation)(nil).SetContentType), contentType)
 }
 
 // SetContext mocks base method.

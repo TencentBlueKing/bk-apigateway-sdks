@@ -1,6 +1,7 @@
 package internal_test
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io/ioutil"
@@ -128,27 +129,32 @@ var _ = Describe("operation", func() {
 		})
 
 		It("should set request body with json", func() {
+			requestBody := []byte(`{"foo":"bar"}`)
+
+			provider := dmock.NewMockBodyProvider(ctrl)
+			provider.EXPECT().ProvideBody(operation, gomock.Any()).DoAndReturn(func(op define.Operation, data interface{}) error {
+				op.
+					SetContentType("application/json").
+					SetContentLength(int64(len(requestBody))).
+					SetBodyReader(bytes.NewReader(requestBody))
+
+				return nil
+			})
+
 			mockTransportRoundTrip()
-			json := `{"foo":"bar"}`
 
 			response, err := operation.
-				SetBodyProvider(func(op define.Operation, data interface{}) error {
-					op.SetBodyReader(strings.NewReader(data.(string)))
-					op.SetHeaders(map[string]string{
-						"Content-Type": "application/json",
-					})
-
-					return nil
-				}).
-				SetBody(json).
+				SetBodyProvider(provider).
+				SetBody(gomock.Any()).
 				Request()
 
 			Expect(err).To(BeNil())
 			Expect(response.Request.Header.Get("Content-Type")).To(Equal("application/json"))
+			Expect(int(response.Request.ContentLength)).To(Equal(len(requestBody)))
 
 			body, err := ioutil.ReadAll(response.Request.Body)
 			Expect(err).To(BeNil())
-			Expect(string(body)).To(Equal(`{"foo":"bar"}`))
+			Expect(body).To(Equal(requestBody))
 		})
 
 		It("should decode response body", func() {

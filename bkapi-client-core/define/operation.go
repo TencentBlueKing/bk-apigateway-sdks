@@ -32,7 +32,7 @@ type Operation interface {
 	// SetBodyProvider method sets the request body provider.
 	// A provider not only provides the request body,
 	// but also provides the request headers, like Content-Type.
-	SetBodyProvider(bodyProvider func(operation Operation, data interface{}) error) Operation
+	SetBodyProvider(bodyProvider BodyProvider) Operation
 
 	// SetResult method sets the operation result.
 	SetResult(result interface{}) Operation
@@ -44,6 +44,12 @@ type Operation interface {
 
 	// SetContext method sets the request context.
 	SetContext(ctx context.Context) Operation
+
+	// SetContentType method sets the request content type.
+	SetContentType(contentType string) Operation
+
+	// SetContentEncoding method sets the request content encoding.
+	SetContentLength(contentLength int64) Operation
 
 	// Request method sends the operation request and returns the response.
 	Request() (*http.Response, error)
