@@ -70,8 +70,22 @@ func (mr *MockOperationMockRecorder) Request() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Request", reflect.TypeOf((*MockOperation)(nil).Request))
 }
 
+// SetBody mocks base method.
+func (m *MockOperation) SetBody(data interface{}) define.Operation {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetBody", data)
+	ret0, _ := ret[0].(define.Operation)
+	return ret0
+}
+
+// SetBody indicates an expected call of SetBody.
+func (mr *MockOperationMockRecorder) SetBody(data interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetBody", reflect.TypeOf((*MockOperation)(nil).SetBody), data)
+}
+
 // SetBodyProvider mocks base method.
-func (m *MockOperation) SetBodyProvider(bodyProvider func(define.Operation)) define.Operation {
+func (m *MockOperation) SetBodyProvider(bodyProvider func(define.Operation, interface{}) error) define.Operation {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SetBodyProvider", bodyProvider)
 	ret0, _ := ret[0].(define.Operation)

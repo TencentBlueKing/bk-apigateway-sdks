@@ -131,11 +131,13 @@ var _ = Describe("operation", func() {
 			mockTransportRoundTrip()
 
 			response, err := operation.
-				SetBodyProvider(func(op define.Operation) {
+				SetBodyProvider(func(op define.Operation, data interface{}) error {
 					op.SetBodyReader(strings.NewReader(`{"foo":"bar"}`))
 					op.SetHeaders(map[string]string{
 						"Content-Type": "application/json",
 					})
+
+					return nil
 				}).
 				Request()
 
