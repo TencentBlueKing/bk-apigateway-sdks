@@ -26,10 +26,13 @@ type Operation interface {
 	// SetBodyReader method sets the request body.
 	SetBodyReader(body io.Reader) Operation
 
+	// SetBody method sets the data for body provider
+	SetBody(data interface{}) Operation
+
 	// SetBodyProvider method sets the request body provider.
 	// A provider not only provides the request body,
 	// but also provides the request headers, like Content-Type.
-	SetBodyProvider(bodyProvider func(operation Operation)) Operation
+	SetBodyProvider(bodyProvider func(operation Operation, data interface{}) error) Operation
 
 	// SetResult method sets the operation result.
 	SetResult(result interface{}) Operation

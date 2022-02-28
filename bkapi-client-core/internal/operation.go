@@ -12,13 +12,13 @@ import (
 	"gopkg.in/h2non/gentleman.v2/plugin"
 )
 
-//go:generate mockgen -destination=./mock/http.go -package=mock net/http RoundTripper
-
 // Operation is a wrapper for a request, it allows to set the request options
 // and send the request.
 type Operation struct {
 	name          string
 	err           error
+	bodyData      interface{}
+	bodyProvider  func(define.Operation, interface{}) error
 	result        interface{}
 	resultDecoder func(response *http.Response, result interface{}) error
 	request       *gentleman.Request
@@ -29,6 +29,7 @@ func (op *Operation) String() string {
 	return op.name
 }
 
+// GetError :
 func (op *Operation) GetError() error {
 	return op.err
 }
@@ -77,9 +78,16 @@ func (op *Operation) SetBodyReader(body io.Reader) define.Operation {
 	return op
 }
 
+// SetBody :
+func (op *Operation) SetBody(body interface{}) define.Operation {
+	op.bodyData = body
+
+	return op
+}
+
 // SetBodyProvider used to set the operation body provider.
-func (op *Operation) SetBodyProvider(bodyProvider func(operation define.Operation)) define.Operation {
-	bodyProvider(op)
+func (op *Operation) SetBodyProvider(bodyProvider func(operation define.Operation, data interface{}) error) define.Operation {
+	op.bodyProvider = bodyProvider
 
 	return op
 }
@@ -105,11 +113,42 @@ func (op *Operation) SetContext(ctx context.Context) define.Operation {
 	return op
 }
 
+func (op *Operation) callBodyProvider() error {
+	if op.bodyProvider == nil {
+		return nil
+	}
+
+	err := op.bodyProvider(op, op.bodyData)
+	if err != nil {
+		return errors.WithMessagef(err, "failed to set body for operation %s", op)
+	}
+
+	return nil
+}
+
+func (op *Operation) callResultDecoder(response *http.Response) error {
+	if op.resultDecoder == nil {
+		return nil
+	}
+
+	err := op.resultDecoder(response, op.result)
+	if err != nil {
+		return errors.WithMessagef(err, "failed to decode result for operation %s", op)
+	}
+
+	return nil
+}
+
 // Request will send the operation request and return the response.
 func (op *Operation) Request() (*http.Response, error) {
 	// when the operation already has an error, return it directly
 	if op.err != nil {
 		return nil, op.err
+	}
+
+	err := op.callBodyProvider()
+	if err != nil {
+		return nil, err
 	}
 
 	response, err := op.request.Send()
@@ -122,12 +161,13 @@ func (op *Operation) Request() (*http.Response, error) {
 	}
 
 	rawResponse := response.RawResponse
-	if op.resultDecoder == nil {
-		return rawResponse, nil
+
+	err = op.callResultDecoder(rawResponse)
+	if err != nil {
+		return nil, err
 	}
 
-	// if the operation has a result decoder, decode the response body
-	return rawResponse, op.resultDecoder(rawResponse, op.result)
+	return rawResponse, nil
 }
 
 // NewOperation creates a new operation.
