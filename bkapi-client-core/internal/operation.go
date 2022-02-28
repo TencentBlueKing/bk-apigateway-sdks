@@ -1,8 +1,10 @@
 package internal
 
 import (
+	"bytes"
 	"context"
 	"io"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define"
@@ -20,7 +22,7 @@ type Operation struct {
 	bodyData       interface{}
 	bodyProvider   define.BodyProvider
 	result         interface{}
-	resultProvider func(response *http.Response, result interface{}) error
+	resultProvider define.ResultProvider
 	request        *gentleman.Request
 }
 
@@ -100,7 +102,7 @@ func (op *Operation) SetResult(result interface{}) define.Operation {
 }
 
 // SetResultProvider used to set the operation result provider.
-func (op *Operation) SetResultProvider(provider func(response *http.Response, result interface{}) error) define.Operation {
+func (op *Operation) SetResultProvider(provider define.ResultProvider) define.Operation {
 	op.resultProvider = provider
 
 	return op
@@ -140,12 +142,14 @@ func (op *Operation) callBodyProvider() error {
 	return nil
 }
 
-func (op *Operation) callResultProvider(response *http.Response) error {
+func (op *Operation) callResultProvider(response *gentleman.Response) error {
 	if op.resultProvider == nil {
 		return nil
 	}
 
-	err := op.resultProvider(response, op.result)
+	response.RawResponse.Body = ioutil.NopCloser(bytes.NewReader(response.Bytes()))
+
+	err := op.resultProvider.ProvideResult(response.RawResponse, op.result)
 	if err != nil {
 		return errors.WithMessagef(err, "failed to decode result for operation %s", op)
 	}
@@ -174,14 +178,12 @@ func (op *Operation) Request() (*http.Response, error) {
 		return nil, response.Error
 	}
 
-	rawResponse := response.RawResponse
-
-	err = op.callResultProvider(rawResponse)
+	err = op.callResultProvider(response)
 	if err != nil {
 		return nil, err
 	}
 
-	return rawResponse, nil
+	return response.RawResponse, nil
 }
 
 // NewOperation creates a new operation.
