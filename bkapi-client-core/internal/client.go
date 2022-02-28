@@ -6,7 +6,6 @@ import (
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define"
 	"github.com/pkg/errors"
 	"gopkg.in/h2non/gentleman.v2"
-	"gopkg.in/h2non/gentleman.v2/plugin"
 )
 
 // BkApiClient is a base client for define.
@@ -48,7 +47,7 @@ func (cli *BkApiClient) NewOperation(config define.OperationConfig, opts ...defi
 		cli.operationOptions, opts,
 	} {
 		if len(o) > 0 {
-			operation.Apply(opts...)
+			operation.Apply(o...)
 		}
 	}
 
@@ -87,28 +86,8 @@ func (o *BkApiClientOption) ApplyToClient(cli define.BkApiClient) error {
 }
 
 // NewBkApiClientOption creates a new client option.
-func NewBkApiClientOption(fn func(client *BkApiClient) error) define.BkApiClientOption {
+func NewBkApiClientOption(fn func(client *BkApiClient) error) *BkApiClientOption {
 	return &BkApiClientOption{
 		fn: fn,
 	}
-}
-
-// NewClientPluginOption creates a new gentleman client plugin option.
-func NewClientPluginOption(plugins ...plugin.Plugin) define.BkApiClientOption {
-	return NewBkApiClientOption(func(cli *BkApiClient) error {
-		for _, plugin := range plugins {
-			cli.client.Use(plugin)
-		}
-
-		return nil
-	})
-}
-
-// NewClientCommonOption creates a new common client option.
-func NewClientCommonOption(options ...define.OperationOption) define.BkApiClientOption {
-	return NewBkApiClientOption(func(cli *BkApiClient) error {
-		cli.operationOptions = append(cli.operationOptions, options...)
-		return nil
-	})
-
 }

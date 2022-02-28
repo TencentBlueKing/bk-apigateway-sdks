@@ -3,14 +3,12 @@ package internal_test
 import (
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
 	"gopkg.in/h2non/gentleman.v2"
-	"gopkg.in/h2non/gentleman.v2/plugins/timeout"
 	"gopkg.in/h2non/gentleman.v2/plugins/transport"
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define"
@@ -125,15 +123,6 @@ var _ = Describe("Client", func() {
 			})
 
 			Expect(opt.ApplyToClient(&client)).To(Equal(err))
-		})
-
-		It("should apply timeout plugin", func() {
-			plugin := timeout.Request(time.Second)
-			rawStack := gentlemanClient.Middleware.GetStack()
-
-			Expect(client.Apply(internal.NewClientPluginOption(plugin))).To(BeNil())
-
-			Expect(gentlemanClient.Middleware.GetStack()).To(HaveLen(len(rawStack) + 1))
 		})
 	})
 })

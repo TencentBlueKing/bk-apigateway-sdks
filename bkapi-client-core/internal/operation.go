@@ -12,6 +12,8 @@ import (
 	"gopkg.in/h2non/gentleman.v2/plugin"
 )
 
+//go:generate mockgen -destination=./mock/http.go -package=mock net/http RoundTripper
+
 // Operation is a wrapper for a request, it allows to set the request options
 // and send the request.
 type Operation struct {
@@ -25,6 +27,10 @@ type Operation struct {
 // String returns the operation name.
 func (op *Operation) String() string {
 	return op.name
+}
+
+func (op *Operation) GetError() error {
+	return op.err
 }
 
 // Apply method applies the given options to the operation.
@@ -150,19 +156,8 @@ func (o *OperationOption) ApplyToOperation(op define.Operation) error {
 }
 
 // NewOperationOption creates a new operation option.
-func NewOperationOption(fn func(operation *Operation) error) define.OperationOption {
+func NewOperationOption(fn func(operation *Operation) error) *OperationOption {
 	return &OperationOption{
 		fn: fn,
 	}
-}
-
-// NewOperationPluginOption creates a new operation plugin option.
-func NewOperationPluginOption(plugins ...plugin.Plugin) define.OperationOption {
-	return NewOperationOption(func(operation *Operation) error {
-		for _, plugin := range plugins {
-			operation.request.Use(plugin)
-		}
-
-		return nil
-	})
 }
