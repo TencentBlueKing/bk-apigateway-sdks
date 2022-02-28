@@ -7,6 +7,9 @@ type BkApiClient interface {
 	// Apply method applies the given options to the client.
 	Apply(opts ...BkApiClientOption) error
 
+	// AddOperationOptions adds the common options to each operation.
+	AddOperationOptions(opts ...OperationOption) error
+
 	// NewOperation method creates a new operation dynamically and apply the given options.
 	NewOperation(config OperationConfig, opts ...OperationOption) Operation
 }

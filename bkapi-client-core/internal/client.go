@@ -21,6 +21,11 @@ func (cli *BkApiClient) Name() string {
 	return cli.name
 }
 
+// Client returns the gentleman client.
+func (cli *BkApiClient) Client() *gentleman.Client {
+	return cli.client
+}
+
 // Apply method applies the given options to the client.
 func (cli *BkApiClient) Apply(opts ...define.BkApiClientOption) error {
 	for _, opt := range opts {
@@ -32,6 +37,12 @@ func (cli *BkApiClient) Apply(opts ...define.BkApiClientOption) error {
 		}
 	}
 
+	return nil
+}
+
+// AddOperationOptions method adds the common options to each operation.
+func (cli *BkApiClient) AddOperationOptions(opts ...define.OperationOption) error {
+	cli.operationOptions = append(cli.operationOptions, opts...)
 	return nil
 }
 

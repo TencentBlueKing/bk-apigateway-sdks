@@ -183,6 +183,11 @@ type OperationOption struct {
 	fn func(operation *Operation) error
 }
 
+// ApplyToClient will apply the given options to the client.
+func (o *OperationOption) ApplyToClient(client define.BkApiClient) error {
+	return client.AddOperationOptions(o)
+}
+
 // ApplyToOperation will check if the operation is valid and apply the option to the operation.
 func (o *OperationOption) ApplyToOperation(op define.Operation) error {
 	operation, ok := op.(*Operation)

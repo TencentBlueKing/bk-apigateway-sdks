@@ -34,6 +34,24 @@ func (m *MockBkApiClient) EXPECT() *MockBkApiClientMockRecorder {
 	return m.recorder
 }
 
+// AddOperationOptions mocks base method.
+func (m *MockBkApiClient) AddOperationOptions(opts ...define.OperationOption) error {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "AddOperationOptions", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddOperationOptions indicates an expected call of AddOperationOptions.
+func (mr *MockBkApiClientMockRecorder) AddOperationOptions(opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddOperationOptions", reflect.TypeOf((*MockBkApiClient)(nil).AddOperationOptions), opts...)
+}
+
 // Apply mocks base method.
 func (m *MockBkApiClient) Apply(opts ...define.BkApiClientOption) error {
 	m.ctrl.T.Helper()

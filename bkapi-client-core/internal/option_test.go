@@ -1,8 +1,6 @@
 package internal_test
 
 import (
-	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define"
-	dmock "github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define/mock"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/internal"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/internal/mock"
 	"github.com/golang/mock/gomock"
@@ -44,59 +42,12 @@ var _ = Describe("Option", func() {
 		})
 
 		It("should apply to client", func() {
-			operation := dmock.NewMockOperation(ctrl)
-			operation.EXPECT().Apply(option).Return(nil)
-
-			client := internal.NewBkApiClient("", client, func(name string, request *gentleman.Request) define.Operation {
-				return operation
-			})
+			client := internal.NewBkApiClient("", client, nil)
 			Expect(client.Apply(option)).To(Succeed())
 
-			client.NewOperation(define.OperationConfig{})
-		})
-	})
-
-	Context("SimpleOperationOption", func() {
-		var (
-			ctrl   *gomock.Controller
-			client *gentleman.Client
-		)
-
-		BeforeEach(func() {
-			ctrl = gomock.NewController(GinkgoT())
-			client = gentleman.New()
-		})
-
-		AfterEach(func() {
-			ctrl.Finish()
-		})
-
-		It("should apply to operation", func() {
-			called := false
-			request := client.Request()
-			operation := internal.NewOperation("", request)
-			option := internal.NewSimpleOperationOption(func(op *internal.Operation) error {
-				called = true
-				Expect(op).To(Equal(operation))
-				return nil
-			})
-			operation.Apply(option)
-			Expect(operation.GetError()).To(BeNil())
-			Expect(called).To(BeTrue())
-		})
-
-		It("should apply to client", func() {
-			operation := dmock.NewMockOperation(ctrl)
-			option := internal.NewSimpleOperationOption(nil)
-
-			operation.EXPECT().Apply(option).Return(nil)
-
-			client := internal.NewBkApiClient("", client, func(name string, request *gentleman.Request) define.Operation {
-				return operation
-			})
-			Expect(client.Apply(option)).To(Succeed())
-
-			client.NewOperation(define.OperationConfig{})
+			gentlemanClient := client.Client()
+			stacks := gentlemanClient.Middleware.GetStack()
+			Expect(stacks).To(Equal([]plugin.Plugin{pluginA, pluginB}))
 		})
 	})
 })
