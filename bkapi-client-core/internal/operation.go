@@ -70,8 +70,8 @@ func (op *Operation) SetPathParams(params map[string]string) define.Operation {
 	return op
 }
 
-// SetBody used to set the operation body.
-func (op *Operation) SetBody(body io.Reader) define.Operation {
+// SetBodyReader used to set the operation body.
+func (op *Operation) SetBodyReader(body io.Reader) define.Operation {
 	op.request.Body(body)
 
 	return op

@@ -118,7 +118,7 @@ var _ = Describe("operation", func() {
 			mockTransportRoundTrip()
 
 			response, err := operation.
-				SetBody(strings.NewReader("testing")).
+				SetBodyReader(strings.NewReader("testing")).
 				Request()
 			Expect(err).To(BeNil())
 
@@ -132,7 +132,7 @@ var _ = Describe("operation", func() {
 
 			response, err := operation.
 				SetBodyProvider(func(op define.Operation) {
-					op.SetBody(strings.NewReader(`{"foo":"bar"}`))
+					op.SetBodyReader(strings.NewReader(`{"foo":"bar"}`))
 					op.SetHeaders(map[string]string{
 						"Content-Type": "application/json",
 					})
