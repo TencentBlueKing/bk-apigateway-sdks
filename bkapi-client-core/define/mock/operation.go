@@ -70,20 +70,6 @@ func (mr *MockOperationMockRecorder) Request() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Request", reflect.TypeOf((*MockOperation)(nil).Request))
 }
 
-// SetBody mocks base method.
-func (m *MockOperation) SetBody(body io.Reader) define.Operation {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetBody", body)
-	ret0, _ := ret[0].(define.Operation)
-	return ret0
-}
-
-// SetBody indicates an expected call of SetBody.
-func (mr *MockOperationMockRecorder) SetBody(body interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetBody", reflect.TypeOf((*MockOperation)(nil).SetBody), body)
-}
-
 // SetBodyProvider mocks base method.
 func (m *MockOperation) SetBodyProvider(bodyProvider func(define.Operation)) define.Operation {
 	m.ctrl.T.Helper()
@@ -96,6 +82,20 @@ func (m *MockOperation) SetBodyProvider(bodyProvider func(define.Operation)) def
 func (mr *MockOperationMockRecorder) SetBodyProvider(bodyProvider interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetBodyProvider", reflect.TypeOf((*MockOperation)(nil).SetBodyProvider), bodyProvider)
+}
+
+// SetBodyReader mocks base method.
+func (m *MockOperation) SetBodyReader(body io.Reader) define.Operation {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetBodyReader", body)
+	ret0, _ := ret[0].(define.Operation)
+	return ret0
+}
+
+// SetBodyReader indicates an expected call of SetBodyReader.
+func (mr *MockOperationMockRecorder) SetBodyReader(body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetBodyReader", reflect.TypeOf((*MockOperation)(nil).SetBodyReader), body)
 }
 
 // SetContext mocks base method.

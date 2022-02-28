@@ -23,8 +23,8 @@ type Operation interface {
 	// SetPathParams method sets the request path parameters.
 	SetPathParams(params map[string]string) Operation
 
-	// SetBody method sets the request body.
-	SetBody(body io.Reader) Operation
+	// SetBodyReader method sets the request body.
+	SetBodyReader(body io.Reader) Operation
 
 	// SetBodyProvider method sets the request body provider.
 	// A provider not only provides the request body,
