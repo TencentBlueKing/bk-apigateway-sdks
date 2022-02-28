@@ -4,8 +4,6 @@ import (
 	"gopkg.in/h2non/gentleman.v2/plugin"
 )
 
-//go:generate mockgen -destination=./mock/plugin.go -package=mock gopkg.in/h2non/gentleman.v2/plugin Plugin
-
 // PluginOption wraps a plugin for a client or an operation.
 type PluginOption struct {
 	*BkApiClientOption
@@ -28,4 +26,23 @@ func NewPluginOption(plugins ...plugin.Plugin) *PluginOption {
 	})
 
 	return &opt
+}
+
+// SimpleOperationOption wrap a operation option that can be used to client
+type SimpleOperationOption struct {
+	*BkApiClientOption
+	*OperationOption
+}
+
+// NewSimpleOperationOption creates a new SimpleOperationOption.
+func NewSimpleOperationOption(fn func(operation *Operation) error) *SimpleOperationOption {
+	opt := &SimpleOperationOption{
+		OperationOption: NewOperationOption(fn),
+	}
+	opt.BkApiClientOption = NewBkApiClientOption(func(client *BkApiClient) error {
+		client.operationOptions = append(client.operationOptions, opt)
+		return nil
+	})
+
+	return opt
 }
