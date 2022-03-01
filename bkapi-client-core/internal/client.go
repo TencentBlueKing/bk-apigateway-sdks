@@ -53,12 +53,14 @@ func (cli *BkApiClient) NewOperation(config define.OperationConfig, opts ...defi
 		Method(config.Method).
 		AddPath(strings.TrimPrefix(config.Path, "/"))
 
-	name := config.Name
-	if name == "" {
-		name = fmt.Sprintf("(%s %s)", config.Method, config.Path)
+	var name string
+	if config.Name == "" {
+		name = fmt.Sprintf("%s(%s %s)", cli.Name(), config.Method, config.Path)
+	} else {
+		name = fmt.Sprintf("%s.%s", cli.Name(), config.Name)
 	}
 
-	operation := cli.operationFactory(fmt.Sprintf("%s.%s", cli.Name(), name), request)
+	operation := cli.operationFactory(name, request)
 
 	for _, o := range [][]define.OperationOption{
 		cli.operationOptions, opts,

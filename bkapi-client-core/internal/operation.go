@@ -26,6 +26,11 @@ type Operation struct {
 	request        *gentleman.Request
 }
 
+// Name returns the operation name.
+func (op *Operation) Name() string {
+	return op.name
+}
+
 // String returns the operation name.
 func (op *Operation) String() string {
 	return op.name

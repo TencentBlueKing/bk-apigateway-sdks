@@ -10,6 +10,9 @@ import (
 
 // Operation defines the operation of the API.
 type Operation interface {
+	// Name method returns the operation's name.
+	Name() string
+
 	// Apply method applies the given options to the operation.
 	Apply(opts ...OperationOption) Operation
 

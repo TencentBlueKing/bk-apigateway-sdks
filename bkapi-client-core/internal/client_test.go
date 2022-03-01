@@ -37,6 +37,8 @@ var _ = Describe("Client", func() {
 		client = internal.NewBkApiClient(
 			"testing", gentlemanClient,
 			func(name string, req *gentleman.Request) define.Operation {
+				operation.EXPECT().Name().Return(name).AnyTimes()
+
 				request = req
 				return operation
 			},
@@ -98,6 +100,23 @@ var _ = Describe("Client", func() {
 
 			op := client.NewOperation(define.OperationConfig{}, option)
 			Expect(op).NotTo(BeNil())
+		})
+
+		It("should generate operation name by config.Name", func() {
+			operation := client.NewOperation(define.OperationConfig{
+				Name: "operation",
+			})
+
+			Expect(operation.Name()).To(Equal("testing.operation"))
+		})
+
+		It("should generate anonymous operation name", func() {
+			operation := client.NewOperation(define.OperationConfig{
+				Method: "GET",
+				Path:   "/test",
+			})
+
+			Expect(operation.Name()).To(Equal("testing(GET /test)"))
 		})
 	})
 
