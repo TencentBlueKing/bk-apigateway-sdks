@@ -2,6 +2,7 @@ package bkapi
 
 import (
 	"encoding/json"
+	"os"
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/internal"
@@ -22,6 +23,8 @@ type Config struct {
 	AuthorizationParams map[string]string
 	AuthorizationJWT    string
 	JsonMarshaler       func(v interface{}) ([]byte, error)
+
+	Getenv func(string) string
 }
 
 func (c *Config) setAuthAccessTokenAuthParams(params map[string]string) bool {
@@ -69,9 +72,36 @@ func (c *Config) getAuthParams() map[string]string {
 	return params
 }
 
+func (c *Config) initConfig(apiName string) {
+	c.apiName = apiName
+
+	if c.Getenv == nil {
+		c.Getenv = os.Getenv
+	}
+
+	if c.AppCode == "" {
+		c.AppCode = c.getEnv("BK_APP_CODE", "APP_CODE")
+	}
+
+	if c.AppSecret == "" {
+		c.AppSecret = c.getEnv("BK_APP_SECRET", "SECRET_KEY")
+	}
+}
+
+func (c *Config) getEnv(keys ...string) string {
+	for _, k := range keys {
+		v := c.Getenv(k)
+		if v != "" {
+			return v
+		}
+	}
+
+	return ""
+}
+
 // Config method clone and return a new Config instance
 func (c Config) Config(apiName string) define.ClientConfig {
-	c.apiName = apiName
+	c.initConfig(apiName)
 	return &c
 }
 

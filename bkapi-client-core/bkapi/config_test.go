@@ -2,6 +2,7 @@ package bkapi_test
 
 import (
 	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/bkapi"
@@ -12,8 +13,8 @@ var _ = Describe("Config", func() {
 		config := bkapi.Config{}
 		Expect(config.GetName()).To(Equal(""))
 
-		newConfig := config.Config("testing").(*bkapi.Config)
-		Expect(newConfig.GetName()).To(Equal("testing"))
+		providedConfig := config.Config("testing").(*bkapi.Config)
+		Expect(providedConfig.GetName()).To(Equal("testing"))
 
 		Expect(config.GetName()).To(Equal(""))
 	})
@@ -93,4 +94,38 @@ var _ = Describe("Config", func() {
 			"X-Bkapi-Authorization": `{"access_token": "access_token"}`,
 		}))
 	})
+
+	DescribeTable("should get app code from env", func(key string) {
+		config := bkapi.Config{
+			Getenv: func(k string) string {
+				if k == key {
+					return "app"
+				}
+				return ""
+			},
+		}
+
+		providedConfig := config.Config("testing").(*bkapi.Config)
+		Expect(providedConfig.AppCode).To(Equal("app"))
+	},
+		Entry("BK_APP_CODE", "BK_APP_CODE"),
+		Entry("APP_CODE", "APP_CODE"),
+	)
+
+	DescribeTable("should get app secret from env", func(key string) {
+		config := bkapi.Config{
+			Getenv: func(k string) string {
+				if k == key {
+					return "secret"
+				}
+				return ""
+			},
+		}
+
+		providedConfig := config.Config("testing").(*bkapi.Config)
+		Expect(providedConfig.AppSecret).To(Equal("secret"))
+	},
+		Entry("BK_APP_SECRET", "BK_APP_SECRET"),
+		Entry("SECRET_KEY", "SECRET_KEY"),
+	)
 })
