@@ -127,6 +127,19 @@ var _ = Describe("Client", func() {
 
 			Expect(operation.Name()).To(Equal("testing(GET /test)"))
 		})
+
+		It("should set the user agent", func() {
+			op := client.NewOperation(define.OperationConfig{})
+			Expect(op).To(Equal(operation))
+
+			mockTransportRoundTrip()
+
+			_, err := request.Send()
+			Expect(err).To(BeNil())
+
+			request := request.Context.Request
+			Expect(request.Header.Get("User-Agent")).To(Equal(fmt.Sprintf("%s/%s", define.UserAgent, define.Version)))
+		})
 	})
 
 	Context("BkApiClientOption", func() {

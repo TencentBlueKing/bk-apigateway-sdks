@@ -7,7 +7,11 @@ import (
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define"
 	"github.com/pkg/errors"
 	"gopkg.in/h2non/gentleman.v2"
+	"gopkg.in/h2non/gentleman.v2/plugins/headers"
 )
+
+// DefaultUserAgent :
+var DefaultUserAgent string
 
 // BkApiClient is a base client for define.
 type BkApiClient struct {
@@ -50,6 +54,7 @@ func (cli *BkApiClient) AddOperationOptions(opts ...define.OperationOption) erro
 // NewOperation will create a new operation dynamically and apply the given options.
 func (cli *BkApiClient) NewOperation(config define.OperationConfig, opts ...define.OperationOption) define.Operation {
 	request := cli.client.Request().
+		Use(headers.Set("User-Agent", DefaultUserAgent)).
 		Method(config.Method).
 		AddPath(strings.TrimPrefix(config.Path, "/"))
 
@@ -109,4 +114,8 @@ func NewBkApiClientOption(fn func(client *BkApiClient) error) *BkApiClientOption
 	return &BkApiClientOption{
 		fn: fn,
 	}
+}
+
+func init() {
+	DefaultUserAgent = fmt.Sprintf("%s/%s", define.UserAgent, define.Version)
 }
