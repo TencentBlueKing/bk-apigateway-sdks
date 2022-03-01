@@ -11,7 +11,6 @@ import (
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define"
 	dmock "github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define/mock"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/internal"
-	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/internal/mock"
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -24,7 +23,7 @@ var _ = Describe("operation", func() {
 	Context("Operation", func() {
 		var (
 			ctrl          *gomock.Controller
-			mockTransport *mock.MockRoundTripper
+			mockTransport *dmock.MockRoundTripper
 			client        *gentleman.Client
 			response      *http.Response
 			operation     *internal.Operation
@@ -32,7 +31,7 @@ var _ = Describe("operation", func() {
 
 		BeforeEach(func() {
 			ctrl = gomock.NewController(GinkgoT())
-			mockTransport = mock.NewMockRoundTripper(ctrl)
+			mockTransport = dmock.NewMockRoundTripper(ctrl)
 
 			client = gentleman.New()
 			client.Use(transport.Set(mockTransport))

@@ -31,9 +31,14 @@ func (op *Operation) String() string {
 	return op.name
 }
 
-// GetError :
+// GetError returns the operation error.
 func (op *Operation) GetError() error {
 	return op.err
+}
+
+// GetGentlemanRequest returns the operation request.
+func (op *Operation) GetGentlemanRequest() *gentleman.Request {
+	return op.request
 }
 
 // Apply method applies the given options to the operation.

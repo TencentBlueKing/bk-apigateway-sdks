@@ -77,3 +77,20 @@ func NewJsonResultProvider() *UnmarshalResultProvider {
 		return json.NewDecoder(body).Decode(v)
 	})
 }
+
+// FunctionalBodyProvider :
+type FunctionalBodyProvider struct {
+	fn func(operation define.Operation, data interface{}) error
+}
+
+// ProvideBody :
+func (p *FunctionalBodyProvider) ProvideBody(operation define.Operation, data interface{}) error {
+	return p.fn(operation, data)
+}
+
+// NewFunctionalBodyProvider :
+func NewFunctionalBodyProvider(fn func(operation define.Operation, data interface{}) error) *FunctionalBodyProvider {
+	return &FunctionalBodyProvider{
+		fn: fn,
+	}
+}
