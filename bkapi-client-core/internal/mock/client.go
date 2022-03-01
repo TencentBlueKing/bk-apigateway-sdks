@@ -70,6 +70,20 @@ func (mr *MockBkApiClientMockRecorder) Apply(opts ...interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Apply", reflect.TypeOf((*MockBkApiClient)(nil).Apply), opts...)
 }
 
+// Name mocks base method.
+func (m *MockBkApiClient) Name() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Name")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// Name indicates an expected call of Name.
+func (mr *MockBkApiClientMockRecorder) Name() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Name", reflect.TypeOf((*MockBkApiClient)(nil).Name))
+}
+
 // NewOperation mocks base method.
 func (m *MockBkApiClient) NewOperation(config define.OperationConfig, opts ...define.OperationOption) define.Operation {
 	m.ctrl.T.Helper()

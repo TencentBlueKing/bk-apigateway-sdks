@@ -6,7 +6,7 @@ import (
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/bkapi"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define"
-	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define/mock"
+	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/internal/mock"
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

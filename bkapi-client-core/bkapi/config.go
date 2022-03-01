@@ -2,15 +2,17 @@ package bkapi
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/internal"
 	"github.com/pkg/errors"
 )
 
-// Config is the configuration of BkApi client.
-type Config struct {
+// ClientConfig is the configuration of BkApi client.
+type ClientConfig struct {
 	apiName string
 
 	Endpoint string
@@ -27,7 +29,7 @@ type Config struct {
 	Getenv func(string) string
 }
 
-func (c *Config) setAuthAccessTokenAuthParams(params map[string]string) bool {
+func (c *ClientConfig) setAuthAccessTokenAuthParams(params map[string]string) bool {
 	if c.AccessToken == "" {
 		return false
 	}
@@ -43,7 +45,7 @@ func (c *Config) setAuthAccessTokenAuthParams(params map[string]string) bool {
 	return true
 }
 
-func (c *Config) setAppAuthParams(params map[string]string) {
+func (c *ClientConfig) setAppAuthParams(params map[string]string) {
 	if c.AppCode != "" {
 		params["bk_app_code"] = c.AppCode
 	}
@@ -53,13 +55,13 @@ func (c *Config) setAppAuthParams(params map[string]string) {
 	}
 }
 
-func (c *Config) setCommonAuthParams(params map[string]string) {
+func (c *ClientConfig) setCommonAuthParams(params map[string]string) {
 	for k, v := range c.AuthorizationParams {
 		params[k] = v
 	}
 }
 
-func (c *Config) getAuthParams() map[string]string {
+func (c *ClientConfig) getAuthParams() map[string]string {
 	params := make(map[string]string, 4+len(c.AuthorizationParams))
 
 	if c.setAuthAccessTokenAuthParams(params) {
@@ -72,7 +74,7 @@ func (c *Config) getAuthParams() map[string]string {
 	return params
 }
 
-func (c *Config) initConfig(apiName string) {
+func (c *ClientConfig) initConfig(apiName string) {
 	c.apiName = apiName
 
 	if c.Getenv == nil {
@@ -88,7 +90,7 @@ func (c *Config) initConfig(apiName string) {
 	}
 }
 
-func (c *Config) getEnv(keys ...string) string {
+func (c *ClientConfig) getEnv(keys ...string) string {
 	for _, k := range keys {
 		v := c.Getenv(k)
 		if v != "" {
@@ -100,26 +102,28 @@ func (c *Config) getEnv(keys ...string) string {
 }
 
 // Config method clone and return a new Config instance
-func (c Config) Config(apiName string) define.ClientConfig {
+func (c ClientConfig) Config(apiName string) define.ClientConfig {
 	c.initConfig(apiName)
 	return &c
 }
 
 // GetName method will return the api name.
-func (c *Config) GetName() string {
+func (c *ClientConfig) GetName() string {
 	return c.apiName
 }
 
 // GetUrl method will render the endpoint with api name and stage.
-func (c *Config) GetUrl() string {
-	return internal.ReplacePlaceHolder(c.Endpoint, map[string]string{
+func (c *ClientConfig) GetUrl() string {
+	endpoint := fmt.Sprintf("%s/", strings.TrimSuffix(c.Endpoint, "/"))
+
+	return internal.ReplacePlaceHolder(endpoint, map[string]string{
 		"api_name": c.apiName,
 		"stage":    c.Stage,
 	})
 }
 
 // GetAuthorizationHeaders method will return the authorization headers.
-func (c *Config) GetAuthorizationHeaders() map[string]string {
+func (c *ClientConfig) GetAuthorizationHeaders() map[string]string {
 	params := c.getAuthParams()
 	// nil means no authorization headers
 	if len(params) == 0 {

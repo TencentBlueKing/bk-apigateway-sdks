@@ -1,6 +1,6 @@
 package define
 
-//go:generate mockgen -source=$GOFILE -destination=./mock/$GOFILE -package=mock ClientConfig,ClientConfigProvider
+//go:generate mockgen -source=$GOFILE -destination=../internal/mock/$GOFILE -package=mock ClientConfig,ClientConfigProvider
 
 // ClientConfig :
 type ClientConfig interface {

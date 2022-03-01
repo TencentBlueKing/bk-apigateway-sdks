@@ -12,8 +12,8 @@ import (
 	"gopkg.in/h2non/gentleman.v2/plugins/transport"
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define"
-	dmock "github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define/mock"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/internal"
+	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/internal/mock"
 )
 
 var _ = Describe("Client", func() {
@@ -21,15 +21,15 @@ var _ = Describe("Client", func() {
 		ctrl            *gomock.Controller
 		client          *internal.BkApiClient
 		gentlemanClient *gentleman.Client
-		operation       *dmock.MockOperation
+		operation       *mock.MockOperation
 		request         *gentleman.Request
-		mockTransport   *dmock.MockRoundTripper
+		mockTransport   *mock.MockRoundTripper
 	)
 
 	BeforeEach(func() {
 		ctrl = gomock.NewController(GinkgoT())
-		mockTransport = dmock.NewMockRoundTripper(ctrl)
-		operation = dmock.NewMockOperation(ctrl)
+		mockTransport = mock.NewMockRoundTripper(ctrl)
+		operation = mock.NewMockOperation(ctrl)
 
 		gentlemanClient = gentleman.New()
 		gentlemanClient.Use(transport.Set(mockTransport))
@@ -61,14 +61,14 @@ var _ = Describe("Client", func() {
 		})
 
 		It("should fail on apply", func() {
-			option := dmock.NewMockBkApiClientOption(ctrl)
+			option := mock.NewMockBkApiClientOption(ctrl)
 
 			option.EXPECT().ApplyToClient(gomock.Any()).Return(errors.New("test"))
 			Expect(client.Apply(option)).NotTo(BeNil())
 		})
 
 		It("should apply an option", func() {
-			option := dmock.NewMockBkApiClientOption(ctrl)
+			option := mock.NewMockBkApiClientOption(ctrl)
 			option.EXPECT().ApplyToClient(client).Return(nil)
 
 			Expect(client.Apply(option)).To(BeNil())
@@ -89,11 +89,11 @@ var _ = Describe("Client", func() {
 			Expect(err).To(BeNil())
 
 			Expect(request.Context.Request.Method).To(Equal("POST"))
-			Expect(request.Context.Request.URL.Path).To(Equal("/test"))
+			Expect(request.Context.Request.URL.Path).To(Equal("test"))
 		})
 
 		It("should new an operation with options", func() {
-			option := dmock.NewMockOperationOption(ctrl)
+			option := mock.NewMockOperationOption(ctrl)
 			operation.EXPECT().Apply(option)
 
 			op := client.NewOperation(define.OperationConfig{}, option)
@@ -103,7 +103,7 @@ var _ = Describe("Client", func() {
 
 	Context("BkApiClientOption", func() {
 		It("should fail when the type is not supported", func() {
-			var client dmock.MockBkApiClient
+			var client mock.MockBkApiClient
 
 			opt := internal.NewBkApiClientOption(nil)
 			err := opt.ApplyToClient(&client)

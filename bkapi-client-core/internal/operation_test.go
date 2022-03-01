@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define"
-	dmock "github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define/mock"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/internal"
+	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/internal/mock"
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -23,7 +23,7 @@ var _ = Describe("operation", func() {
 	Context("Operation", func() {
 		var (
 			ctrl          *gomock.Controller
-			mockTransport *dmock.MockRoundTripper
+			mockTransport *mock.MockRoundTripper
 			client        *gentleman.Client
 			response      *http.Response
 			operation     *internal.Operation
@@ -31,7 +31,7 @@ var _ = Describe("operation", func() {
 
 		BeforeEach(func() {
 			ctrl = gomock.NewController(GinkgoT())
-			mockTransport = dmock.NewMockRoundTripper(ctrl)
+			mockTransport = mock.NewMockRoundTripper(ctrl)
 
 			client = gentleman.New()
 			client.Use(transport.Set(mockTransport))
@@ -54,7 +54,7 @@ var _ = Describe("operation", func() {
 		}
 
 		It("should fail on apply", func() {
-			option := dmock.NewMockOperationOption(ctrl)
+			option := mock.NewMockOperationOption(ctrl)
 			option.EXPECT().ApplyToOperation(gomock.Any()).Return(errors.New("test"))
 
 			_, err := operation.
@@ -130,7 +130,7 @@ var _ = Describe("operation", func() {
 		It("should set request body with json", func() {
 			requestBody := []byte(`{"foo":"bar"}`)
 
-			provider := dmock.NewMockBodyProvider(ctrl)
+			provider := mock.NewMockBodyProvider(ctrl)
 			provider.EXPECT().ProvideBody(operation, gomock.Any()).DoAndReturn(func(op define.Operation, data interface{}) error {
 				op.
 					SetContentType("application/json").
@@ -159,7 +159,7 @@ var _ = Describe("operation", func() {
 		It("should decode response body", func() {
 			mockTransportRoundTrip()
 
-			provider := dmock.NewMockResultProvider(ctrl)
+			provider := mock.NewMockResultProvider(ctrl)
 			provider.EXPECT().ProvideResult(gomock.Any(), gomock.Any()).DoAndReturn(func(response *http.Response, r interface{}) error {
 				result := r.(map[string]interface{})
 				result["foo"] = "bar"
@@ -193,7 +193,7 @@ var _ = Describe("operation", func() {
 
 	Context("OperationOption", func() {
 		It("should fail when the operation type is not supported", func() {
-			var mockOperation dmock.MockOperation
+			var mockOperation mock.MockOperation
 
 			opt := internal.NewOperationOption(nil)
 			err := opt.ApplyToOperation(&mockOperation)
