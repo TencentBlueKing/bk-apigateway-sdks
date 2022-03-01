@@ -94,11 +94,20 @@ var _ = Describe("Client", func() {
 			Expect(request.Context.Request.URL.Path).To(Equal("test"))
 		})
 
-		It("should new an operation with options", func() {
+		It("should new an operation with option", func() {
 			option := mock.NewMockOperationOption(ctrl)
 			operation.EXPECT().Apply(option)
 
 			op := client.NewOperation(define.OperationConfig{}, option)
+			Expect(op).NotTo(BeNil())
+		})
+
+		It("should new an operation with common operation option", func() {
+			option := mock.NewMockOperationOption(ctrl)
+			operation.EXPECT().Apply(option)
+			Expect(client.AddOperationOptions(option)).To(BeNil())
+
+			op := client.NewOperation(define.OperationConfig{})
 			Expect(op).NotTo(BeNil())
 		})
 
