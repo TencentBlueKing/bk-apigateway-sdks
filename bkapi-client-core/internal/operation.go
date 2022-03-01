@@ -85,7 +85,7 @@ func (op *Operation) SetBodyReader(body io.Reader) define.Operation {
 	return op
 }
 
-// SetBody :
+// SetBody used to set the operation body.
 func (op *Operation) SetBody(body interface{}) define.Operation {
 	op.bodyData = body
 
@@ -214,7 +214,7 @@ func (o *OperationOption) ApplyToOperation(op define.Operation) error {
 	operation, ok := op.(*Operation)
 	if !ok {
 		return errors.WithMessagef(
-			define.ErrTypeNotMatch, "expected type *Operation, got %T", op,
+			define.ErrTypeNotMatch, "expected type %T, got %T", operation, op,
 		)
 	}
 
