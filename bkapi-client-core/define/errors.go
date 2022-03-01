@@ -2,7 +2,8 @@ package define
 
 import "errors"
 
-// ErrTypeNotMatch :
+//
 var (
+	// ErrTypeNotMatch defines the error which indicates the type of the value is not match.
 	ErrTypeNotMatch = errors.New("type not match")
 )

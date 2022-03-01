@@ -1,8 +1,7 @@
-package internal
+package bkapi
 
 import (
 	"bytes"
-	"encoding/json"
 	"io"
 	"net/http"
 
@@ -19,6 +18,17 @@ type MarshalBodyProvider struct {
 // ContentType returns the Content-Type of the request body.
 func (m *MarshalBodyProvider) ContentType() string {
 	return m.contentType
+}
+
+// ApplyToClient will add to the operation operations.
+func (m *MarshalBodyProvider) ApplyToClient(cli define.BkApiClient) error {
+	return cli.AddOperationOptions(m)
+}
+
+// ApplyToOperation will set the body provider.
+func (m *MarshalBodyProvider) ApplyToOperation(op define.Operation) error {
+	op.SetBodyProvider(m)
+	return nil
 }
 
 // ProvideBody method provides the request body, and returns the content length.
@@ -44,14 +54,20 @@ func NewMarshalBodyProvider(contentType string, marshalFn func(v interface{}) ([
 	}
 }
 
-// NewJsonBodyProvider creates a json BodyProvider.
-func NewJsonBodyProvider() *MarshalBodyProvider {
-	return NewMarshalBodyProvider("application/json", json.Marshal)
-}
-
 // UnmarshalResultProvider wraps the unmarshal function to provide result from the response body.
 type UnmarshalResultProvider struct {
 	unmarshalFn func(body io.Reader, v interface{}) error
+}
+
+// ApplyToClient will add to the operation operations.
+func (p *UnmarshalResultProvider) ApplyToClient(cli define.BkApiClient) error {
+	return cli.AddOperationOptions(p)
+}
+
+// ApplyToOperation will set the result provider.
+func (p *UnmarshalResultProvider) ApplyToOperation(op define.Operation) error {
+	op.SetResultProvider(p)
+	return nil
 }
 
 // ProvideResult method provides the result from the response body.
@@ -71,24 +87,28 @@ func NewUnmarshalResultProvider(fn func(body io.Reader, v interface{}) error) *U
 	}
 }
 
-// NewJsonResultProvider creates a json ResultProvider.
-func NewJsonResultProvider() *UnmarshalResultProvider {
-	return NewUnmarshalResultProvider(func(body io.Reader, v interface{}) error {
-		return json.NewDecoder(body).Decode(v)
-	})
-}
-
-// FunctionalBodyProvider :
+// FunctionalBodyProvider provides the request body by the given function.
 type FunctionalBodyProvider struct {
 	fn func(operation define.Operation, data interface{}) error
 }
 
-// ProvideBody :
+// ApplyToClient will add to the operation operations.
+func (p *FunctionalBodyProvider) ApplyToClient(cli define.BkApiClient) error {
+	return cli.AddOperationOptions(p)
+}
+
+// ApplyToOperation will set the body provider.
+func (p *FunctionalBodyProvider) ApplyToOperation(op define.Operation) error {
+	op.SetBodyProvider(p)
+	return nil
+}
+
+// ProvideBody method calls the given function to provide the request body.
 func (p *FunctionalBodyProvider) ProvideBody(operation define.Operation, data interface{}) error {
 	return p.fn(operation, data)
 }
 
-// NewFunctionalBodyProvider :
+// NewFunctionalBodyProvider creates a new BodyProvider with the given function.
 func NewFunctionalBodyProvider(fn func(operation define.Operation, data interface{}) error) *FunctionalBodyProvider {
 	return &FunctionalBodyProvider{
 		fn: fn,

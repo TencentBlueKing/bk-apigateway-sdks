@@ -14,42 +14,32 @@ import (
 
 var _ = Describe("Form", func() {
 	var (
-		ctrl      *gomock.Controller
-		operation *mock.MockOperation
+		ctrl *gomock.Controller
 	)
 
 	BeforeEach(func() {
 		ctrl = gomock.NewController(GinkgoT())
-		operation = mock.NewMockOperation(ctrl)
 	})
 
 	AfterEach(func() {
 		ctrl.Finish()
 	})
 
-	It("should set form body", func() {
-		operation.EXPECT().SetBodyProvider(gomock.Any()).
-			DoAndReturn(func(provider define.BodyProvider) define.Operation {
-				result := `hello=world`
+	It("should provide urlencoded form", func() {
+		result := "hello=world"
+		operation := mock.NewMockOperation(ctrl)
+		operation.EXPECT().SetContentType("application/x-www-form-urlencoded").Return(operation)
+		operation.EXPECT().SetContentLength(int64(len(result))).Return(operation)
+		operation.EXPECT().SetBodyReader(gomock.Any()).DoAndReturn(func(body io.Reader) define.Operation {
+			data, err := ioutil.ReadAll(body)
+			Expect(err).To(BeNil())
+			Expect(string(data)).To(Equal(result))
+			return operation
+		})
 
-				operation.EXPECT().SetContentType("application/x-www-form-urlencoded").Return(operation)
-				operation.EXPECT().SetContentLength(int64(len(result))).Return(operation)
-				operation.EXPECT().SetBodyReader(gomock.Any()).DoAndReturn(func(reader io.Reader) define.Operation {
-					body, err := ioutil.ReadAll(reader)
-					Expect(err).To(BeNil())
-					Expect(string(body)).To(Equal(result))
-
-					return operation
-				})
-
-				Expect(provider.ProvideBody(operation, map[string][]string{
-					"hello": {"world"},
-				})).To(BeNil())
-
-				return operation
-			})
-
-		option := bkapi.OptFormBodyProvider()
-		Expect(option.ApplyToOperation(operation)).To(Succeed())
+		provider := bkapi.FormBodyProvider()
+		Expect(provider.ProvideBody(operation, map[string][]string{
+			"hello": {"world"},
+		})).To(BeNil())
 	})
 })

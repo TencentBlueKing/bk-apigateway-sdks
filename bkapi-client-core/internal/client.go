@@ -89,7 +89,7 @@ func (o *BkApiClientOption) ApplyToClient(cli define.BkApiClient) error {
 	client, ok := cli.(*BkApiClient)
 	if !ok {
 		return errors.WithMessagef(
-			define.ErrTypeNotMatch, "expected type *BkApiClient, got %T", cli,
+			define.ErrTypeNotMatch, "expected type %T, got %T", client, cli,
 		)
 	}
 

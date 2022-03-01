@@ -7,15 +7,18 @@ import (
 	"gopkg.in/h2non/gentleman.v2/plugins/multipart"
 )
 
-// OptMultipartFormBodyProvider :
-func OptMultipartFormBodyProvider() *internal.OperationOption {
-	return internal.NewOperationOption(func(operation *internal.Operation) error {
-		request := operation.GetGentlemanRequest()
+// MultipartFormFieldsBodyProvider provides request body as multipart form.
+type MultipartFormFieldsBodyProvider struct {
+	*FunctionalBodyProvider
+}
 
-		operation.SetBodyProvider(internal.NewFunctionalBodyProvider(func(op define.Operation, v interface{}) error {
+// NewMultipartFormFieldsBodyProvider create a new MultipartFormFieldsBodyProvider
+func NewMultipartFormFieldsBodyProvider() *MultipartFormFieldsBodyProvider {
+	return &MultipartFormFieldsBodyProvider{
+		FunctionalBodyProvider: NewFunctionalBodyProvider(func(operation define.Operation, v interface{}) error {
 			values, ok := v.(map[string][]string)
 			if !ok {
-				return errors.WithMessagef(define.ErrTypeNotMatch, "expected map[string][]string, but got %T", v)
+				return errors.WithMessagef(define.ErrTypeNotMatch, "expected %T, but got %T", values, v)
 			}
 
 			fields := make(map[string]multipart.Values, len(values))
@@ -23,11 +26,19 @@ func OptMultipartFormBodyProvider() *internal.OperationOption {
 				fields[k] = multipart.Values(v)
 			}
 
-			request.Use(multipart.Fields(fields))
+			operation.Apply(internal.NewPluginOption(multipart.Fields(fields)))
 
 			return nil
-		}))
+		}),
+	}
+}
 
-		return nil
-	})
+// MultipartFormBodyProvider provides request body as multipart form.
+func MultipartFormBodyProvider() *MultipartFormFieldsBodyProvider {
+	return NewMultipartFormFieldsBodyProvider()
+}
+
+// OptMultipartFormBodyProvider provides request body as multipart form.
+func OptMultipartFormBodyProvider() *MultipartFormFieldsBodyProvider {
+	return NewMultipartFormFieldsBodyProvider()
 }
