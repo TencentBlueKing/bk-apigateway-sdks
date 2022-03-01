@@ -14,7 +14,6 @@ import (
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define"
 	dmock "github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define/mock"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/internal"
-	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/internal/mock"
 )
 
 var _ = Describe("Client", func() {
@@ -24,12 +23,12 @@ var _ = Describe("Client", func() {
 		gentlemanClient *gentleman.Client
 		operation       *dmock.MockOperation
 		request         *gentleman.Request
-		mockTransport   *mock.MockRoundTripper
+		mockTransport   *dmock.MockRoundTripper
 	)
 
 	BeforeEach(func() {
 		ctrl = gomock.NewController(GinkgoT())
-		mockTransport = mock.NewMockRoundTripper(ctrl)
+		mockTransport = dmock.NewMockRoundTripper(ctrl)
 		operation = dmock.NewMockOperation(ctrl)
 
 		gentlemanClient = gentleman.New()
