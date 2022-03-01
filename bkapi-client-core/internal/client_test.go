@@ -82,7 +82,6 @@ var _ = Describe("Client", func() {
 				Path:   "/test",
 			})
 			Expect(op).To(Equal(operation))
-			Expect(request.Middleware.GetStack()).To(HaveLen(2))
 
 			mockTransportRoundTrip()
 			// make a request to apply the middlewares

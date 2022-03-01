@@ -7,20 +7,24 @@ import (
 	"gopkg.in/h2non/gentleman.v2"
 )
 
-// Config is the configuration of BkApi client.
-type Config struct {
-	Endpoint  string
-	AppCode   string
-	AppSecret string
-	Stage     string
+func newGentlemanClient(config define.ClientConfig) *gentleman.Client {
+	client := gentleman.New().
+		URL(config.GetUrl())
+
+	headers := config.GetAuthorizationHeaders()
+	if len(headers) > 0 {
+		client.SetHeaders(headers)
+	}
+
+	return client
 }
 
 // NewBkApiClient creates a new BkApiClient.
-func NewBkApiClient(name string, config Config, opts ...define.BkApiClientOption) (*internal.BkApiClient, error) {
-	gentlemanClient := gentleman.New().
-		URL(config.Endpoint)
+func NewBkApiClient(apiName string, configProvider define.ClientConfigProvider, opts ...define.BkApiClientOption) (*internal.BkApiClient, error) {
+	config := configProvider.Config(apiName)
+	gentlemanClient := newGentlemanClient(config)
 
-	client := internal.NewBkApiClient(name, gentlemanClient, func(name string, request *gentleman.Request) define.Operation {
+	client := internal.NewBkApiClient(apiName, gentlemanClient, func(name string, request *gentleman.Request) define.Operation {
 		return internal.NewOperation(name, request)
 	})
 
@@ -30,7 +34,7 @@ func NewBkApiClient(name string, config Config, opts ...define.BkApiClientOption
 
 	err := client.Apply(opts...)
 	if err != nil {
-		return nil, errors.WithMessagef(err, "failed to apply options to client %s", name)
+		return nil, errors.WithMessagef(err, "failed to apply options to client %s", apiName)
 	}
 
 	return client, nil
