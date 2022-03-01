@@ -5,8 +5,7 @@ import (
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/bkapi"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define"
-	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define/mock"
-	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/internal"
+	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/internal/mock"
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -19,7 +18,7 @@ var _ = Describe("Client", func() {
 		configProvider       *mock.MockClientConfigProvider
 		config               *mock.MockClientConfig
 		roundTripper         *mock.MockRoundTripper
-		roundTripperOpt      *internal.PluginOption
+		roundTripperOpt      define.BkapiOption
 		url                  string
 		authorizationHeaders map[string]string
 	)
@@ -45,7 +44,7 @@ var _ = Describe("Client", func() {
 		ctrl.Finish()
 	})
 
-	getMockRequest := func(client *internal.BkApiClient) (request *http.Request) {
+	getMockRequest := func(client define.BkApiClient) (request *http.Request) {
 		roundTripper.EXPECT().RoundTrip(gomock.Any()).DoAndReturn(func(req *http.Request) (*http.Response, error) {
 			request = req
 			return &http.Response{}, nil

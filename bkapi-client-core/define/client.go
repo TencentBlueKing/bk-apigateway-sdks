@@ -1,10 +1,13 @@
 package define
 
-//go:generate mockgen -source=$GOFILE -destination=./mock/$GOFILE -package=mock BkApiClient,BkApiClientOption
-//go:generate mockgen -destination=./mock/http.go -package=mock net/http RoundTripper
+//go:generate mockgen -source=$GOFILE -destination=../internal/mock/$GOFILE -package=mock BkApiClient,BkApiClientOption
+//go:generate mockgen -destination=../internal/mock/http.go -package=mock net/http RoundTripper
 
 // BkApiClient defines the interface of BkApi client.
 type BkApiClient interface {
+	// Name method returns the client's name.
+	Name() string
+
 	// Apply method applies the given options to the client.
 	Apply(opts ...BkApiClientOption) error
 

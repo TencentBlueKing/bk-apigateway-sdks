@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define"
 	"github.com/pkg/errors"
@@ -50,9 +51,14 @@ func (cli *BkApiClient) AddOperationOptions(opts ...define.OperationOption) erro
 func (cli *BkApiClient) NewOperation(config define.OperationConfig, opts ...define.OperationOption) define.Operation {
 	request := cli.client.Request().
 		Method(config.Method).
-		Path(config.Path)
+		AddPath(strings.TrimPrefix(config.Path, "/"))
 
-	operation := cli.operationFactory(fmt.Sprintf("%s.%s", cli.Name(), config.Name), request)
+	name := config.Name
+	if name == "" {
+		name = fmt.Sprintf("(%s %s)", config.Method, config.Path)
+	}
+
+	operation := cli.operationFactory(fmt.Sprintf("%s.%s", cli.Name(), name), request)
 
 	for _, o := range [][]define.OperationOption{
 		cli.operationOptions, opts,

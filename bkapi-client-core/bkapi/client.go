@@ -20,7 +20,7 @@ func newGentlemanClient(config define.ClientConfig) *gentleman.Client {
 }
 
 // NewBkApiClient creates a new BkApiClient.
-func NewBkApiClient(apiName string, configProvider define.ClientConfigProvider, opts ...define.BkApiClientOption) (*internal.BkApiClient, error) {
+func NewBkApiClient(apiName string, configProvider define.ClientConfigProvider, opts ...define.BkApiClientOption) (define.BkApiClient, error) {
 	config := configProvider.Config(apiName)
 	gentlemanClient := newGentlemanClient(config)
 

@@ -2,7 +2,7 @@ package define
 
 import "net/http"
 
-//go:generate mockgen -source=$GOFILE -destination=./mock/$GOFILE -package=mock BodyProvider,ResultProvider
+//go:generate mockgen -source=$GOFILE -destination=../internal/mock/$GOFILE -package=mock BodyProvider,ResultProvider
 
 // BodyProvider defines the function to provide the request body.
 type BodyProvider interface {

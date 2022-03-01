@@ -10,25 +10,25 @@ import (
 
 var _ = Describe("Config", func() {
 	It("should clone a new config", func() {
-		config := bkapi.Config{}
+		config := bkapi.ClientConfig{}
 		Expect(config.GetName()).To(Equal(""))
 
-		providedConfig := config.Config("testing").(*bkapi.Config)
+		providedConfig := config.Config("testing").(*bkapi.ClientConfig)
 		Expect(providedConfig.GetName()).To(Equal("testing"))
 
 		Expect(config.GetName()).To(Equal(""))
 	})
 
 	It("should return endpoint as url", func() {
-		config := bkapi.Config{
+		config := bkapi.ClientConfig{
 			Endpoint: "http://example.com",
 		}
 
-		Expect(config.Config("testing").GetUrl()).To(Equal("http://example.com"))
+		Expect(config.Config("testing").GetUrl()).To(Equal("http://example.com/"))
 	})
 
 	It("should render endpoint with params", func() {
-		config := bkapi.Config{
+		config := bkapi.ClientConfig{
 			Endpoint: "http://{api_name}.example.com/{stage}/",
 			Stage:    "prod",
 		}
@@ -37,7 +37,7 @@ var _ = Describe("Config", func() {
 	})
 
 	It("should not return authorization headers when related params are empty", func() {
-		config := bkapi.Config{
+		config := bkapi.ClientConfig{
 			AccessToken:         "",
 			AuthorizationJWT:    "",
 			AppCode:             "",
@@ -49,7 +49,7 @@ var _ = Describe("Config", func() {
 	})
 
 	It("should return access token authorization headers", func() {
-		config := bkapi.Config{
+		config := bkapi.ClientConfig{
 			AccessToken:      "access_token",
 			AuthorizationJWT: "jwt",
 		}
@@ -60,7 +60,7 @@ var _ = Describe("Config", func() {
 	})
 
 	It("should return app code authorization headers", func() {
-		config := bkapi.Config{
+		config := bkapi.ClientConfig{
 			AppCode:   "app_code",
 			AppSecret: "app_secret",
 		}
@@ -71,7 +71,7 @@ var _ = Describe("Config", func() {
 	})
 
 	It("should return common authorization headers", func() {
-		config := bkapi.Config{
+		config := bkapi.ClientConfig{
 			AuthorizationParams: map[string]string{
 				"bk_token": "token",
 			},
@@ -83,7 +83,7 @@ var _ = Describe("Config", func() {
 	})
 
 	It("should return authorization headers marshal by custom marshaler", func() {
-		config := bkapi.Config{
+		config := bkapi.ClientConfig{
 			AccessToken: "access_token",
 			JsonMarshaler: func(v interface{}) ([]byte, error) {
 				return []byte(`{"access_token": "access_token"}`), nil
@@ -96,7 +96,7 @@ var _ = Describe("Config", func() {
 	})
 
 	DescribeTable("should get app code from env", func(key string) {
-		config := bkapi.Config{
+		config := bkapi.ClientConfig{
 			Getenv: func(k string) string {
 				if k == key {
 					return "app"
@@ -105,7 +105,7 @@ var _ = Describe("Config", func() {
 			},
 		}
 
-		providedConfig := config.Config("testing").(*bkapi.Config)
+		providedConfig := config.Config("testing").(*bkapi.ClientConfig)
 		Expect(providedConfig.AppCode).To(Equal("app"))
 	},
 		Entry("BK_APP_CODE", "BK_APP_CODE"),
@@ -113,7 +113,7 @@ var _ = Describe("Config", func() {
 	)
 
 	DescribeTable("should get app secret from env", func(key string) {
-		config := bkapi.Config{
+		config := bkapi.ClientConfig{
 			Getenv: func(k string) string {
 				if k == key {
 					return "secret"
@@ -122,7 +122,7 @@ var _ = Describe("Config", func() {
 			},
 		}
 
-		providedConfig := config.Config("testing").(*bkapi.Config)
+		providedConfig := config.Config("testing").(*bkapi.ClientConfig)
 		Expect(providedConfig.AppSecret).To(Equal("secret"))
 	},
 		Entry("BK_APP_SECRET", "BK_APP_SECRET"),

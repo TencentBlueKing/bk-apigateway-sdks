@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-//go:generate mockgen -source=$GOFILE -destination=./mock/$GOFILE -package=mock Operation,OperationOption
+//go:generate mockgen -source=$GOFILE -destination=../internal/mock/$GOFILE -package=mock Operation,OperationOption
 
 // Operation defines the operation of the API.
 type Operation interface {
