@@ -88,7 +88,7 @@ var _ = Describe("Operation", func() {
 			body := make(map[string]interface{})
 			operation.EXPECT().SetBody(body).Return(nil)
 
-			option := bkapi.OptSetOperationBody(body)
+			option := bkapi.OptSetRequestBody(body)
 			Expect(option.ApplyToOperation(operation)).To(Succeed())
 		})
 
@@ -96,7 +96,7 @@ var _ = Describe("Operation", func() {
 			result := make(map[string]interface{})
 			operation.EXPECT().SetResult(result).Return(nil)
 
-			option := bkapi.OptSetOperationResult(result)
+			option := bkapi.OptSetRequestResult(result)
 			Expect(option.ApplyToOperation(operation)).To(Succeed())
 		})
 	})
