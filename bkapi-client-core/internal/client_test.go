@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/TencentBlueKing/gopkg/logging"
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -23,7 +24,9 @@ var _ = Describe("Client", func() {
 		gentlemanClient         *gentleman.Client
 		operation               *mock.MockOperation
 		request                 *gentleman.Request
+		response                *http.Response
 		mockTransport           *mock.MockRoundTripper
+		clientConfig            *mock.MockClientConfig
 		operationConfig         *mock.MockOperationConfig
 		operationConfigProvider *mock.MockOperationConfigProvider
 	)
@@ -36,6 +39,11 @@ var _ = Describe("Client", func() {
 		gentlemanClient = gentleman.New()
 		gentlemanClient.Use(transport.Set(mockTransport))
 
+		clientConfig = mock.NewMockClientConfig(ctrl)
+		clientConfig.EXPECT().GetUrl().Return("").AnyTimes()
+		clientConfig.EXPECT().GetAuthorizationHeaders().Return(nil).AnyTimes()
+		clientConfig.EXPECT().GetLogger().Return(logging.GetLogger("")).AnyTimes()
+
 		client = internal.NewBkApiClient(
 			"testing", gentlemanClient,
 			func(name string, req *gentleman.Request) define.Operation {
@@ -44,7 +52,9 @@ var _ = Describe("Client", func() {
 				request = req
 				return operation
 			},
+			clientConfig,
 		)
+
 		operationConfig = mock.NewMockOperationConfig(ctrl)
 		operationConfig.EXPECT().GetName().Return("").AnyTimes()
 		operationConfig.EXPECT().GetPath().Return("").AnyTimes()
@@ -52,6 +62,10 @@ var _ = Describe("Client", func() {
 
 		operationConfigProvider = mock.NewMockOperationConfigProvider(ctrl)
 		operationConfigProvider.EXPECT().ProvideConfig().Return(operationConfig).AnyTimes()
+
+		response = &http.Response{
+			Header: http.Header{},
+		}
 	})
 
 	AfterEach(func() {
@@ -60,9 +74,9 @@ var _ = Describe("Client", func() {
 
 	mockTransportRoundTrip := func() {
 		mockTransport.EXPECT().RoundTrip(gomock.Any()).DoAndReturn(func(req *http.Request) (*http.Response, error) {
-			return &http.Response{
-				Request: req,
-			}, nil
+			response.Request = req
+
+			return response, nil
 		})
 	}
 
@@ -164,6 +178,125 @@ var _ = Describe("Client", func() {
 
 			request := request.Context.Request
 			Expect(request.Header.Get("User-Agent")).To(Equal(fmt.Sprintf("%s/%s", define.UserAgent, define.Version)))
+		})
+
+		Context("Logger", func() {
+			var (
+				logger *mock.MockLogger
+			)
+
+			BeforeEach(func() {
+				logger = mock.NewMockLogger(ctrl)
+
+				clientConfig = mock.NewMockClientConfig(ctrl)
+				clientConfig.EXPECT().GetUrl().Return("").AnyTimes()
+				clientConfig.EXPECT().GetAuthorizationHeaders().Return(nil).AnyTimes()
+				clientConfig.EXPECT().GetLogger().Return(logger).AnyTimes()
+
+				client = internal.NewBkApiClient(
+					"testing", gentlemanClient,
+					func(name string, req *gentleman.Request) define.Operation {
+						operation.EXPECT().Name().Return(name).AnyTimes()
+
+						request = req
+						return operation
+					},
+					clientConfig,
+				)
+			})
+
+			It("should log 2xx response details", func() {
+				logger.EXPECT().
+					Debug(gomock.Any(), gomock.Any()).
+					DoAndReturn(func(msg string, fields ...map[string]interface{}) {
+						Expect(msg).To(Equal("request success"))
+						Expect(fields).To(HaveLen(1))
+
+						values := fields[0]
+						Expect(values["status_code"]).To(Equal(200))
+						Expect(values["operation"]).To(Equal(operation))
+						Expect(values["bkapi_request_id"]).To(
+							Equal(response.Header.Get("X-Bkapi-Request-Id")),
+						)
+					})
+
+				op := client.NewOperation(operationConfigProvider)
+				Expect(op).To(Equal(operation))
+
+				response.StatusCode = 200
+				response.Header.Set("X-Bkapi-Request-Id", "12345")
+				mockTransportRoundTrip()
+
+				_, err := request.Send()
+				Expect(err).To(BeNil())
+			})
+
+			It("should log 4xx response details", func() {
+				logger.EXPECT().
+					Warn(gomock.Any(), gomock.Any()).
+					DoAndReturn(func(msg string, fields ...map[string]interface{}) {
+						Expect(msg).To(Equal("request error caused by client"))
+						Expect(fields).To(HaveLen(1))
+
+						values := fields[0]
+						Expect(values["status_code"]).To(Equal(403))
+						Expect(values["operation"]).To(Equal(operation))
+						Expect(values["bkapi_request_id"]).To(
+							Equal(response.Header.Get("X-Bkapi-Request-Id")),
+						)
+						Expect(values["bkapi_error_code"]).To(
+							Equal(response.Header.Get("X-Bkapi-Error-Code")),
+						)
+						Expect(values["bkapi_error_message"]).To(
+							Equal(response.Header.Get("X-Bkapi-Error-Message")),
+						)
+					})
+
+				op := client.NewOperation(operationConfigProvider)
+				Expect(op).To(Equal(operation))
+
+				response.StatusCode = 403
+				response.Header.Set("X-Bkapi-Request-Id", "12345")
+				response.Header.Set("X-Bkapi-Error-Code", "0")
+				response.Header.Set("X-Bkapi-Error-Message", "test error message")
+				mockTransportRoundTrip()
+
+				_, err := request.Send()
+				Expect(err).To(BeNil())
+			})
+			It("should log 5xx response details", func() {
+				logger.EXPECT().
+					Error(gomock.Any(), gomock.Any()).
+					DoAndReturn(func(msg string, fields ...map[string]interface{}) {
+						Expect(msg).To(Equal("request error caused by server"))
+						Expect(fields).To(HaveLen(1))
+
+						values := fields[0]
+						Expect(values["status_code"]).To(Equal(502))
+						Expect(values["operation"]).To(Equal(operation))
+						Expect(values["bkapi_request_id"]).To(
+							Equal(response.Header.Get("X-Bkapi-Request-Id")),
+						)
+						Expect(values["bkapi_error_code"]).To(
+							Equal(response.Header.Get("X-Bkapi-Error-Code")),
+						)
+						Expect(values["bkapi_error_message"]).To(
+							Equal(response.Header.Get("X-Bkapi-Error-Message")),
+						)
+					})
+
+				op := client.NewOperation(operationConfigProvider)
+				Expect(op).To(Equal(operation))
+
+				response.StatusCode = 502
+				response.Header.Set("X-Bkapi-Request-Id", "12345")
+				response.Header.Set("X-Bkapi-Error-Code", "0")
+				response.Header.Set("X-Bkapi-Error-Message", "test error message")
+				mockTransportRoundTrip()
+
+				_, err := request.Send()
+				Expect(err).To(BeNil())
+			})
 		})
 	})
 

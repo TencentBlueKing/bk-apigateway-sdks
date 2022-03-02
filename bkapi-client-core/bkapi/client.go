@@ -8,6 +8,7 @@ import (
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/internal"
+	"github.com/TencentBlueKing/gopkg/logging"
 	"gopkg.in/h2non/gentleman.v2"
 )
 
@@ -25,12 +26,9 @@ func newGentlemanClient(config define.ClientConfig) *gentleman.Client {
 
 // NewBkApiClient creates a new BkApiClient.
 func NewBkApiClient(apiName string, configProvider define.ClientConfigProvider, opts ...define.BkApiClientOption) (define.BkApiClient, error) {
-	config := configProvider.ProvideConfig(apiName)
-	gentlemanClient := newGentlemanClient(config)
-
-	client := internal.NewBkApiClient(apiName, gentlemanClient, func(name string, request *gentleman.Request) define.Operation {
+	client := internal.NewBkApiClient(apiName, gentleman.New(), func(name string, request *gentleman.Request) define.Operation {
 		return internal.NewOperation(name, request)
-	})
+	}, configProvider.ProvideConfig(apiName))
 
 	if len(opts) == 0 {
 		return client, nil
@@ -48,18 +46,30 @@ func NewBkApiClient(apiName string, configProvider define.ClientConfigProvider, 
 type ClientConfig struct {
 	apiName string
 
+	// Endpoint is the url of the BkApi server.
 	Endpoint string
-	Stage    string
+	// Stage is the api stage name, defaults to "prod".
+	Stage string
 
-	AppCode   string
+	// AppCode is the blueking app code.
+	AppCode string
+	// AppSecret is the secret key of the blueking app.
 	AppSecret string
 
-	AccessToken         string
+	// AccessToken is the access token of the user and app, optional.
+	AccessToken string
+	// AuthorizationParams is the authorization params of the user and app, optional.
 	AuthorizationParams map[string]string
-	AuthorizationJWT    string
-	JsonMarshaler       func(v interface{}) ([]byte, error)
+	// AuthorizationJWT is the bkapi jwt, optional.
+	AuthorizationJWT string
+	// JsonMarshal is the json marshal function, defaults to json.Marshal.
+	JsonMarshaler func(v interface{}) ([]byte, error)
 
+	// Getenv is the function to get env, defaults to os.Getenv.
 	Getenv func(string) string
+
+	// Logger is used to log the request and response.
+	Logger logging.Logger
 }
 
 func (c *ClientConfig) setAuthAccessTokenAuthParams(params map[string]string) bool {
@@ -140,6 +150,14 @@ func (c *ClientConfig) initBkApiConfig() {
 	})
 }
 
+func (c *ClientConfig) initLogger() {
+	if c.Logger != nil {
+		return
+	}
+
+	c.Logger = logging.GetLogger("github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/bkapi")
+}
+
 func (c *ClientConfig) initConfig(apiName string) {
 	c.apiName = apiName
 
@@ -149,6 +167,7 @@ func (c *ClientConfig) initConfig(apiName string) {
 
 	c.initAppConfig()
 	c.initBkApiConfig()
+	c.initLogger()
 }
 
 func (c *ClientConfig) getEnv(keys ...string) string {
@@ -203,4 +222,9 @@ func (c *ClientConfig) GetAuthorizationHeaders() map[string]string {
 	}
 
 	return map[string]string{"X-Bkapi-Authorization": string(value)}
+}
+
+// GetLogger method will return the logger.
+func (c *ClientConfig) GetLogger() logging.Logger {
+	return c.Logger
 }
