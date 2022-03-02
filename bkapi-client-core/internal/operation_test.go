@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -189,6 +190,18 @@ var _ = Describe("operation", func() {
 			Expect(requestCtx.Value("key")).To(Equal("testing"))
 		})
 
+		It("should close response body", func() {
+			body := mock.NewMockReadCloser(ctrl)
+			body.EXPECT().Read(gomock.Any()).Return(0, io.EOF).AnyTimes()
+			body.EXPECT().Close().Return(nil)
+			response.Body = body
+
+			mockTransportRoundTrip()
+
+			_, err := operation.Request()
+			Expect(err).To(BeNil())
+			Expect(response.Close).To(BeTrue())
+		})
 	})
 
 	Context("OperationOption", func() {
