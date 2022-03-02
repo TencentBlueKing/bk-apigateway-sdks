@@ -153,11 +153,12 @@ func (op *Operation) callBodyProvider() error {
 }
 
 func (op *Operation) callResultProvider(response *gentleman.Response) error {
+	// it should read the response body to avoid the resource leak
+	response.RawResponse.Body = ioutil.NopCloser(bytes.NewReader(response.Bytes()))
+
 	if op.resultProvider == nil {
 		return nil
 	}
-
-	response.RawResponse.Body = ioutil.NopCloser(bytes.NewReader(response.Bytes()))
 
 	err := op.resultProvider.ProvideResult(response.RawResponse, op.result)
 	if err != nil {
