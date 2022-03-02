@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define"
-	"github.com/pkg/errors"
 	"gopkg.in/h2non/gentleman.v2"
 	gmctx "gopkg.in/h2non/gentleman.v2/context"
 	"gopkg.in/h2non/gentleman.v2/plugin"
@@ -51,7 +50,7 @@ func (op *Operation) Apply(opts ...define.OperationOption) define.Operation {
 	for _, opt := range opts {
 		err := opt.ApplyToOperation(op)
 		if err != nil {
-			op.err = errors.WithMessagef(err, "failed to apply option %s", opt)
+			op.err = define.ErrorWrapf(err, "failed to apply option %s", opt)
 		}
 	}
 
@@ -146,7 +145,7 @@ func (op *Operation) callBodyProvider() error {
 
 	err := op.bodyProvider.ProvideBody(op, op.bodyData)
 	if err != nil {
-		return errors.WithMessagef(err, "failed to set body for operation %s", op)
+		return define.ErrorWrapf(err, "failed to set body for operation %s", op)
 	}
 
 	return nil
@@ -162,7 +161,7 @@ func (op *Operation) callResultProvider(response *gentleman.Response) error {
 
 	err := op.resultProvider.ProvideResult(response.RawResponse, op.result)
 	if err != nil {
-		return errors.WithMessagef(err, "failed to decode result for operation %s", op)
+		return define.ErrorWrapf(err, "failed to decode result for operation %s", op)
 	}
 
 	return nil
@@ -219,7 +218,7 @@ func (o *OperationOption) ApplyToClient(client define.BkApiClient) error {
 func (o *OperationOption) ApplyToOperation(op define.Operation) error {
 	operation, ok := op.(*Operation)
 	if !ok {
-		return errors.WithMessagef(
+		return define.ErrorWrapf(
 			define.ErrTypeNotMatch, "expected type %T, got %T", operation, op,
 		)
 	}

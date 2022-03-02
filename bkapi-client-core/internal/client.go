@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define"
-	"github.com/pkg/errors"
 	"gopkg.in/h2non/gentleman.v2"
 	"gopkg.in/h2non/gentleman.v2/context"
 	"gopkg.in/h2non/gentleman.v2/plugin"
@@ -38,7 +37,7 @@ func (cli *BkApiClient) Apply(opts ...define.BkApiClientOption) error {
 	for _, opt := range opts {
 		err := opt.ApplyToClient(cli)
 		if err != nil {
-			return errors.WithMessagef(
+			return define.ErrorWrapf(
 				err, "failed to apply option %v to client %s", opt, cli.Name(),
 			)
 		}
@@ -108,7 +107,7 @@ type BkApiClientOption struct {
 func (o *BkApiClientOption) ApplyToClient(cli define.BkApiClient) error {
 	client, ok := cli.(*BkApiClient)
 	if !ok {
-		return errors.WithMessagef(
+		return define.ErrorWrapf(
 			define.ErrTypeNotMatch, "expected type %T, got %T", client, cli,
 		)
 	}

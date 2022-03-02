@@ -8,7 +8,6 @@ import (
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/internal"
-	"github.com/pkg/errors"
 	"gopkg.in/h2non/gentleman.v2"
 )
 
@@ -39,7 +38,7 @@ func NewBkApiClient(apiName string, configProvider define.ClientConfigProvider, 
 
 	err := client.Apply(opts...)
 	if err != nil {
-		return nil, errors.WithMessagef(err, "failed to apply options to client %s", apiName)
+		return nil, define.ErrorWrapf(err, "failed to apply options to client %s", apiName)
 	}
 
 	return client, nil
@@ -200,7 +199,7 @@ func (c *ClientConfig) GetAuthorizationHeaders() map[string]string {
 	value, err := marshaler(params)
 	if err != nil {
 		// params contains basic type only, so this should never happen.
-		panic(errors.WithMessagef(err, "failed to marshal bkapi authorization"))
+		panic(define.ErrorWrapf(err, "failed to marshal bkapi authorization"))
 	}
 
 	return map[string]string{"X-Bkapi-Authorization": string(value)}

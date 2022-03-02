@@ -4,7 +4,6 @@ import (
 	"net/url"
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define"
-	"github.com/pkg/errors"
 )
 
 // FormMarshalBodyProvider provides request body as urlencoded form.
@@ -24,7 +23,7 @@ func FormBodyProvider() *FormMarshalBodyProvider {
 	return NewFormMarshalBodyProvider(func(v interface{}) ([]byte, error) {
 		values, ok := v.(map[string][]string)
 		if !ok {
-			return nil, errors.WithMessagef(define.ErrTypeNotMatch, "expected %T, but got %T", values, v)
+			return nil, define.ErrorWrapf(define.ErrTypeNotMatch, "expected %T, but got %T", values, v)
 		}
 
 		forms := url.Values(values)
