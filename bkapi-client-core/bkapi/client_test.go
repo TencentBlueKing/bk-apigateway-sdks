@@ -66,7 +66,7 @@ var _ = Describe("Client", func() {
 	})
 
 	It("should apply url from config", func() {
-		url = "http://example.com"
+		url = "http://example.com/"
 		client, err := bkapi.NewBkApiClient(apiName, configProvider, roundTripperOpt)
 		Expect(err).To(BeNil())
 

@@ -74,13 +74,7 @@ func (c *ClientConfig) getAuthParams() map[string]string {
 	return params
 }
 
-func (c *ClientConfig) initConfig(apiName string) {
-	c.apiName = apiName
-
-	if c.Getenv == nil {
-		c.Getenv = os.Getenv
-	}
-
+func (c *ClientConfig) initAppConfig() {
 	if c.AppCode == "" {
 		c.AppCode = c.getEnv("BK_APP_CODE", "APP_CODE")
 	}
@@ -88,6 +82,40 @@ func (c *ClientConfig) initConfig(apiName string) {
 	if c.AppSecret == "" {
 		c.AppSecret = c.getEnv("BK_APP_SECRET", "SECRET_KEY")
 	}
+}
+
+func (c *ClientConfig) initBkApiConfig() {
+	if c.Stage == "" {
+		c.Stage = "prod"
+	}
+
+	endpoint := c.Endpoint
+	if endpoint == "" {
+		apiTmpl := c.getEnv("BK_API_URL_TMPL")
+		stageTmpl := c.getEnv("BK_API_STAGE_URL_TMPL")
+
+		if apiTmpl != "" {
+			endpoint = fmt.Sprintf("%s/{stage}", strings.TrimSuffix(apiTmpl, "/"))
+		} else if stageTmpl != "" {
+			endpoint = stageTmpl
+		}
+	}
+
+	c.Endpoint = internal.ReplacePlaceHolder(endpoint, map[string]string{
+		"api_name": c.apiName,
+		"stage":    c.Stage,
+	})
+}
+
+func (c *ClientConfig) initConfig(apiName string) {
+	c.apiName = apiName
+
+	if c.Getenv == nil {
+		c.Getenv = os.Getenv
+	}
+
+	c.initAppConfig()
+	c.initBkApiConfig()
 }
 
 func (c *ClientConfig) getEnv(keys ...string) string {

@@ -91,7 +91,7 @@ var _ = Describe("Client", func() {
 			Expect(err).To(BeNil())
 
 			Expect(request.Context.Request.Method).To(Equal("POST"))
-			Expect(request.Context.Request.URL.Path).To(Equal("test"))
+			Expect(request.Context.Request.URL.Path).To(Equal("/test"))
 		})
 
 		It("should new an operation with option", func() {
