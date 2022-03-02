@@ -2,6 +2,7 @@ package define
 
 //go:generate mockgen -source=$GOFILE -destination=../internal/mock/$GOFILE -package=mock BkApiClient,BkApiClientOption
 //go:generate mockgen -destination=../internal/mock/http.go -package=mock net/http RoundTripper
+//go:generate mockgen -destination=../internal/mock/io.go -package=mock io ReadCloser
 
 // BkApiClient defines the interface of BkApi client.
 type BkApiClient interface {

@@ -152,14 +152,17 @@ func (op *Operation) callBodyProvider() error {
 }
 
 func (op *Operation) callResultProvider(response *gentleman.Response) error {
+	rawResponse := response.RawResponse
+
 	// it should read the response body to avoid the resource leak
-	response.RawResponse.Body = ioutil.NopCloser(bytes.NewReader(response.Bytes()))
+	rawResponse.Body = ioutil.NopCloser(bytes.NewReader(response.Bytes()))
+	rawResponse.Close = true
 
 	if op.resultProvider == nil {
 		return nil
 	}
 
-	err := op.resultProvider.ProvideResult(response.RawResponse, op.result)
+	err := op.resultProvider.ProvideResult(rawResponse, op.result)
 	if err != nil {
 		return define.ErrorWrapf(err, "failed to decode result for operation %s", op)
 	}
