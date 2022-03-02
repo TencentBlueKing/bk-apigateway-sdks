@@ -95,6 +95,43 @@ var _ = Describe("Config", func() {
 		}))
 	})
 
+	It("should set stage by default", func() {
+		config := bkapi.ClientConfig{}
+		providedConfig := config.Config("testing").(*bkapi.ClientConfig)
+
+		Expect(providedConfig.Stage).To(Equal("prod"))
+	})
+
+	It("should set endpoint by env BK_API_URL_TMPL", func() {
+		config := bkapi.ClientConfig{
+			Stage: "test",
+			Getenv: func(k string) string {
+				if k == "BK_API_URL_TMPL" {
+					return "http://{api_name}.example.com/"
+				}
+				return ""
+			},
+		}
+		providedConfig := config.Config("testing").(*bkapi.ClientConfig)
+
+		Expect(providedConfig.Endpoint).To(Equal("http://testing.example.com/test"))
+	})
+
+	It("should set endpoint by env BK_API_URL_TMPL", func() {
+		config := bkapi.ClientConfig{
+			Stage: "dev",
+			Getenv: func(k string) string {
+				if k == "BK_API_STAGE_URL_TMPL" {
+					return "http://{stage}-{api_name}.example.com/"
+				}
+				return ""
+			},
+		}
+		providedConfig := config.Config("testing").(*bkapi.ClientConfig)
+
+		Expect(providedConfig.Endpoint).To(Equal("http://dev-testing.example.com/"))
+	})
+
 	DescribeTable("should get app code from env", func(key string) {
 		config := bkapi.ClientConfig{
 			Getenv: func(k string) string {

@@ -7,6 +7,8 @@ import (
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define"
 	"github.com/pkg/errors"
 	"gopkg.in/h2non/gentleman.v2"
+	"gopkg.in/h2non/gentleman.v2/context"
+	"gopkg.in/h2non/gentleman.v2/plugin"
 	"gopkg.in/h2non/gentleman.v2/plugins/headers"
 )
 
@@ -54,9 +56,13 @@ func (cli *BkApiClient) AddOperationOptions(opts ...define.OperationOption) erro
 // NewOperation will create a new operation dynamically and apply the given options.
 func (cli *BkApiClient) NewOperation(config define.OperationConfig, opts ...define.OperationOption) define.Operation {
 	request := cli.client.Request().
-		Use(headers.Set("User-Agent", DefaultUserAgent)).
 		Method(config.Method).
-		AddPath(strings.TrimPrefix(config.Path, "/"))
+		Use(headers.Set("User-Agent", DefaultUserAgent)).
+		Use(plugin.NewRequestPlugin(func(c *context.Context, h context.Handler) {
+			path := strings.TrimSuffix(c.Request.URL.Path, "/")
+			c.Request.URL.Path = fmt.Sprintf("%s/%s", path, strings.TrimPrefix(config.Path, "/"))
+			h.Next(c)
+		}))
 
 	var name string
 	if config.Name == "" {
