@@ -3,7 +3,6 @@ package bkapi
 import (
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/internal"
-	"github.com/pkg/errors"
 	"gopkg.in/h2non/gentleman.v2/plugins/multipart"
 )
 
@@ -18,7 +17,7 @@ func NewMultipartFormFieldsBodyProvider() *MultipartFormFieldsBodyProvider {
 		FunctionalBodyProvider: NewFunctionalBodyProvider(func(operation define.Operation, v interface{}) error {
 			values, ok := v.(map[string][]string)
 			if !ok {
-				return errors.WithMessagef(define.ErrTypeNotMatch, "expected %T, but got %T", values, v)
+				return define.ErrorWrapf(define.ErrTypeNotMatch, "expected %T, but got %T", values, v)
 			}
 
 			fields := make(map[string]multipart.Values, len(values))

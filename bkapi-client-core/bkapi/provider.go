@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define"
-	"github.com/pkg/errors"
 )
 
 // MarshalBodyProvider wraps the marshal function to provide the request body.
@@ -35,7 +34,7 @@ func (m *MarshalBodyProvider) ApplyToOperation(op define.Operation) error {
 func (m *MarshalBodyProvider) ProvideBody(operation define.Operation, data interface{}) error {
 	content, err := m.marshalFn(data)
 	if err != nil {
-		return errors.Wrapf(err, "failed to marshal data to %s", m.contentType)
+		return define.ErrorWrapf(err, "failed to marshal data to %s", m.contentType)
 	}
 
 	operation.
@@ -74,7 +73,7 @@ func (p *UnmarshalResultProvider) ApplyToOperation(op define.Operation) error {
 func (p *UnmarshalResultProvider) ProvideResult(response *http.Response, result interface{}) error {
 	err := p.unmarshalFn(response.Body, result)
 	if err != nil {
-		return errors.Wrap(err, "failed to unmarshal response body")
+		return define.ErrorWrapf(err, "failed to unmarshal response body")
 	}
 
 	return nil
