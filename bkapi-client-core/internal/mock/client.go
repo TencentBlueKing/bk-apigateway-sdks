@@ -85,7 +85,7 @@ func (mr *MockBkApiClientMockRecorder) Name() *gomock.Call {
 }
 
 // NewOperation mocks base method.
-func (m *MockBkApiClient) NewOperation(config define.OperationConfig, opts ...define.OperationOption) define.Operation {
+func (m *MockBkApiClient) NewOperation(config define.OperationConfigProvider, opts ...define.OperationOption) define.Operation {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{config}
 	for _, a := range opts {

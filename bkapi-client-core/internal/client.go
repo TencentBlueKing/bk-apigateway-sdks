@@ -54,21 +54,22 @@ func (cli *BkApiClient) AddOperationOptions(opts ...define.OperationOption) erro
 }
 
 // NewOperation will create a new operation dynamically and apply the given options.
-func (cli *BkApiClient) NewOperation(config define.OperationConfig, opts ...define.OperationOption) define.Operation {
+func (cli *BkApiClient) NewOperation(provider define.OperationConfigProvider, opts ...define.OperationOption) define.Operation {
+	config := provider.ProvideConfig()
 	request := cli.client.Request().
-		Method(config.Method).
+		Method(config.GetMethod()).
 		Use(headers.Set("User-Agent", DefaultUserAgent)).
 		Use(plugin.NewRequestPlugin(func(c *context.Context, h context.Handler) {
 			path := strings.TrimSuffix(c.Request.URL.Path, "/")
-			c.Request.URL.Path = fmt.Sprintf("%s/%s", path, strings.TrimPrefix(config.Path, "/"))
+			c.Request.URL.Path = fmt.Sprintf("%s/%s", path, strings.TrimPrefix(config.GetPath(), "/"))
 			h.Next(c)
 		}))
 
-	var name string
-	if config.Name == "" {
-		name = fmt.Sprintf("%s(%s %s)", cli.Name(), config.Method, config.Path)
+	name := config.GetName()
+	if name == "" {
+		name = fmt.Sprintf("%s(%s %s)", cli.Name(), config.GetMethod(), config.GetPath())
 	} else {
-		name = fmt.Sprintf("%s.%s", cli.Name(), config.Name)
+		name = fmt.Sprintf("%s.%s", cli.Name(), name)
 	}
 
 	operation := cli.operationFactory(name, request)

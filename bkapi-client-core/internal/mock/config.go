@@ -85,16 +85,118 @@ func (m *MockClientConfigProvider) EXPECT() *MockClientConfigProviderMockRecorde
 	return m.recorder
 }
 
-// Config mocks base method.
-func (m *MockClientConfigProvider) Config(apiName string) define.ClientConfig {
+// ProvideConfig mocks base method.
+func (m *MockClientConfigProvider) ProvideConfig(apiName string) define.ClientConfig {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Config", apiName)
+	ret := m.ctrl.Call(m, "ProvideConfig", apiName)
 	ret0, _ := ret[0].(define.ClientConfig)
 	return ret0
 }
 
-// Config indicates an expected call of Config.
-func (mr *MockClientConfigProviderMockRecorder) Config(apiName interface{}) *gomock.Call {
+// ProvideConfig indicates an expected call of ProvideConfig.
+func (mr *MockClientConfigProviderMockRecorder) ProvideConfig(apiName interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Config", reflect.TypeOf((*MockClientConfigProvider)(nil).Config), apiName)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ProvideConfig", reflect.TypeOf((*MockClientConfigProvider)(nil).ProvideConfig), apiName)
+}
+
+// MockOperationConfig is a mock of OperationConfig interface.
+type MockOperationConfig struct {
+	ctrl     *gomock.Controller
+	recorder *MockOperationConfigMockRecorder
+}
+
+// MockOperationConfigMockRecorder is the mock recorder for MockOperationConfig.
+type MockOperationConfigMockRecorder struct {
+	mock *MockOperationConfig
+}
+
+// NewMockOperationConfig creates a new mock instance.
+func NewMockOperationConfig(ctrl *gomock.Controller) *MockOperationConfig {
+	mock := &MockOperationConfig{ctrl: ctrl}
+	mock.recorder = &MockOperationConfigMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockOperationConfig) EXPECT() *MockOperationConfigMockRecorder {
+	return m.recorder
+}
+
+// GetMethod mocks base method.
+func (m *MockOperationConfig) GetMethod() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetMethod")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GetMethod indicates an expected call of GetMethod.
+func (mr *MockOperationConfigMockRecorder) GetMethod() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMethod", reflect.TypeOf((*MockOperationConfig)(nil).GetMethod))
+}
+
+// GetName mocks base method.
+func (m *MockOperationConfig) GetName() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetName")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GetName indicates an expected call of GetName.
+func (mr *MockOperationConfigMockRecorder) GetName() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetName", reflect.TypeOf((*MockOperationConfig)(nil).GetName))
+}
+
+// GetPath mocks base method.
+func (m *MockOperationConfig) GetPath() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPath")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GetPath indicates an expected call of GetPath.
+func (mr *MockOperationConfigMockRecorder) GetPath() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPath", reflect.TypeOf((*MockOperationConfig)(nil).GetPath))
+}
+
+// MockOperationConfigProvider is a mock of OperationConfigProvider interface.
+type MockOperationConfigProvider struct {
+	ctrl     *gomock.Controller
+	recorder *MockOperationConfigProviderMockRecorder
+}
+
+// MockOperationConfigProviderMockRecorder is the mock recorder for MockOperationConfigProvider.
+type MockOperationConfigProviderMockRecorder struct {
+	mock *MockOperationConfigProvider
+}
+
+// NewMockOperationConfigProvider creates a new mock instance.
+func NewMockOperationConfigProvider(ctrl *gomock.Controller) *MockOperationConfigProvider {
+	mock := &MockOperationConfigProvider{ctrl: ctrl}
+	mock.recorder = &MockOperationConfigProviderMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockOperationConfigProvider) EXPECT() *MockOperationConfigProviderMockRecorder {
+	return m.recorder
+}
+
+// ProvideConfig mocks base method.
+func (m *MockOperationConfigProvider) ProvideConfig() define.OperationConfig {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ProvideConfig")
+	ret0, _ := ret[0].(define.OperationConfig)
+	return ret0
+}
+
+// ProvideConfig indicates an expected call of ProvideConfig.
+func (mr *MockOperationConfigProviderMockRecorder) ProvideConfig() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ProvideConfig", reflect.TypeOf((*MockOperationConfigProvider)(nil).ProvideConfig))
 }

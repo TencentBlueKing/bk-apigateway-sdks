@@ -63,13 +63,3 @@ type OperationOption interface {
 	// ApplyToOperation method applies the option to the operation.
 	ApplyToOperation(operation Operation) error
 }
-
-// OperationConfig used to configure the operation.
-type OperationConfig struct {
-	// Name is the operation name.
-	Name string
-	// Method is the HTTP method of the operation.
-	Method string
-	// Path is the HTTP path of the operation.
-	Path string
-}

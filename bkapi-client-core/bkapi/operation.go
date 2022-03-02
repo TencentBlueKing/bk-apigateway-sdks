@@ -4,6 +4,36 @@ import (
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define"
 )
 
+// OperationConfig used to configure the operation.
+type OperationConfig struct {
+	// Name is the operation name.
+	Name string
+	// Method is the HTTP method of the operation.
+	Method string
+	// Path is the HTTP path of the operation.
+	Path string
+}
+
+// ProvideConfig clone and returns a new OperationConfig.
+func (c OperationConfig) ProvideConfig() define.OperationConfig {
+	return &c
+}
+
+// GetName returns the operation name.
+func (c *OperationConfig) GetName() string {
+	return c.Name
+}
+
+// GetMethod returns the HTTP method of the operation.
+func (c *OperationConfig) GetMethod() string {
+	return c.Method
+}
+
+// GetPath returns the HTTP path of the operation.
+func (c *OperationConfig) GetPath() string {
+	return c.Path
+}
+
 // OperationOption is a wrapper for a operation option.
 type OperationOption struct {
 	fn func(operation define.Operation) error

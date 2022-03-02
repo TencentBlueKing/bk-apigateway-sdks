@@ -18,12 +18,14 @@ import (
 
 var _ = Describe("Client", func() {
 	var (
-		ctrl            *gomock.Controller
-		client          *internal.BkApiClient
-		gentlemanClient *gentleman.Client
-		operation       *mock.MockOperation
-		request         *gentleman.Request
-		mockTransport   *mock.MockRoundTripper
+		ctrl                    *gomock.Controller
+		client                  *internal.BkApiClient
+		gentlemanClient         *gentleman.Client
+		operation               *mock.MockOperation
+		request                 *gentleman.Request
+		mockTransport           *mock.MockRoundTripper
+		operationConfig         *mock.MockOperationConfig
+		operationConfigProvider *mock.MockOperationConfigProvider
 	)
 
 	BeforeEach(func() {
@@ -43,6 +45,13 @@ var _ = Describe("Client", func() {
 				return operation
 			},
 		)
+		operationConfig = mock.NewMockOperationConfig(ctrl)
+		operationConfig.EXPECT().GetName().Return("").AnyTimes()
+		operationConfig.EXPECT().GetPath().Return("").AnyTimes()
+		operationConfig.EXPECT().GetMethod().Return("").AnyTimes()
+
+		operationConfigProvider = mock.NewMockOperationConfigProvider(ctrl)
+		operationConfigProvider.EXPECT().ProvideConfig().Return(operationConfig).AnyTimes()
 	})
 
 	AfterEach(func() {
@@ -77,12 +86,17 @@ var _ = Describe("Client", func() {
 		})
 
 		It("should new an operation", func() {
+			operationConfig := mock.NewMockOperationConfig(ctrl)
+			operationConfigProvider := mock.NewMockOperationConfigProvider(ctrl)
+			operationConfigProvider.EXPECT().ProvideConfig().Return(operationConfig).AnyTimes()
+
+			operationConfig.EXPECT().GetName().Return("test").AnyTimes()
+			operationConfig.EXPECT().GetPath().Return("/test").AnyTimes()
+			operationConfig.EXPECT().GetMethod().Return("POST").AnyTimes()
+
 			operation.EXPECT().Apply(gomock.Any()).AnyTimes()
 
-			op := client.NewOperation(define.OperationConfig{
-				Method: "POST",
-				Path:   "/test",
-			})
+			op := client.NewOperation(operationConfigProvider)
 			Expect(op).To(Equal(operation))
 
 			mockTransportRoundTrip()
@@ -98,7 +112,7 @@ var _ = Describe("Client", func() {
 			option := mock.NewMockOperationOption(ctrl)
 			operation.EXPECT().Apply(option)
 
-			op := client.NewOperation(define.OperationConfig{}, option)
+			op := client.NewOperation(operationConfigProvider, option)
 			Expect(op).NotTo(BeNil())
 		})
 
@@ -107,29 +121,40 @@ var _ = Describe("Client", func() {
 			operation.EXPECT().Apply(option)
 			Expect(client.AddOperationOptions(option)).To(BeNil())
 
-			op := client.NewOperation(define.OperationConfig{})
+			op := client.NewOperation(operationConfigProvider)
 			Expect(op).NotTo(BeNil())
 		})
 
 		It("should generate operation name by config.Name", func() {
-			operation := client.NewOperation(define.OperationConfig{
-				Name: "operation",
-			})
+			operationConfig := mock.NewMockOperationConfig(ctrl)
+			operationConfigProvider := mock.NewMockOperationConfigProvider(ctrl)
+			operationConfigProvider.EXPECT().ProvideConfig().Return(operationConfig).AnyTimes()
+
+			operationConfig.EXPECT().GetName().Return("operation").AnyTimes()
+			operationConfig.EXPECT().GetMethod().Return("GET").AnyTimes()
+			operationConfig.EXPECT().GetPath().Return("/test").AnyTimes()
+
+			operation := client.NewOperation(operationConfigProvider)
 
 			Expect(operation.Name()).To(Equal("testing.operation"))
 		})
 
 		It("should generate anonymous operation name", func() {
-			operation := client.NewOperation(define.OperationConfig{
-				Method: "GET",
-				Path:   "/test",
-			})
+			operationConfig := mock.NewMockOperationConfig(ctrl)
+			operationConfigProvider := mock.NewMockOperationConfigProvider(ctrl)
+			operationConfigProvider.EXPECT().ProvideConfig().Return(operationConfig).AnyTimes()
+
+			operationConfig.EXPECT().GetName().Return("").AnyTimes()
+			operationConfig.EXPECT().GetMethod().Return("GET").AnyTimes()
+			operationConfig.EXPECT().GetPath().Return("/test").AnyTimes()
+
+			operation := client.NewOperation(operationConfigProvider)
 
 			Expect(operation.Name()).To(Equal("testing(GET /test)"))
 		})
 
 		It("should set the user agent", func() {
-			op := client.NewOperation(define.OperationConfig{})
+			op := client.NewOperation(operationConfigProvider)
 			Expect(op).To(Equal(operation))
 
 			mockTransportRoundTrip()
