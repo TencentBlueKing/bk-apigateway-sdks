@@ -56,22 +56,20 @@ func (cli *BkApiClient) logResponse(op define.Operation, response *http.Response
 		return
 	}
 
-	context := map[string]interface{}{
-		"operation":           op,
-		"status_code":         response.StatusCode,
-		"status":              response.Status,
-		"bkapi_request_id":    response.Header.Get("X-Bkapi-Request-Id"),
-		"bkapi_error_code":    response.Header.Get("X-Bkapi-Error-Code"),
-		"bkapi_error_message": response.Header.Get("X-Bkapi-Error-Message"),
-	}
+	details := NewBkApiResponseDetailFromResponse(response)
+	fields := details.Map()
+
+	fields["operation"] = op
+	fields["status"] = response.Status
+	fields["status_code"] = response.StatusCode
 
 	switch response.StatusCode / 100 {
 	case 4:
-		logger.Warn("request error caused by client", context)
+		logger.Warn("request error caused by client", fields)
 	case 5:
-		logger.Error("request error caused by server", context)
+		logger.Error("request error caused by server", fields)
 	default:
-		logger.Debug("request success", context)
+		logger.Debug("request success", fields)
 	}
 
 }

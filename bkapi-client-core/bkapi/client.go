@@ -181,7 +181,8 @@ func (c *ClientConfig) getEnv(keys ...string) string {
 	return ""
 }
 
-// ProvideConfig method clone and return a new Config instance
+// ProvideConfig method clone and return a new Config instance.
+// This method should fill the default values which are not set.
 func (c ClientConfig) ProvideConfig(apiName string) define.ClientConfig {
 	c.initConfig(apiName)
 	return &c
