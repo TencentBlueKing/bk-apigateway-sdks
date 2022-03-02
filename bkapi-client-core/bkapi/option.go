@@ -56,19 +56,19 @@ func OptDelAllCookies() define.BkapiOption {
 	return internal.NewPluginOption(cookies.DelAll())
 }
 
-// OptSetHeader sets the header entries associated with key to the single element value.
+// OptSetRequestHeader sets the header entries associated with key to the single element value.
 // It replaces any existing values associated with key.
-func OptSetHeader(key string, value string) define.BkapiOption {
+func OptSetRequestHeader(key string, value string) define.BkapiOption {
 	return internal.NewPluginOption(headers.Set(key, value))
 }
 
-// OptDelHeader deletes the header fields associated with key.
-func OptDelHeader(key string) define.BkapiOption {
+// OptDelRequestHeader deletes the header fields associated with key.
+func OptDelRequestHeader(key string) define.BkapiOption {
 	return internal.NewPluginOption(headers.Del(key))
 }
 
-// OptSetHeaders sets the headers.
-func OptSetHeaders(header map[string]string) define.BkapiOption {
+// OptSetRequestHeaders sets the headers.
+func OptSetRequestHeaders(header map[string]string) define.BkapiOption {
 	return internal.NewPluginOption(headers.SetMap(header))
 }
 
@@ -77,25 +77,25 @@ func OptProxies(servers map[string]string) define.BkapiOption {
 	return internal.NewPluginOption(proxy.Set(servers))
 }
 
-// OptSetQueryParam ets the query param key and value.
+// OptSetRequestQueryParam ets the query param key and value.
 // It replaces any existing values.
-func OptSetQueryParam(key string, value string) define.BkapiOption {
+func OptSetRequestQueryParam(key string, value string) define.BkapiOption {
 	return internal.NewPluginOption(query.Set(key, value))
 }
 
-// OptAddQueryParam adds the query param value to key.
+// OptAddRequestQueryParam adds the query param value to key.
 // It appends to any existing values associated with key.
-func OptAddQueryParam(key string, value string) define.BkapiOption {
+func OptAddRequestQueryParam(key string, value string) define.BkapiOption {
 	return internal.NewPluginOption(query.Add(key, value))
 }
 
-// OptDelQueryParam deletes the query param values associated with key.
-func OptDelQueryParam(key string) define.BkapiOption {
+// OptDelRequestQueryParam deletes the query param values associated with key.
+func OptDelRequestQueryParam(key string) define.BkapiOption {
 	return internal.NewPluginOption(query.Del(key))
 }
 
-// OptSetQueryParams sets the query params.
-func OptSetQueryParams(params map[string]string) define.BkapiOption {
+// OptSetRequestQueryParams sets the query params.
+func OptSetRequestQueryParams(params map[string]string) define.BkapiOption {
 	return internal.NewPluginOption(query.SetMap(params))
 }
 

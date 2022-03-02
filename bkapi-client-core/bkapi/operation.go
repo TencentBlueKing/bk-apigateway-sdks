@@ -56,18 +56,26 @@ func NewOperationOption(fn func(operation define.Operation) error) *OperationOpt
 	}
 }
 
-// OptSetOperationBody sets the body of the operation.
-func OptSetOperationBody(data interface{}) define.OperationOption {
+// OptSetRequestBody sets the body of the operation.
+func OptSetRequestBody(data interface{}) define.OperationOption {
 	return NewOperationOption(func(op define.Operation) error {
 		op.SetBody(data)
 		return nil
 	})
 }
 
-// OptSetOperationResult sets the result of the operation.
-func OptSetOperationResult(result interface{}) define.OperationOption {
+// OptSetRequestResult sets the result of the operation.
+func OptSetRequestResult(result interface{}) define.OperationOption {
 	return NewOperationOption(func(op define.Operation) error {
 		op.SetResult(result)
+		return nil
+	})
+}
+
+// OptSetRequestPathParams sets the path parameters of the operation.
+func OptSetRequestPathParams(params map[string]string) define.OperationOption {
+	return NewOperationOption(func(op define.Operation) error {
+		op.SetPathParams(params)
 		return nil
 	})
 }
