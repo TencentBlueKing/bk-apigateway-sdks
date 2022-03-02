@@ -15,7 +15,7 @@ type BkApiClient interface {
 	AddOperationOptions(opts ...OperationOption) error
 
 	// NewOperation method creates a new operation dynamically and apply the given options.
-	NewOperation(config OperationConfig, opts ...OperationOption) Operation
+	NewOperation(config OperationConfigProvider, opts ...OperationOption) Operation
 }
 
 // BkApiClientOption defines the interface of BkApi client option.

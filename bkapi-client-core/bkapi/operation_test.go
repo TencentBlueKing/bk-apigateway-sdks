@@ -10,39 +10,94 @@ import (
 )
 
 var _ = Describe("Operation", func() {
-	var (
-		ctrl *gomock.Controller
-	)
+	Context("OperationConfig", func() {
+		It("should clone a config", func() {
+			config := bkapi.OperationConfig{
+				Name:   "test",
+				Path:   "/test",
+				Method: "GET",
+			}
 
-	BeforeEach(func() {
-		ctrl = gomock.NewController(GinkgoT())
+			providedConfig := config.ProvideConfig()
+
+			config.Name = ""
+			config.Path = ""
+			config.Method = ""
+
+			Expect(providedConfig.GetName()).To(Equal("test"))
+			Expect(providedConfig.GetPath()).To(Equal("/test"))
+			Expect(providedConfig.GetMethod()).To(Equal("GET"))
+		})
 	})
 
-	AfterEach(func() {
-		ctrl.Finish()
-	})
+	Context("OperationOption", func() {
+		var (
+			ctrl *gomock.Controller
+		)
 
-	It("should apply to client", func() {
-		option := bkapi.NewOperationOption(nil)
-
-		client := mock.NewMockBkApiClient(ctrl)
-		client.EXPECT().AddOperationOptions(option).Return(nil)
-
-		Expect(option.ApplyToClient(client)).To(Succeed())
-	})
-
-	It("should apply to operation", func() {
-		operation := mock.NewMockOperation(ctrl)
-
-		called := false
-		option := bkapi.NewOperationOption(func(op define.Operation) error {
-			called = true
-			Expect(op).To(Equal(operation))
-
-			return nil
+		BeforeEach(func() {
+			ctrl = gomock.NewController(GinkgoT())
 		})
 
-		Expect(option.ApplyToOperation(operation)).To(Succeed())
-		Expect(called).To(BeTrue())
+		AfterEach(func() {
+			ctrl.Finish()
+		})
+
+		It("should apply to client", func() {
+			option := bkapi.NewOperationOption(nil)
+
+			client := mock.NewMockBkApiClient(ctrl)
+			client.EXPECT().AddOperationOptions(option).Return(nil)
+
+			Expect(option.ApplyToClient(client)).To(Succeed())
+		})
+
+		It("should apply to operation", func() {
+			operation := mock.NewMockOperation(ctrl)
+
+			called := false
+			option := bkapi.NewOperationOption(func(op define.Operation) error {
+				called = true
+				Expect(op).To(Equal(operation))
+
+				return nil
+			})
+
+			Expect(option.ApplyToOperation(operation)).To(Succeed())
+			Expect(called).To(BeTrue())
+		})
+	})
+
+	Context("Option", func() {
+		var (
+			ctrl      *gomock.Controller
+			operation *mock.MockOperation
+		)
+
+		BeforeEach(func() {
+			ctrl = gomock.NewController(GinkgoT())
+
+			operation = mock.NewMockOperation(ctrl)
+		})
+
+		AfterEach(func() {
+			ctrl.Finish()
+		})
+
+		It("should set the body", func() {
+			body := make(map[string]interface{})
+			operation.EXPECT().SetBody(body).Return(nil)
+
+			option := bkapi.OptSetOperationBody(body)
+			Expect(option.ApplyToOperation(operation)).To(Succeed())
+		})
+
+		It("should set the result", func() {
+			result := make(map[string]interface{})
+			operation.EXPECT().SetResult(result).Return(nil)
+
+			option := bkapi.OptSetOperationResult(result)
+			Expect(option.ApplyToOperation(operation)).To(Succeed())
+		})
 	})
 })
