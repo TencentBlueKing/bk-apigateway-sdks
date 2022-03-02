@@ -40,11 +40,6 @@ func (op *Operation) GetError() error {
 	return op.err
 }
 
-// GetGentlemanRequest returns the operation request.
-func (op *Operation) GetGentlemanRequest() *gentleman.Request {
-	return op.request
-}
-
 // Apply method applies the given options to the operation.
 func (op *Operation) Apply(opts ...define.OperationOption) define.Operation {
 	for _, opt := range opts {
@@ -187,16 +182,12 @@ func (op *Operation) Request() (*http.Response, error) {
 		return nil, err
 	}
 
-	if response.Error != nil {
-		return nil, response.Error
-	}
-
 	err = op.callResultProvider(response)
 	if err != nil {
 		return nil, err
 	}
 
-	return response.RawResponse, nil
+	return response.RawResponse, response.Error
 }
 
 // NewOperation creates a new operation.

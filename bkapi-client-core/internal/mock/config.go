@@ -8,6 +8,7 @@ import (
 	reflect "reflect"
 
 	define "github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define"
+	logging "github.com/TencentBlueKing/gopkg/logging"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -46,6 +47,20 @@ func (m *MockClientConfig) GetAuthorizationHeaders() map[string]string {
 func (mr *MockClientConfigMockRecorder) GetAuthorizationHeaders() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAuthorizationHeaders", reflect.TypeOf((*MockClientConfig)(nil).GetAuthorizationHeaders))
+}
+
+// GetLogger mocks base method.
+func (m *MockClientConfig) GetLogger() logging.Logger {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetLogger")
+	ret0, _ := ret[0].(logging.Logger)
+	return ret0
+}
+
+// GetLogger indicates an expected call of GetLogger.
+func (mr *MockClientConfigMockRecorder) GetLogger() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLogger", reflect.TypeOf((*MockClientConfig)(nil).GetLogger))
 }
 
 // GetUrl mocks base method.

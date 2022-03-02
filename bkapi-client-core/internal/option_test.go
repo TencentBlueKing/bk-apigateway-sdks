@@ -3,11 +3,11 @@ package internal_test
 import (
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/internal"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/internal/mock"
+	"github.com/TencentBlueKing/gopkg/logging"
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"gopkg.in/h2non/gentleman.v2"
-	"gopkg.in/h2non/gentleman.v2/plugin"
 )
 
 var _ = Describe("Option", func() {
@@ -38,16 +38,23 @@ var _ = Describe("Option", func() {
 			Expect(operation.GetError()).To(BeNil())
 
 			stacks := request.Middleware.GetStack()
-			Expect(stacks).To(Equal([]plugin.Plugin{pluginA, pluginB}))
+			Expect(stacks).To(ContainElement(pluginA))
+			Expect(stacks).To(ContainElement(pluginB))
 		})
 
 		It("should apply to client", func() {
-			client := internal.NewBkApiClient("", client, nil)
-			Expect(client.Apply(option)).To(Succeed())
+			clientConfig := mock.NewMockClientConfig(ctrl)
+			clientConfig.EXPECT().GetUrl().Return("").AnyTimes()
+			clientConfig.EXPECT().GetAuthorizationHeaders().Return(nil).AnyTimes()
+			clientConfig.EXPECT().GetLogger().Return(logging.GetLogger("")).AnyTimes()
 
-			gentlemanClient := client.Client()
-			stacks := gentlemanClient.Middleware.GetStack()
-			Expect(stacks).To(Equal([]plugin.Plugin{pluginA, pluginB}))
+			cli := internal.NewBkApiClient("", client, nil, clientConfig)
+
+			Expect(cli.Apply(option)).To(Succeed())
+
+			stacks := client.Middleware.GetStack()
+			Expect(stacks).To(ContainElement(pluginA))
+			Expect(stacks).To(ContainElement(pluginB))
 		})
 	})
 })

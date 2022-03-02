@@ -2,9 +2,11 @@ package internal
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/bkapi-client-core/define"
+	"github.com/TencentBlueKing/gopkg/logging"
 	"gopkg.in/h2non/gentleman.v2"
 	"gopkg.in/h2non/gentleman.v2/context"
 	"gopkg.in/h2non/gentleman.v2/plugin"
@@ -17,6 +19,7 @@ var DefaultUserAgent string
 // BkApiClient is a base client for define.
 type BkApiClient struct {
 	name             string
+	logger           logging.Logger
 	client           *gentleman.Client
 	operationOptions []define.OperationOption
 	operationFactory func(name string, request *gentleman.Request) define.Operation
@@ -25,11 +28,6 @@ type BkApiClient struct {
 // Name returns the client name.
 func (cli *BkApiClient) Name() string {
 	return cli.name
-}
-
-// Client returns the gentleman client.
-func (cli *BkApiClient) Client() *gentleman.Client {
-	return cli.client
 }
 
 // Apply method applies the given options to the client.
@@ -52,10 +50,34 @@ func (cli *BkApiClient) AddOperationOptions(opts ...define.OperationOption) erro
 	return nil
 }
 
-// NewOperation will create a new operation dynamically and apply the given options.
-func (cli *BkApiClient) NewOperation(provider define.OperationConfigProvider, opts ...define.OperationOption) define.Operation {
-	config := provider.ProvideConfig()
-	request := cli.client.Request().
+func (cli *BkApiClient) logResponse(op define.Operation, response *http.Response) {
+	logger := cli.logger
+	if logger == nil {
+		return
+	}
+
+	context := map[string]interface{}{
+		"operation":           op,
+		"status_code":         response.StatusCode,
+		"status":              response.Status,
+		"bkapi_request_id":    response.Header.Get("X-Bkapi-Request-Id"),
+		"bkapi_error_code":    response.Header.Get("X-Bkapi-Error-Code"),
+		"bkapi_error_message": response.Header.Get("X-Bkapi-Error-Message"),
+	}
+
+	switch response.StatusCode / 100 {
+	case 4:
+		logger.Warn("request error caused by client", context)
+	case 5:
+		logger.Error("request error caused by server", context)
+	default:
+		logger.Debug("request success", context)
+	}
+
+}
+
+func (cli *BkApiClient) newGentlemanRequest(config define.OperationConfig) *gentleman.Request {
+	return cli.client.Request().
 		Method(config.GetMethod()).
 		Use(headers.Set("User-Agent", DefaultUserAgent)).
 		Use(plugin.NewRequestPlugin(func(c *context.Context, h context.Handler) {
@@ -63,23 +85,40 @@ func (cli *BkApiClient) NewOperation(provider define.OperationConfigProvider, op
 			c.Request.URL.Path = fmt.Sprintf("%s/%s", path, strings.TrimPrefix(config.GetPath(), "/"))
 			h.Next(c)
 		}))
+}
 
+func (cli *BkApiClient) newOperationName(config define.OperationConfig) string {
 	name := config.GetName()
-	if name == "" {
-		name = fmt.Sprintf("%s(%s %s)", cli.Name(), config.GetMethod(), config.GetPath())
-	} else {
-		name = fmt.Sprintf("%s.%s", cli.Name(), name)
+	if name != "" {
+		return fmt.Sprintf("%s.%s", cli.Name(), name)
 	}
 
-	operation := cli.operationFactory(name, request)
+	return fmt.Sprintf("%s(%s %s)", cli.Name(), config.GetMethod(), config.GetPath())
+}
 
+func (cli *BkApiClient) applyOperationOptions(op define.Operation, opts ...define.OperationOption) {
 	for _, o := range [][]define.OperationOption{
 		cli.operationOptions, opts,
 	} {
 		if len(o) > 0 {
-			operation.Apply(o...)
+			op.Apply(o...)
 		}
 	}
+}
+
+// NewOperation will create a new operation dynamically and apply the given options.
+func (cli *BkApiClient) NewOperation(provider define.OperationConfigProvider, opts ...define.OperationOption) define.Operation {
+	config := provider.ProvideConfig()
+	request := cli.newGentlemanRequest(config)
+	name := cli.newOperationName(config)
+	operation := cli.operationFactory(name, request)
+
+	request.Use(plugin.NewResponsePlugin(func(c *context.Context, h context.Handler) {
+		cli.logResponse(operation, c.Response)
+		h.Next(c)
+	}))
+
+	cli.applyOperationOptions(operation, opts...)
 
 	return operation
 }
@@ -89,12 +128,22 @@ func NewBkApiClient(
 	name string,
 	client *gentleman.Client,
 	factory func(name string, request *gentleman.Request) define.Operation,
+	config define.ClientConfig,
 ) *BkApiClient {
+
+	client.URL(config.GetUrl())
+
+	headers := config.GetAuthorizationHeaders()
+	if len(headers) > 0 {
+		client.SetHeaders(headers)
+	}
+
 	return &BkApiClient{
 		name:             name,
 		client:           client,
-		operationOptions: make([]define.OperationOption, 0),
 		operationFactory: factory,
+		logger:           config.GetLogger(),
+		operationOptions: make([]define.OperationOption, 0),
 	}
 }
 

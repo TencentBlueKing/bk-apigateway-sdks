@@ -68,30 +68,13 @@ var _ = Describe("Client", func() {
 		}
 
 		It("should apply option", func() {
+			config.EXPECT().GetLogger().Return(nil).AnyTimes()
+
 			client, err := bkapi.NewBkApiClient(apiName, configProvider, roundTripperOpt)
 			Expect(err).To(BeNil())
 
 			request := getMockRequest(client)
 			Expect(request).NotTo(BeNil())
-		})
-
-		It("should apply url from config", func() {
-			url = "http://example.com/"
-			client, err := bkapi.NewBkApiClient(apiName, configProvider, roundTripperOpt)
-			Expect(err).To(BeNil())
-
-			request := getMockRequest(client)
-			Expect(request.URL.String()).To(Equal(url))
-		})
-
-		It("should set the authorization header", func() {
-			authorizationHeaders["Authorization"] = "Bearer token"
-
-			client, err := bkapi.NewBkApiClient(apiName, configProvider, roundTripperOpt)
-			Expect(err).To(BeNil())
-
-			request := getMockRequest(client)
-			Expect(request.Header.Get("Authorization")).To(Equal("Bearer token"))
 		})
 	})
 
