@@ -10,6 +10,7 @@ import (
 var (
 	// ErrTypeNotMatch defines the error which indicates the type of the value is not match.
 	ErrTypeNotMatch = errors.New("type not match")
+	ErrBkApiRequest = errors.New("bkapi request error")
 )
 
 // ErrorWrapf annotates err with the format specifier and arguments.
@@ -24,4 +25,12 @@ func EnableStackTraceErrorWrapf() {
 // This function is not thread safe, do not call it in parallel.
 func SetErrorWrapf(f func(err error, format string, args ...interface{}) error) {
 	ErrorWrapf = f
+}
+
+// BkApiRequestError is the error returned by api gateway.
+type BkApiRequestError interface {
+	error
+	RequestId() string
+	ErrorCode() string
+	ErrorMessage() string
 }

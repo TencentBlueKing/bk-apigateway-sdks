@@ -202,6 +202,27 @@ var _ = Describe("operation", func() {
 			Expect(err).To(BeNil())
 			Expect(response.Close).To(BeTrue())
 		})
+
+		It("should return bkapi error", func() {
+			response.StatusCode = 403
+			response.Header = http.Header{
+				"X-Bkapi-Request-Id":    []string{"request-id"},
+				"X-Bkapi-Error-Code":    []string{"error-code"},
+				"X-Bkapi-Error-Message": []string{"error-message"},
+			}
+
+			mockTransportRoundTrip()
+
+			_, err := operation.Request()
+			Expect(err).NotTo(BeNil())
+
+			detail, ok := err.(*internal.BkApiResponseDetail)
+			Expect(ok).To(BeTrue())
+
+			Expect(detail.RequestId()).To(Equal("request-id"))
+			Expect(detail.ErrorCode()).To(Equal("error-code"))
+			Expect(detail.ErrorMessage()).To(Equal("error-message"))
+		})
 	})
 
 	Context("OperationOption", func() {

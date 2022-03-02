@@ -165,6 +165,16 @@ func (op *Operation) callResultProvider(response *gentleman.Response) error {
 	return nil
 }
 
+func (op *Operation) checkBkapiError(response *gentleman.Response) error {
+	if response.Ok {
+		return nil
+	}
+
+	detail := NewBkApiResponseDetailFromResponse(response.RawResponse)
+
+	return detail.GetError()
+}
+
 // Request will send the operation request and return the response.
 func (op *Operation) Request() (*http.Response, error) {
 	// when the operation already has an error, return it directly
@@ -178,6 +188,11 @@ func (op *Operation) Request() (*http.Response, error) {
 	}
 
 	response, err := op.request.Send()
+	if err != nil {
+		return nil, err
+	}
+
+	err = op.checkBkapiError(response)
 	if err != nil {
 		return nil, err
 	}
