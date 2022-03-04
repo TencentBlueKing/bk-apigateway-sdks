@@ -54,6 +54,14 @@ var _ = Describe("Provider", func() {
 			})
 			Expect(provider.ProvideBody(operation, "world")).To(BeNil())
 		})
+
+		It("should set an empty body", func() {
+			provider := bkapi.NewMarshalBodyProvider("text/plain", func(v interface{}) ([]byte, error) {
+				panic("should not be called")
+			})
+
+			Expect(provider.ProvideBody(operation, nil)).To(BeNil())
+		})
 	})
 
 	Context("UnmarshalResultProvider", func() {
@@ -73,6 +81,16 @@ var _ = Describe("Provider", func() {
 			result, err := ioutil.ReadAll(reader)
 			Expect(err).To(BeNil())
 			Expect(string(result)).To(Equal("hello world"))
+		})
+
+		It("should not unmarshal the result", func() {
+			provider := bkapi.NewUnmarshalResultProvider(func(body io.Reader, v interface{}) error {
+				panic("should not be called")
+			})
+
+			Expect(provider.ProvideResult(&http.Response{
+				Body: ioutil.NopCloser(strings.NewReader("hello world")),
+			}, nil)).To(BeNil())
 		})
 	})
 

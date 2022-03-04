@@ -32,6 +32,11 @@ func (m *MarshalBodyProvider) ApplyToOperation(op define.Operation) error {
 
 // ProvideBody method provides the request body, and returns the content length.
 func (m *MarshalBodyProvider) ProvideBody(operation define.Operation, data interface{}) error {
+	// for most scenarios, a nil data represents an empty body.
+	if data == nil {
+		return nil
+	}
+
 	content, err := m.marshalFn(data)
 	if err != nil {
 		return define.ErrorWrapf(err, "failed to marshal data to %s", m.contentType)
@@ -71,6 +76,11 @@ func (p *UnmarshalResultProvider) ApplyToOperation(op define.Operation) error {
 
 // ProvideResult method provides the result from the response body.
 func (p *UnmarshalResultProvider) ProvideResult(response *http.Response, result interface{}) error {
+	// for most unmarshal functions, a nil receiver is not expected.
+	if result == nil {
+		return nil
+	}
+
 	err := p.unmarshalFn(response.Body, result)
 	if err != nil {
 		return define.ErrorWrapf(err, "failed to unmarshal response body")

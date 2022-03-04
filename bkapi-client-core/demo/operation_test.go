@@ -149,10 +149,12 @@ var _ = Describe("Operation", func() {
 		})
 
 		It("should handle decode error", func() {
+			var result map[string]interface{}
 
+			// 5xx response will sent non-json body
 			_, err := client.StatusCode().
 				SetResultProvider(bkapi.JsonResultProvider()).
-				SetResult(nil). // result not set
+				SetResult(&result).
 				SetPathParams(map[string]string{
 					"code": "500",
 				}).
