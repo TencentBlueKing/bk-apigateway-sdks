@@ -222,9 +222,14 @@ func NewManager(
 	}, nil
 }
 
+// NewDefaultManager create a new default manager.
+func NewDefaultManager(apiName string, config bkapi.ClientConfig) (*Manager, error) {
+	return NewManager(apiName, config, nil, apigateway.New)
+}
+
 // NewManagerFrom file will create a new manager from the file.
 func NewManagerFrom(apiName string, config bkapi.ClientConfig, path string, data interface{}) (*Manager, error) {
-	manager, err := NewManager(apiName, config, nil, apigateway.New)
+	manager, err := NewDefaultManager(apiName, config)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create manager")
 	}
