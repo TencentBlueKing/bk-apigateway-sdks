@@ -71,6 +71,7 @@ var _ = Describe("Manager", func() {
 					"public_key": "public_key",
 				},
 			})
+		defer gock.Off()
 
 		info, err := manager.GetPublicKey()
 		Expect(err).To(BeNil())
@@ -89,6 +90,7 @@ var _ = Describe("Manager", func() {
 					"public_key": "public_key",
 				},
 			})
+		defer gock.Off()
 
 		key, err := manager.GetPublicKeyString()
 		Expect(err).To(BeNil())

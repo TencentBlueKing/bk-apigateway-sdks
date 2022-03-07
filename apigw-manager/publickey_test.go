@@ -52,6 +52,7 @@ var _ = Describe("Publickey", func() {
 					"public_key": "public_key",
 				},
 			})
+		defer gock.Off()
 
 		for i := 0; i < 10; i++ {
 			publicKey, err := provider.ProvidePublicKey("testing")
