@@ -130,12 +130,3 @@ func (c *Client) SyncStage(opts ...define.OperationOption) define.Operation {
 		Path:   "/api/v1/apis/{api_name}/stages/sync/",
 	}, opts...)
 }
-
-//  更新微网关实例状态
-func (c *Client) UpdateMicroGatewayStatus(opts ...define.OperationOption) define.Operation {
-	return c.BkApiClient.NewOperation(bkapi.OperationConfig{
-		Name:   "update_micro_gateway_status",
-		Method: "PUT",
-		Path:   "/api/v1/edge-controller/micro-gateway/{instance_id}/status/",
-	}, opts...)
-}
