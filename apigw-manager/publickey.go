@@ -15,17 +15,34 @@ type PublicKeyProvider interface {
 	ProvidePublicKey(apiName string) (string, error)
 }
 
-// PublicKeyMemoryCache :
+// PublicKeySimpleProvider provides some predefined public keys.
+type PublicKeySimpleProvider struct {
+	publicKeys map[string]string
+}
+
+// ProvidePublicKey returns public key for given api name.
+func (p *PublicKeySimpleProvider) ProvidePublicKey(apiName string) (string, error) {
+	return p.publicKeys[apiName], nil
+}
+
+// NewPublicKeySimpleProvider creates a simple public key provider.
+func NewPublicKeySimpleProvider(publicKeys map[string]string) *PublicKeySimpleProvider {
+	return &PublicKeySimpleProvider{
+		publicKeys: publicKeys,
+	}
+}
+
+// PublicKeyMemoryCache will cache public key in memory.
 type PublicKeyMemoryCache struct {
 	cache memory.Cache
 }
 
-// ProvidePublicKey :
+// ProvidePublicKey gets public key from cache.
 func (c *PublicKeyMemoryCache) ProvidePublicKey(apiName string) (string, error) {
 	return c.cache.GetString(cache.NewStringKey(apiName))
 }
 
-// NewPublicKeyMemoryCache :
+// NewPublicKeyMemoryCache creates a memory cache for public key.
 func NewPublicKeyMemoryCache(
 	config bkapi.ClientConfig,
 	expiration time.Duration,
@@ -57,9 +74,7 @@ func NewPublicKeyMemoryCache(
 	}
 }
 
-// NewDefaultPublicKeyMemoryCache :
-func NewDefaultPublicKeyMemoryCache(
-	config bkapi.ClientConfig, expiration time.Duration,
-) *PublicKeyMemoryCache {
-	return NewPublicKeyMemoryCache(config, expiration, NewDefaultManager)
+// NewDefaultPublicKeyMemoryCache creates a default memory cache for public key.
+func NewDefaultPublicKeyMemoryCache(config bkapi.ClientConfig) *PublicKeyMemoryCache {
+	return NewPublicKeyMemoryCache(config, 12*time.Hour, NewDefaultManager)
 }

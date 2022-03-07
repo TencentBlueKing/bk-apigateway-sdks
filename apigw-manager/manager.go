@@ -134,8 +134,8 @@ func (m *Manager) SyncStageConfig(namespace string) (map[string]interface{}, err
 	return m.requestWithBody(m.client.SyncStage(), data)
 }
 
-// SyncAccessStrategies sync the access strategies from definition under the namespace to apigw.
-func (m *Manager) SyncAccessStrategies(namespace string) (map[string]interface{}, error) {
+// SyncPluginConfig sync the plugin config from definition under the namespace to apigw.
+func (m *Manager) SyncPluginConfig(namespace string) (map[string]interface{}, error) {
 	data, err := m.definition.Get(namespace)
 	if err != nil {
 		return nil, errors.WithMessagef(err, "failed to get %s", namespace)
