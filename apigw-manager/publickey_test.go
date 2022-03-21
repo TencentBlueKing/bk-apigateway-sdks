@@ -27,7 +27,9 @@ var _ = Describe("Publickey", func() {
 			config, time.Hour,
 			func(apiName string, config bkapi.ClientConfig) (*manager.Manager, error) {
 				return manager.NewManager(
-					apiName, config, nil,
+					apiName,
+					config,
+					nil,
 					func(configProvider define.ClientConfigProvider, opts ...define.BkApiClientOption) (*apigateway.Client, error) {
 						opts = append(opts, bkapi.OptTransport(gock.NewTransport()))
 						return apigateway.New(configProvider, opts...)

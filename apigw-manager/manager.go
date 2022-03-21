@@ -29,7 +29,10 @@ type Manager struct {
 	config     *bkapi.ClientConfig
 }
 
-func (m *Manager) requestWithBody(operation define.Operation, body map[string]interface{}) (map[string]interface{}, error) {
+func (m *Manager) requestWithBody(
+	operation define.Operation,
+	body map[string]interface{},
+) (map[string]interface{}, error) {
 	return m.request(operation.SetBody(body))
 }
 
@@ -50,7 +53,12 @@ func (m *Manager) request(operation define.Operation) (map[string]interface{}, e
 		return result.Data, nil
 	}
 
-	return result.Data, errors.Wrapf(ErrApigatewayRequest, "code: %d, message: %s", result.Code, result.Message)
+	return result.Data, errors.Wrapf(
+		ErrApigatewayRequest,
+		"code: %d, message: %s",
+		result.Code,
+		result.Message,
+	)
 }
 
 // LoadDefinition will load the definition from the file.
@@ -206,7 +214,9 @@ func (m *Manager) Release(namespace string) (map[string]interface{}, error) {
 
 // NewManager create a new manager.
 func NewManager(
-	apiName string, config bkapi.ClientConfig, definition *Definition,
+	apiName string,
+	config bkapi.ClientConfig,
+	definition *Definition,
 	clientFactory func(configProvider define.ClientConfigProvider, opts ...define.BkApiClientOption) (*apigateway.Client, error),
 ) (*Manager, error) {
 	client, err := clientFactory(config, bkapi.OptJsonBodyProvider(), bkapi.JsonResultProvider())
@@ -228,7 +238,12 @@ func NewDefaultManager(apiName string, config bkapi.ClientConfig) (*Manager, err
 }
 
 // NewManagerFrom file will create a new manager from the file.
-func NewManagerFrom(apiName string, config bkapi.ClientConfig, path string, data interface{}) (*Manager, error) {
+func NewManagerFrom(
+	apiName string,
+	config bkapi.ClientConfig,
+	path string,
+	data interface{},
+) (*Manager, error) {
 	manager, err := NewDefaultManager(apiName, config)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create manager")

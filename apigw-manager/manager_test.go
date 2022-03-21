@@ -30,7 +30,9 @@ var _ = Describe("Manager", func() {
 
 		var err error
 		manager, err = mgr.NewManager(
-			apiName, config, nil,
+			apiName,
+			config,
+			nil,
 			func(configProvider define.ClientConfigProvider, opts ...define.BkApiClientOption) (*apigateway.Client, error) {
 				opts = append(opts, bkapi.OptTransport(gock.NewTransport()))
 				return apigateway.New(configProvider, opts...)
