@@ -76,4 +76,5 @@ $RECYCLE.BIN/
 
 # End of https://www.toptal.com/developers/gitignore/api/linux,macos,windows,vscode
 
-workspace.code-workspace
+*.code-workspace
+vendor/
