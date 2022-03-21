@@ -105,7 +105,10 @@ func (cli *BkApiClient) applyOperationOptions(op define.Operation, opts ...defin
 }
 
 // NewOperation will create a new operation dynamically and apply the given options.
-func (cli *BkApiClient) NewOperation(provider define.OperationConfigProvider, opts ...define.OperationOption) define.Operation {
+func (cli *BkApiClient) NewOperation(
+	provider define.OperationConfigProvider,
+	opts ...define.OperationOption,
+) define.Operation {
 	config := provider.ProvideConfig()
 	request := cli.newGentlemanRequest(config)
 	name := cli.newOperationName(config)

@@ -25,10 +25,19 @@ func newGentlemanClient(config define.ClientConfig) *gentleman.Client {
 }
 
 // NewBkApiClient creates a new BkApiClient.
-func NewBkApiClient(apiName string, configProvider define.ClientConfigProvider, opts ...define.BkApiClientOption) (define.BkApiClient, error) {
-	client := internal.NewBkApiClient(apiName, gentleman.New(), func(name string, request *gentleman.Request) define.Operation {
-		return internal.NewOperation(name, request)
-	}, configProvider.ProvideConfig(apiName))
+func NewBkApiClient(
+	apiName string,
+	configProvider define.ClientConfigProvider,
+	opts ...define.BkApiClientOption,
+) (define.BkApiClient, error) {
+	client := internal.NewBkApiClient(
+		apiName,
+		gentleman.New(),
+		func(name string, request *gentleman.Request) define.Operation {
+			return internal.NewOperation(name, request)
+		},
+		configProvider.ProvideConfig(apiName),
+	)
 
 	if len(opts) == 0 {
 		return client, nil

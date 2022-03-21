@@ -132,14 +132,16 @@ var _ = Describe("operation", func() {
 			requestBody := []byte(`{"foo":"bar"}`)
 
 			provider := mock.NewMockBodyProvider(ctrl)
-			provider.EXPECT().ProvideBody(operation, gomock.Any()).DoAndReturn(func(op define.Operation, data interface{}) error {
-				op.
-					SetContentType("application/json").
-					SetContentLength(int64(len(requestBody))).
-					SetBodyReader(bytes.NewReader(requestBody))
+			provider.EXPECT().
+				ProvideBody(operation, gomock.Any()).
+				DoAndReturn(func(op define.Operation, data interface{}) error {
+					op.
+						SetContentType("application/json").
+						SetContentLength(int64(len(requestBody))).
+						SetBodyReader(bytes.NewReader(requestBody))
 
-				return nil
-			})
+					return nil
+				})
 
 			mockTransportRoundTrip()
 
@@ -161,12 +163,14 @@ var _ = Describe("operation", func() {
 			mockTransportRoundTrip()
 
 			provider := mock.NewMockResultProvider(ctrl)
-			provider.EXPECT().ProvideResult(gomock.Any(), gomock.Any()).DoAndReturn(func(response *http.Response, r interface{}) error {
-				result := r.(map[string]interface{})
-				result["foo"] = "bar"
+			provider.EXPECT().
+				ProvideResult(gomock.Any(), gomock.Any()).
+				DoAndReturn(func(response *http.Response, r interface{}) error {
+					result := r.(map[string]interface{})
+					result["foo"] = "bar"
 
-				return nil
-			})
+					return nil
+				})
 			result := make(map[string]interface{})
 
 			_, err := operation.

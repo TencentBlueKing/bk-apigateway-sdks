@@ -33,7 +33,9 @@ type JsonUnmarshalResultProvider struct {
 }
 
 // NewJsonUnmarshalResultProvider creates a new JsonUnmarshalResultProvider with unmarshal function.
-func NewJsonUnmarshalResultProvider(unmarshaler func(body io.Reader, v interface{}) error) *JsonUnmarshalResultProvider {
+func NewJsonUnmarshalResultProvider(
+	unmarshaler func(body io.Reader, v interface{}) error,
+) *JsonUnmarshalResultProvider {
 	return &JsonUnmarshalResultProvider{
 		UnmarshalResultProvider: NewUnmarshalResultProvider(unmarshaler),
 	}
