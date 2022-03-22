@@ -25,4 +25,4 @@
 
 ## 协议
 
-基于 MIT 协议， 详细请参考[LICENSE](LICENSE.txt)
+基于 MIT 协议，详细请参考[LICENSE](LICENSE)

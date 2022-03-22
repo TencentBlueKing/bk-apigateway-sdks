@@ -24,4 +24,4 @@ If you have good ideas or suggestions, please let us know by Issues or Pull Requ
 
 ## License
 
-Based on the MIT protocol. Please refer to [LICENSE](LICENSE.txt)
+Based on the MIT protocol, Please refer to [LICENSE](LICENSE)
