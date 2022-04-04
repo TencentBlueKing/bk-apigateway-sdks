@@ -228,7 +228,9 @@ func NewManager(
 	apiName string,
 	config bkapi.ClientConfig,
 	definition *Definition,
-	clientFactory func(configProvider define.ClientConfigProvider, opts ...define.BkApiClientOption) (*apigateway.Client, error),
+	clientFactory func(
+		configProvider define.ClientConfigProvider, opts ...define.BkApiClientOption,
+	) (*apigateway.Client, error),
 ) (*Manager, error) {
 	client, err := clientFactory(config, bkapi.OptJsonBodyProvider(), bkapi.JsonResultProvider())
 	if err != nil {
