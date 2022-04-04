@@ -15,6 +15,8 @@ import "errors"
 
 //
 var (
-	ErrNotFound          = errors.New("not found")
-	ErrApigatewayRequest = errors.New("apigateway request error")
+	ErrNotFound                            = errors.New("not found")
+	ErrApigatewayRequest                   = errors.New("apigateway request error")
+	ErrApiGatewayPublicKeyNotFound         = errors.New("public key not found")
+	ErrApiGatewayPublicKeyTypeNotSupported = errors.New("public key type not supported")
 )

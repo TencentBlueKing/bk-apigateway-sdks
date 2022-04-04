@@ -19,12 +19,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-//
-var (
-	ErrApiGatewayPublicKeyNotFound         = errors.New("public key not found")
-	ErrApiGatewayPublicKeyTypeNotSupported = errors.New("public key type not supported")
-)
-
 type apiGatewayResult struct {
 	Code      int                    `json:"code"`
 	HasResult bool                   `json:"result"`
