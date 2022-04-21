@@ -1,5 +1,5 @@
 on: [push, pull_request]
-name: apigw-manager
+name: manager
 jobs:
   test:
     strategy:
@@ -17,4 +17,4 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
       - name: Test
-        run: cd apigw-manager && go test ./...
+        run: cd manager && go test ./...

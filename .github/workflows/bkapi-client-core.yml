@@ -1,5 +1,5 @@
 on: [push, pull_request]
-name: bkapi-client-core
+name: core
 jobs:
   test:
     strategy:
@@ -17,4 +17,4 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
       - name: Test
-        run: cd bkapi-client-core && go test ./...
+        run: cd core && go test ./...

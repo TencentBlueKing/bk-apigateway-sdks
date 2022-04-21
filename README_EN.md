@@ -5,9 +5,9 @@
 This repository contains the SDKs and tools for the Blueking API Gateway, simplifying the development process of developers who want to integrate with the Blueking API Gateway.
 
 ## Overview
-- [apigw-manager](apigw-manager)：Gateway management toolset
-- [bkapi-bk-apigateway](bkapi-bk-apigateway)：Blueking API Gateway client SDK
-- [bkapi-client-core](bkapi-client-core)：Blueking API Gateway client core library
+- [manager](manager)：Gateway management toolset
+- [apigateway](apigateway)：Blueking API Gateway client SDK
+- [core](core)：Blueking API Gateway client core library
 
 ## BlueKing Community
 
