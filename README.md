@@ -5,9 +5,9 @@
 该仓库包含了蓝鲸 API 网关相关的 SDK 及工具集，简化开发者接入和使用蓝鲸 API 网关的开发过程。
 
 ## 总览
-- [apigw-manager](apigw-manager)：网关管理工具集
-- [bkapi-bk-apigateway](bkapi-bk-apigateway)：网关客户端 SDK
-- [bkapi-client-core](bkapi-client-core)：网关客户端核心库
+- [manager](manager)：网关管理工具集
+- [apigateway](apigateway)：网关客户端 SDK
+- [core](core)：网关客户端核心库
 
 
 ## 蓝鲸社区
