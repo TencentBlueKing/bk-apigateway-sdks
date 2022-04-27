@@ -12,6 +12,8 @@
 package manager
 
 import (
+	"io/ioutil"
+
 	apigateway "github.com/TencentBlueKing/bk-apigateway-sdks/apigateway"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
@@ -157,6 +159,25 @@ func (m *Manager) SyncPluginConfig(namespace string) (map[string]interface{}, er
 	return m.requestWithBody(m.client.SyncAccessStrategy(), data)
 }
 
+func (m *Manager) replaceIncludedResourcesContent(
+	data map[string]interface{},
+	resourceFileKey, contentFileKey string,
+) error {
+	resourceFile, ok := data[resourceFileKey]
+	if !ok {
+		return nil
+	}
+
+	delete(data, resourceFileKey)
+	content, err := ioutil.ReadFile(resourceFile.(string))
+	if err != nil {
+		return errors.Wrapf(err, "failed to read %s", resourceFile)
+	}
+
+	data[contentFileKey] = string(content)
+	return nil
+}
+
 // SyncResourcesConfig sync the resources config from definition under the namespace to apigw.
 func (m *Manager) SyncResourcesConfig(namespace string) (map[string]interface{}, error) {
 	data, err := m.definition.Get(namespace)
@@ -164,6 +185,10 @@ func (m *Manager) SyncResourcesConfig(namespace string) (map[string]interface{},
 		return nil, errors.WithMessagef(err, "failed to get %s", namespace)
 	}
 
+	err = m.replaceIncludedResourcesContent(data, "include_file", "content")
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to replace content from resourcefile")
+	}
 	return m.requestWithBody(m.client.SyncResources(), data)
 }
 
