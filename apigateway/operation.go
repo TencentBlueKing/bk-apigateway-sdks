@@ -43,6 +43,15 @@ func (c *Client) CreateResourceVersion(opts ...define.OperationOption) define.Op
 	}, opts...)
 }
 
+//  生成 SDK
+func (c *Client) GenerateSdk(opts ...define.OperationOption) define.Operation {
+	return c.BkApiClient.NewOperation(bkapi.OperationConfig{
+		Name:   "generate_sdk",
+		Method: "POST",
+		Path:   "/api/v1/apis/{api_name}/sdk/",
+	}, opts...)
+}
+
 //  获取网关公钥
 func (c *Client) GetApigwPublicKey(opts ...define.OperationOption) define.Operation {
 	return c.BkApiClient.NewOperation(bkapi.OperationConfig{
@@ -58,6 +67,15 @@ func (c *Client) GetLatestResourceVersion(opts ...define.OperationOption) define
 		Name:   "get_latest_resource_version",
 		Method: "GET",
 		Path:   "/api/v1/apis/{api_name}/resource_versions/latest/",
+	}, opts...)
+}
+
+//  获取微网关应用权限
+func (c *Client) GetMicroGatewayAppPermissions(opts ...define.OperationOption) define.Operation {
+	return c.BkApiClient.NewOperation(bkapi.OperationConfig{
+		Name:   "get_micro_gateway_app_permissions",
+		Method: "GET",
+		Path:   "/api/v1/edge-controller/micro-gateway/{instance_id}/permissions/",
 	}, opts...)
 }
 
@@ -79,7 +97,7 @@ func (c *Client) ImportResourceDocsByArchive(opts ...define.OperationOption) def
 	}, opts...)
 }
 
-// ImportResourceDocsBySwagger :
+// 通过 Swagger 格式导入文档 :
 func (c *Client) ImportResourceDocsBySwagger(opts ...define.OperationOption) define.Operation {
 	return c.BkApiClient.NewOperation(bkapi.OperationConfig{
 		Name:   "import_resource_docs_by_swagger",
@@ -139,5 +157,14 @@ func (c *Client) SyncStage(opts ...define.OperationOption) define.Operation {
 		Name:   "sync_stage",
 		Method: "POST",
 		Path:   "/api/v1/apis/{api_name}/stages/sync/",
+	}, opts...)
+}
+
+//  更新微网关实例状态
+func (c *Client) UpdateMicroGatewayStatus(opts ...define.OperationOption) define.Operation {
+	return c.BkApiClient.NewOperation(bkapi.OperationConfig{
+		Name:   "update_micro_gateway_status",
+		Method: "PUT",
+		Path:   "/api/v1/edge-controller/micro-gateway/{instance_id}/status/",
 	}, opts...)
 }
