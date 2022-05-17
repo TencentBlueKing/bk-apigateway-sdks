@@ -1,7 +1,7 @@
 /**
  * TencentBlueKing is pleased to support the open source community by
  * making 蓝鲸智云-蓝鲸 PaaS 平台(BlueKing-PaaS) available.
- * Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
+ * Copyright (C) 2017 THL A29 Limited, a Tencent company. All rights reserved.
  * Licensed under the MIT License (the "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at http://opensource.org/licenses/MIT
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
@@ -76,7 +76,11 @@ func (m *MockLogger) DebugContext(arg0 context.Context, arg1 string, arg2 ...map
 func (mr *MockLoggerMockRecorder) DebugContext(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DebugContext", reflect.TypeOf((*MockLogger)(nil).DebugContext), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(
+		mr.mock,
+		"DebugContext",
+		reflect.TypeOf((*MockLogger)(nil).DebugContext),
+		varargs...)
 }
 
 // Error mocks base method.
@@ -110,7 +114,11 @@ func (m *MockLogger) ErrorContext(arg0 context.Context, arg1 string, arg2 ...map
 func (mr *MockLoggerMockRecorder) ErrorContext(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ErrorContext", reflect.TypeOf((*MockLogger)(nil).ErrorContext), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(
+		mr.mock,
+		"ErrorContext",
+		reflect.TypeOf((*MockLogger)(nil).ErrorContext),
+		varargs...)
 }
 
 // Info mocks base method.
@@ -144,7 +152,11 @@ func (m *MockLogger) InfoContext(arg0 context.Context, arg1 string, arg2 ...map[
 func (mr *MockLoggerMockRecorder) InfoContext(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InfoContext", reflect.TypeOf((*MockLogger)(nil).InfoContext), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(
+		mr.mock,
+		"InfoContext",
+		reflect.TypeOf((*MockLogger)(nil).InfoContext),
+		varargs...)
 }
 
 // Trace mocks base method.
@@ -178,7 +190,11 @@ func (m *MockLogger) TraceContext(arg0 context.Context, arg1 string, arg2 ...map
 func (mr *MockLoggerMockRecorder) TraceContext(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TraceContext", reflect.TypeOf((*MockLogger)(nil).TraceContext), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(
+		mr.mock,
+		"TraceContext",
+		reflect.TypeOf((*MockLogger)(nil).TraceContext),
+		varargs...)
 }
 
 // Warn mocks base method.
@@ -212,5 +228,9 @@ func (m *MockLogger) WarnContext(arg0 context.Context, arg1 string, arg2 ...map[
 func (mr *MockLoggerMockRecorder) WarnContext(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WarnContext", reflect.TypeOf((*MockLogger)(nil).WarnContext), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(
+		mr.mock,
+		"WarnContext",
+		reflect.TypeOf((*MockLogger)(nil).WarnContext),
+		varargs...)
 }
