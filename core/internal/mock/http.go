@@ -1,7 +1,7 @@
 /**
  * TencentBlueKing is pleased to support the open source community by
  * making 蓝鲸智云-蓝鲸 PaaS 平台(BlueKing-PaaS) available.
- * Copyright (C) 2017-2021 THL A29 Limited, a Tencent company. All rights reserved.
+ * Copyright (C) 2017 THL A29 Limited, a Tencent company. All rights reserved.
  * Licensed under the MIT License (the "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at http://opensource.org/licenses/MIT
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
@@ -57,5 +57,10 @@ func (m *MockRoundTripper) RoundTrip(arg0 *http.Request) (*http.Response, error)
 // RoundTrip indicates an expected call of RoundTrip.
 func (mr *MockRoundTripperMockRecorder) RoundTrip(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RoundTrip", reflect.TypeOf((*MockRoundTripper)(nil).RoundTrip), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(
+		mr.mock,
+		"RoundTrip",
+		reflect.TypeOf((*MockRoundTripper)(nil).RoundTrip),
+		arg0,
+	)
 }
