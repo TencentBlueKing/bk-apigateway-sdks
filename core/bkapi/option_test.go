@@ -59,10 +59,19 @@ var _ = Describe("Option", func() {
 		return response
 	}
 
-	It("OptAddRequestQueryParamList", func() {
-		opt := bkapi.OptAddRequestQueryParamList("testing", []string{"a", "b", "c"})
-		response := applyOptions(opt)
+	Context("OptAddRequestQueryParamList", func() {
+		It("usage", func() {
+			opt := bkapi.OptAddRequestQueryParamList("testing", []string{"a", "b", "c"})
+			response := applyOptions(opt)
 
-		Expect(response.Request.URL.Query().Encode()).To(Equal("testing=a&testing=b&testing=c"))
+			Expect(response.Request.URL.Query().Encode()).To(Equal("testing=a&testing=b&testing=c"))
+		})
+
+		It("usage with empty list", func() {
+			opt := bkapi.OptAddRequestQueryParamList("testing", []string{})
+			response := applyOptions(opt)
+
+			Expect(response.Request.URL.Query().Encode()).To(Equal(""))
+		})
 	})
 })
