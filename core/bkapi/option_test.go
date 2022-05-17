@@ -12,6 +12,7 @@
 package bkapi_test
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi"
@@ -30,16 +31,18 @@ var _ = Describe("Option", func() {
 		ctrl         *gomock.Controller
 		roundTripper *mock.MockRoundTripper
 		operation    *internal.Operation
+		requestError error
 	)
 
 	BeforeEach(func() {
 		ctrl = gomock.NewController(GinkgoT())
+		requestError = nil
 		roundTripper = mock.NewMockRoundTripper(ctrl)
 		roundTripper.EXPECT().RoundTrip(gomock.Any()).DoAndReturn(func(req *http.Request) (*http.Response, error) {
 			return &http.Response{
 				StatusCode: http.StatusOK,
 				Request:    req,
-			}, nil
+			}, requestError
 		}).AnyTimes()
 
 		request := gentleman.NewRequest()
@@ -54,7 +57,9 @@ var _ = Describe("Option", func() {
 
 	applyOptions := func(opts ...define.OperationOption) *http.Response {
 		response, err := operation.Apply(opts...).Request()
-		Expect(err).To(BeNil())
+		if requestError == nil {
+			Expect(err).To(BeNil())
+		}
 
 		return response
 	}
@@ -72,6 +77,53 @@ var _ = Describe("Option", func() {
 			response := applyOptions(opt)
 
 			Expect(response.Request.URL.Query().Encode()).To(Equal(""))
+		})
+	})
+
+	It("OptRequestCallback", func() {
+		var realRequest *http.Request
+		opt := bkapi.OptRequestCallback(func(req *http.Request) *http.Request {
+			realRequest = req
+			return req
+		})
+		response := applyOptions(opt)
+
+		Expect(response.Request).To(Equal(realRequest))
+	})
+
+	It("OptResponseCallback", func() {
+		var realResponse *http.Response
+		opt := bkapi.OptResponseCallback(func(rsp *http.Response) *http.Response {
+			Expect(rsp).NotTo(BeNil())
+			realResponse = rsp
+			return rsp
+		})
+		response := applyOptions(opt)
+
+		Expect(response).To(Equal(realResponse))
+	})
+
+	Context("OptErrorCallback", func() {
+		It("should be called when error occurs", func() {
+			requestError = fmt.Errorf("testing")
+			var realError error
+			opt := bkapi.OptErrorCallback(func(err error) error {
+				Expect(err).NotTo(BeNil())
+				realError = err
+				return err
+			})
+
+			applyOptions(opt)
+			Expect(realError).NotTo(BeNil())
+		})
+
+		It("should not be called when no error occurs", func() {
+			opt := bkapi.OptErrorCallback(func(err error) error {
+				Fail("should not be called")
+				return err
+			})
+
+			applyOptions(opt)
 		})
 	})
 })
