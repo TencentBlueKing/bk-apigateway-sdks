@@ -12,6 +12,8 @@
 package bkapi
 
 import (
+	"net/http"
+
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/internal"
 	"gopkg.in/h2non/gentleman.v2/context"
@@ -29,6 +31,30 @@ func OptAddRequestQueryParamList(key string, values []string) define.BkapiOption
 		}
 
 		ctx.Request.URL.RawQuery = query.Encode()
+		h.Next(ctx)
+	}))
+}
+
+// OptRequestCallback sets the callback function for the request.
+func OptRequestCallback(fn func(request *http.Request) *http.Request) define.BkapiOption {
+	return internal.NewPluginOption(plugin.NewRequestPlugin(func(ctx *context.Context, h context.Handler) {
+		ctx.Request = fn(ctx.Request)
+		h.Next(ctx)
+	}))
+}
+
+// OptResponseCallback sets the callback function for the response.
+func OptResponseCallback(fn func(response *http.Response) *http.Response) define.BkapiOption {
+	return internal.NewPluginOption(plugin.NewResponsePlugin(func(ctx *context.Context, h context.Handler) {
+		ctx.Response = fn(ctx.Response)
+		h.Next(ctx)
+	}))
+}
+
+// OptErrorCallback sets the callback function for the error.
+func OptErrorCallback(fn func(err error) error) define.BkapiOption {
+	return internal.NewPluginOption(plugin.NewErrorPlugin(func(ctx *context.Context, h context.Handler) {
+		ctx.Error = fn(ctx.Error)
 		h.Next(ctx)
 	}))
 }
