@@ -22,7 +22,7 @@ import (
 
 // OptAddRequestQueryParamList adds the query param value list to key.
 // It appends to any existing values associated with key.
-func OptAddRequestQueryParamList(key string, values []string) define.BkapiOption {
+func OptAddRequestQueryParamList(key string, values []string) define.BkApiOption {
 	return internal.NewPluginOption(plugin.NewRequestPlugin(func(ctx *context.Context, h context.Handler) {
 		query := ctx.Request.URL.Query()
 
@@ -36,7 +36,7 @@ func OptAddRequestQueryParamList(key string, values []string) define.BkapiOption
 }
 
 // OptRequestCallback sets the callback function for the request.
-func OptRequestCallback(fn func(request *http.Request) *http.Request) define.BkapiOption {
+func OptRequestCallback(fn func(request *http.Request) *http.Request) define.BkApiOption {
 	return internal.NewPluginOption(plugin.NewRequestPlugin(func(ctx *context.Context, h context.Handler) {
 		ctx.Request = fn(ctx.Request)
 		h.Next(ctx)
@@ -44,7 +44,7 @@ func OptRequestCallback(fn func(request *http.Request) *http.Request) define.Bka
 }
 
 // OptResponseCallback sets the callback function for the response.
-func OptResponseCallback(fn func(response *http.Response) *http.Response) define.BkapiOption {
+func OptResponseCallback(fn func(response *http.Response) *http.Response) define.BkApiOption {
 	return internal.NewPluginOption(plugin.NewResponsePlugin(func(ctx *context.Context, h context.Handler) {
 		ctx.Response = fn(ctx.Response)
 		h.Next(ctx)
@@ -52,7 +52,7 @@ func OptResponseCallback(fn func(response *http.Response) *http.Response) define
 }
 
 // OptErrorCallback sets the callback function for the error.
-func OptErrorCallback(fn func(err error) error) define.BkapiOption {
+func OptErrorCallback(fn func(err error) error) define.BkApiOption {
 	return internal.NewPluginOption(plugin.NewErrorPlugin(func(ctx *context.Context, h context.Handler) {
 		ctx.Error = fn(ctx.Error)
 		h.Next(ctx)
