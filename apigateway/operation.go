@@ -61,6 +61,15 @@ func (c *Client) GetApigwPublicKey(opts ...define.OperationOption) define.Operat
 	}, opts...)
 }
 
+//  查询网关
+func (c *Client) GetApis(opts ...define.OperationOption) define.Operation {
+	return c.BkApiClient.NewOperation(bkapi.OperationConfig{
+		Name:   "get_apis",
+		Method: "GET",
+		Path:   "/api/v1/apis/",
+	}, opts...)
+}
+
 //  获取网关最新版本
 func (c *Client) GetLatestResourceVersion(opts ...define.OperationOption) define.Operation {
 	return c.BkApiClient.NewOperation(bkapi.OperationConfig{
@@ -70,12 +79,21 @@ func (c *Client) GetLatestResourceVersion(opts ...define.OperationOption) define
 	}, opts...)
 }
 
-//  获取微网关应用权限
-func (c *Client) GetMicroGatewayAppPermissions(opts ...define.OperationOption) define.Operation {
+//  查询已发布资源列表
+func (c *Client) GetReleasedResources(opts ...define.OperationOption) define.Operation {
 	return c.BkApiClient.NewOperation(bkapi.OperationConfig{
-		Name:   "get_micro_gateway_app_permissions",
+		Name:   "get_released_resources",
 		Method: "GET",
-		Path:   "/api/v1/edge-controller/micro-gateway/{instance_id}/permissions/",
+		Path:   "/api/v1/apis/{api_name}/released/stages/{stage_name}/resources/",
+	}, opts...)
+}
+
+//  查询环境
+func (c *Client) GetStages(opts ...define.OperationOption) define.Operation {
+	return c.BkApiClient.NewOperation(bkapi.OperationConfig{
+		Name:   "get_stages",
+		Method: "GET",
+		Path:   "/api/v1/apis/{api_name}/stages/",
 	}, opts...)
 }
 
@@ -97,7 +115,7 @@ func (c *Client) ImportResourceDocsByArchive(opts ...define.OperationOption) def
 	}, opts...)
 }
 
-// 通过 Swagger 格式导入文档 :
+//  通过 Swagger 格式导入文档
 func (c *Client) ImportResourceDocsBySwagger(opts ...define.OperationOption) define.Operation {
 	return c.BkApiClient.NewOperation(bkapi.OperationConfig{
 		Name:   "import_resource_docs_by_swagger",
@@ -157,14 +175,5 @@ func (c *Client) SyncStage(opts ...define.OperationOption) define.Operation {
 		Name:   "sync_stage",
 		Method: "POST",
 		Path:   "/api/v1/apis/{api_name}/stages/sync/",
-	}, opts...)
-}
-
-//  更新微网关实例状态
-func (c *Client) UpdateMicroGatewayStatus(opts ...define.OperationOption) define.Operation {
-	return c.BkApiClient.NewOperation(bkapi.OperationConfig{
-		Name:   "update_micro_gateway_status",
-		Method: "PUT",
-		Path:   "/api/v1/edge-controller/micro-gateway/{instance_id}/status/",
 	}, opts...)
 }

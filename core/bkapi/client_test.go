@@ -31,7 +31,7 @@ var _ = Describe("Client", func() {
 			configProvider       *mock.MockClientConfigProvider
 			config               *mock.MockClientConfig
 			roundTripper         *mock.MockRoundTripper
-			roundTripperOpt      define.BkapiOption
+			roundTripperOpt      define.BkApiOption
 			url                  string
 			authorizationHeaders map[string]string
 		)

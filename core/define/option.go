@@ -11,8 +11,8 @@
 
 package define
 
-// BkapiOption combines OperationOption and BkApiClientOption.
-type BkapiOption interface {
+// BkApiOption combines OperationOption and BkApiClientOption.
+type BkApiOption interface {
 	OperationOption
 	BkApiClientOption
 }
