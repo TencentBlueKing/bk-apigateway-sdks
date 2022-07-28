@@ -97,6 +97,24 @@ func (c *Client) GetMicroGatewayInfo(opts ...define.OperationOption) define.Oper
 	}, opts...)
 }
 
+//  获取微网关新添加的网关权限
+func (c *Client) GetMicroGatewayNewestGatewayPermissions(opts ...define.OperationOption) define.Operation {
+	return c.BkApiClient.NewOperation(bkapi.OperationConfig{
+		Name:   "get_micro_gateway_newest_gateway_permissions",
+		Method: "GET",
+		Path:   "/api/v1/edge-controller/micro-gateway/{instance_id}/permissions/gateway/newest/",
+	}, opts...)
+}
+
+//  获取微网关新添加的网关权限
+func (c *Client) GetMicroGatewayNewestResourcePermissions(opts ...define.OperationOption) define.Operation {
+	return c.BkApiClient.NewOperation(bkapi.OperationConfig{
+		Name:   "get_micro_gateway_newest_resource_permissions",
+		Method: "GET",
+		Path:   "/api/v1/edge-controller/micro-gateway/{instance_id}/permissions/resource/newest/",
+	}, opts...)
+}
+
 //  查询已发布资源列表
 func (c *Client) GetReleasedResources(opts ...define.OperationOption) define.Operation {
 	return c.BkApiClient.NewOperation(bkapi.OperationConfig{
