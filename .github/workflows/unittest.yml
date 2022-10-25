@@ -1,5 +1,5 @@
 on: [push, pull_request]
-name: core
+name: unittest
 jobs:
   test:
     strategy:
@@ -17,4 +17,4 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
       - name: Test
-        run: cd core && go test ./...
+        run: go test ./...
