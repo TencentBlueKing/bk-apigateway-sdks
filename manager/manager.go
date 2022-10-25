@@ -136,7 +136,7 @@ func (m *Manager) SyncBasicInfo(namespace string) (map[string]interface{}, error
 		return nil, errors.WithMessagef(err, "failed to get %s", namespace)
 	}
 
-	return m.requestWithBody(m.client.SyncApi(), data)
+	return m.requestWithBody(m.client.SyncAPI(), data)
 }
 
 // SyncStageConfig sync the stage config from definition under the namespace to apigw.
