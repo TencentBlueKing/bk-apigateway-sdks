@@ -12,7 +12,7 @@
 package demo_test
 
 import (
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi"
@@ -27,7 +27,7 @@ var _ = Describe("Operation", func() {
 	BeforeEach(func() {
 		var err error
 		client, err = demo.New(bkapi.ClientConfig{
-			Endpoint: "http://httpbin.org/",
+			Endpoint: "https://httpbin.org/",
 		})
 
 		Expect(err).To(BeNil())
@@ -53,7 +53,7 @@ var _ = Describe("Operation", func() {
 					Request()
 
 				// when you has set the result provider, the result will be decoded automatically
-				Expect(result.URL).To(Equal("http://httpbin.org/anything"))
+				Expect(result.URL).To(Equal("https://httpbin.org/anything"))
 			})
 
 			It("request to anything by option style", func() {
@@ -65,7 +65,7 @@ var _ = Describe("Operation", func() {
 				).Request()
 
 				// it is also ok to set the result provider by option style
-				Expect(result.URL).To(Equal("http://httpbin.org/anything"))
+				Expect(result.URL).To(Equal("https://httpbin.org/anything"))
 			})
 		})
 

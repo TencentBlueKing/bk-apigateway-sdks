@@ -16,7 +16,7 @@ import (
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
 )
 
-// Anything : http://httpbin.org/#/Anything/post_anything
+// Anything : https://httpbin.org/#/Anything/post_anything
 func (c *Client) Anything(opts ...define.OperationOption) define.Operation {
 	return c.BkApiClient.NewOperation(bkapi.OperationConfig{
 		Name:   "anything",
@@ -25,7 +25,7 @@ func (c *Client) Anything(opts ...define.OperationOption) define.Operation {
 	}, opts...)
 }
 
-// StatusCode : http://httpbin.org/#/Status_codes/get_status__codes_
+// StatusCode : https://httpbin.org/#/Status_codes/get_status__codes_
 func (c *Client) StatusCode(opts ...define.OperationOption) define.Operation {
 	return c.BkApiClient.NewOperation(bkapi.OperationConfig{
 		Name:   "status_code",
