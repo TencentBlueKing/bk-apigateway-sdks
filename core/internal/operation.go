@@ -266,3 +266,8 @@ func NewOperationOption(fn func(operation *Operation) error) *OperationOption {
 		fn: fn,
 	}
 }
+
+// GetOperationRawRequest return the underlying raw request
+func GetOperationRawRequest(op *Operation) *gentleman.Request {
+	return op.request
+}
