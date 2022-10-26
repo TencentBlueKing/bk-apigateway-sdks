@@ -9,36 +9,27 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package bkapi_test
+package apigateway_test
 
 import (
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi"
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/internal/mock"
-	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/TencentBlueKing/bk-apigateway-sdks/apigateway"
+	"github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi"
 )
 
-var _ = Describe("Multipart", func() {
-	var (
-		ctrl *gomock.Controller
-	)
+var _ = Describe("Client", func() {
+	It("should create a client by config", func() {
+		client, err := apigateway.New(bkapi.ClientConfig{
+			Endpoint:    "https://{api_name}.example.com/{stage}/",
+			Stage:       "prod",
+			AccessToken: "access_token",
+			AppCode:     "app_code",
+			AppSecret:   "app_secret",
+		})
+		Expect(err).To(BeNil())
 
-	BeforeEach(func() {
-		ctrl = gomock.NewController(GinkgoT())
-	})
-
-	AfterEach(func() {
-		ctrl.Finish()
-	})
-
-	It("should provide multopart form", func() {
-		operation := mock.NewMockOperation(ctrl)
-		operation.EXPECT().Apply(gomock.Any()).Return(operation)
-
-		provider := bkapi.MultipartFormBodyProvider()
-		Expect(provider.ProvideBody(operation, map[string][]string{
-			"hello": {"world"},
-		})).To(BeNil())
+		Expect(client.Name()).To(Equal("bk-apigateway"))
 	})
 })

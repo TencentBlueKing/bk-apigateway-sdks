@@ -16,7 +16,7 @@ import (
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
 )
 
-// Client extends BkApiClient and defines operations for http://httpbin.org/.
+// Client extends BkApiClient and defines operations for https://httpbin.org/.
 type Client struct {
 	define.BkApiClient
 }

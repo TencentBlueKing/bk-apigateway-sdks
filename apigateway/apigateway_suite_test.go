@@ -9,26 +9,16 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package apigateway
+package apigateway_test
 
 import (
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi"
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
+	"testing"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
-// Client : bk-apigateway
-type Client struct {
-	define.BkApiClient
-}
-
-// API Gateway Resources
-func New(configProvider define.ClientConfigProvider, opts ...define.BkApiClientOption) (*Client, error) {
-	client, err := bkapi.NewBkApiClient("bk-apigateway", configProvider, opts...)
-	if err != nil {
-		return nil, err
-	}
-
-	return &Client{
-		BkApiClient: client,
-	}, nil
+func TestApigateway(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Apigateway Suite")
 }
