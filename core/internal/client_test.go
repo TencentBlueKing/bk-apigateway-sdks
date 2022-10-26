@@ -57,7 +57,7 @@ var _ = Describe("Client", func() {
 
 		client = internal.NewBkApiClient(
 			"testing", gentlemanClient,
-			func(name string, req *gentleman.Request) define.Operation {
+			func(name string, client define.BkApiClient, req *gentleman.Request) define.Operation {
 				operation.EXPECT().Name().Return(name).AnyTimes()
 
 				request = req
@@ -150,34 +150,6 @@ var _ = Describe("Client", func() {
 			Expect(op).NotTo(BeNil())
 		})
 
-		It("should generate operation name by config.Name", func() {
-			operationConfig := mock.NewMockOperationConfig(ctrl)
-			operationConfigProvider := mock.NewMockOperationConfigProvider(ctrl)
-			operationConfigProvider.EXPECT().ProvideConfig().Return(operationConfig).AnyTimes()
-
-			operationConfig.EXPECT().GetName().Return("operation").AnyTimes()
-			operationConfig.EXPECT().GetMethod().Return("GET").AnyTimes()
-			operationConfig.EXPECT().GetPath().Return("/test").AnyTimes()
-
-			operation := client.NewOperation(operationConfigProvider)
-
-			Expect(operation.Name()).To(Equal("testing.operation"))
-		})
-
-		It("should generate anonymous operation name", func() {
-			operationConfig := mock.NewMockOperationConfig(ctrl)
-			operationConfigProvider := mock.NewMockOperationConfigProvider(ctrl)
-			operationConfigProvider.EXPECT().ProvideConfig().Return(operationConfig).AnyTimes()
-
-			operationConfig.EXPECT().GetName().Return("").AnyTimes()
-			operationConfig.EXPECT().GetMethod().Return("GET").AnyTimes()
-			operationConfig.EXPECT().GetPath().Return("/test").AnyTimes()
-
-			operation := client.NewOperation(operationConfigProvider)
-
-			Expect(operation.Name()).To(Equal("testing(GET /test)"))
-		})
-
 		It("should set the user agent", func() {
 			op := client.NewOperation(operationConfigProvider)
 			Expect(op).To(Equal(operation))
@@ -206,7 +178,7 @@ var _ = Describe("Client", func() {
 
 				client = internal.NewBkApiClient(
 					"testing", gentlemanClient,
-					func(name string, req *gentleman.Request) define.Operation {
+					func(name string, client define.BkApiClient, req *gentleman.Request) define.Operation {
 						operation.EXPECT().Name().Return(name).AnyTimes()
 
 						request = req

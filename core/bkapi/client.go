@@ -44,8 +44,8 @@ func NewBkApiClient(
 	client := internal.NewBkApiClient(
 		apiName,
 		gentleman.New(),
-		func(name string, request *gentleman.Request) define.Operation {
-			return internal.NewOperation(name, request)
+		func(name string, client define.BkApiClient, request *gentleman.Request) define.Operation {
+			return internal.NewOperation(name, client, request)
 		},
 		configProvider.ProvideConfig(apiName),
 	)

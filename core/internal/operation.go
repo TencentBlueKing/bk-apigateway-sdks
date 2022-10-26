@@ -14,6 +14,7 @@ package internal
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -34,6 +35,7 @@ type Operation struct {
 	result         interface{}
 	resultProvider define.ResultProvider
 	request        *gentleman.Request
+	client         define.BkApiClient
 }
 
 // Name returns the operation name.
@@ -41,9 +43,20 @@ func (op *Operation) Name() string {
 	return op.name
 }
 
+// ClientName returns the client name.
+func (op *Operation) ClientName() string {
+	return op.client.Name()
+}
+
+// FullName returns the operation name.
+func (op *Operation) FullName() string {
+	// <client>.<group>.<resource>
+	return fmt.Sprintf("%s.api.%s", op.ClientName(), op.name)
+}
+
 // String returns the operation name.
 func (op *Operation) String() string {
-	return op.name
+	return fmt.Sprintf("%s %s", op.ClientName(), op.name)
 }
 
 // GetError returns the operation error.
@@ -217,10 +230,11 @@ func (op *Operation) Request() (*http.Response, error) {
 }
 
 // NewOperation creates a new operation.
-func NewOperation(name string, request *gentleman.Request) *Operation {
+func NewOperation(name string, client define.BkApiClient, request *gentleman.Request) *Operation {
 	return &Operation{
 		name:    name,
 		request: request,
+		client:  client,
 	}
 }
 

@@ -21,8 +21,14 @@ import (
 
 // Operation defines the operation of the API.
 type Operation interface {
+	// ClientName method returns the client's name.
+	ClientName() string
+
 	// Name method returns the operation's name.
 	Name() string
+
+	// FullName method returns the operation's name.
+	FullName() string
 
 	// Apply method applies the given options to the operation.
 	Apply(opts ...OperationOption) Operation

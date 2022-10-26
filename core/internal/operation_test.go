@@ -39,6 +39,7 @@ var _ = Describe("operation", func() {
 			client        *gentleman.Client
 			response      *http.Response
 			operation     *internal.Operation
+			bkapiClient   *mock.MockBkApiClient
 		)
 
 		BeforeEach(func() {
@@ -50,8 +51,10 @@ var _ = Describe("operation", func() {
 
 			response = &http.Response{}
 
+			bkapiClient = mock.NewMockBkApiClient(ctrl)
+
 			request := client.Request()
-			operation = internal.NewOperation("test", request)
+			operation = internal.NewOperation("test", bkapiClient, request)
 		})
 
 		AfterEach(func() {
@@ -64,6 +67,14 @@ var _ = Describe("operation", func() {
 				return response, nil
 			})
 		}
+
+		It("should return correct names", func() {
+			bkapiClient.EXPECT().Name().Return("client").AnyTimes()
+
+			Expect(operation.Name()).To(Equal("test"))
+			Expect(operation.FullName()).To(Equal("client.api.test"))
+			Expect(fmt.Sprintf("%v", operation)).To(Equal("client test"))
+		})
 
 		It("should fail on apply", func() {
 			option := mock.NewMockOperationOption(ctrl)
@@ -114,7 +125,7 @@ var _ = Describe("operation", func() {
 			mockTransportRoundTrip()
 
 			request := client.Request().Path("/hello/{name}")
-			operation = internal.NewOperation("test", request)
+			operation = internal.NewOperation("test", bkapiClient, request)
 
 			response, err := operation.
 				SetPathParams(map[string]string{
