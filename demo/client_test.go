@@ -17,7 +17,7 @@ import (
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/demo"
+	"github.com/TencentBlueKing/bk-apigateway-sdks/demo"
 )
 
 var _ = Describe("Client", func() {
