@@ -31,6 +31,7 @@ var _ = Describe("Option", func() {
 		ctrl         *gomock.Controller
 		roundTripper *mock.MockRoundTripper
 		operation    *internal.Operation
+		bkapiClient  *mock.MockBkApiClient
 		requestError error
 	)
 
@@ -48,7 +49,9 @@ var _ = Describe("Option", func() {
 		request := gentleman.NewRequest()
 		request.Use(transport.Set(roundTripper))
 
-		operation = internal.NewOperation("testing", request)
+		bkapiClient = mock.NewMockBkApiClient(ctrl)
+
+		operation = internal.NewOperation("testing", bkapiClient, request)
 	})
 
 	AfterEach(func() {

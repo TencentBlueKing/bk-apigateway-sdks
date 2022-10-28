@@ -18,7 +18,7 @@ import (
 	"testing"
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi"
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/demo"
+	"github.com/TencentBlueKing/bk-apigateway-sdks/demo"
 )
 
 type mockTransport struct {

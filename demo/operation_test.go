@@ -16,7 +16,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi"
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/demo"
+	"github.com/TencentBlueKing/bk-apigateway-sdks/demo"
 )
 
 var _ = Describe("Operation", func() {

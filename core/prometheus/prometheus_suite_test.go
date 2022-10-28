@@ -9,34 +9,16 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package demo_test
+package prometheus
 
 import (
+	"testing"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi"
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/demo"
 )
 
-var _ = Describe("Client", func() {
-	doSomethingWithOperation := func(op define.Operation) {
-		// write your code here
-	}
-
-	It("should create a client by config", func() {
-		client, err := demo.New(bkapi.ClientConfig{
-			Endpoint:    "https://{api_name}.example.com/{stage}/",
-			Stage:       "test",
-			AccessToken: "access_token",
-			AppCode:     "app_code",
-			AppSecret:   "app_secret",
-		})
-		Expect(err).To(BeNil())
-
-		Expect(client.Name()).To(Equal("demo"))
-
-		doSomethingWithOperation(client.Anything())
-	})
-})
+func TestPrometheus(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Prometheus Suite")
+}

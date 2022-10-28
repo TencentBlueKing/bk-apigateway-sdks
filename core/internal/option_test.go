@@ -28,6 +28,7 @@ var _ = Describe("Option", func() {
 			option           *internal.PluginOption
 			pluginA, pluginB *mock.MockPlugin
 			client           *gentleman.Client
+			bkapiClient      *mock.MockBkApiClient
 		)
 
 		BeforeEach(func() {
@@ -36,6 +37,7 @@ var _ = Describe("Option", func() {
 			pluginB = mock.NewMockPlugin(ctrl)
 			option = internal.NewPluginOption(pluginA, pluginB)
 			client = gentleman.New()
+			bkapiClient = mock.NewMockBkApiClient(ctrl)
 		})
 
 		AfterEach(func() {
@@ -44,7 +46,7 @@ var _ = Describe("Option", func() {
 
 		It("should apply to operation", func() {
 			request := client.Request()
-			operation := internal.NewOperation("", request)
+			operation := internal.NewOperation("", bkapiClient, request)
 			operation.Apply(option)
 			Expect(operation.GetError()).To(BeNil())
 

@@ -23,40 +23,42 @@ import (
 	"gopkg.in/h2non/gentleman.v2"
 )
 
-func newGentlemanClient(config define.ClientConfig) *gentleman.Client {
-	client := gentleman.New().
-		URL(config.GetUrl())
+// the common options for all bkapi clients
+var globalBkapiClientOptions []define.BkApiClientOption
 
-	headers := config.GetAuthorizationHeaders()
-	if len(headers) > 0 {
-		client.SetHeaders(headers)
-	}
-
-	return client
+// RegisterGlobalBkapiClientOption use to register a global bkapi client option.
+// Warning: this function is not safe for concurrent access.
+func RegisterGlobalBkapiClientOption(opt define.BkApiClientOption) {
+	globalBkapiClientOptions = append(globalBkapiClientOptions, opt)
 }
 
 // NewBkApiClient creates a new BkApiClient.
 func NewBkApiClient(
 	apiName string,
 	configProvider define.ClientConfigProvider,
-	opts ...define.BkApiClientOption,
+	options ...define.BkApiClientOption,
 ) (define.BkApiClient, error) {
 	client := internal.NewBkApiClient(
 		apiName,
 		gentleman.New(),
-		func(name string, request *gentleman.Request) define.Operation {
-			return internal.NewOperation(name, request)
+		func(name string, client define.BkApiClient, request *gentleman.Request) define.Operation {
+			return internal.NewOperation(name, client, request)
 		},
 		configProvider.ProvideConfig(apiName),
 	)
 
-	if len(opts) == 0 {
-		return client, nil
-	}
+	for phase, opts := range map[string][]define.BkApiClientOption{
+		"global": globalBkapiClientOptions,
+		"client": options,
+	} {
+		if len(opts) == 0 {
+			continue
+		}
 
-	err := client.Apply(opts...)
-	if err != nil {
-		return nil, define.ErrorWrapf(err, "failed to apply options to client %s", apiName)
+		err := client.Apply(opts...)
+		if err != nil {
+			return nil, define.ErrorWrapf(err, "failed to apply options to client %s, phase %s", apiName, phase)
+		}
 	}
 
 	return client, nil

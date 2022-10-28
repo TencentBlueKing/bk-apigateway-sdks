@@ -24,6 +24,8 @@ import (
 	"gopkg.in/h2non/gentleman.v2/plugins/headers"
 )
 
+//go:generate mockgen -destination=../internal/mock/logging.go -package=mock github.com/TencentBlueKing/gopkg/logging Logger
+
 // DefaultUserAgent :
 var DefaultUserAgent string
 
@@ -33,7 +35,7 @@ type BkApiClient struct {
 	logger           logging.Logger
 	client           *gentleman.Client
 	operationOptions []define.OperationOption
-	operationFactory func(name string, request *gentleman.Request) define.Operation
+	operationFactory func(name string, client define.BkApiClient, request *gentleman.Request) define.Operation
 }
 
 // Name returns the client name.
@@ -99,10 +101,10 @@ func (cli *BkApiClient) newGentlemanRequest(config define.OperationConfig) *gent
 func (cli *BkApiClient) newOperationName(config define.OperationConfig) string {
 	name := config.GetName()
 	if name != "" {
-		return fmt.Sprintf("%s.%s", cli.Name(), name)
+		return name
 	}
 
-	return fmt.Sprintf("%s(%s %s)", cli.Name(), config.GetMethod(), config.GetPath())
+	return fmt.Sprintf("(%s %s)", config.GetMethod(), config.GetPath())
 }
 
 func (cli *BkApiClient) applyOperationOptions(op define.Operation, opts ...define.OperationOption) {
@@ -123,7 +125,7 @@ func (cli *BkApiClient) NewOperation(
 	config := provider.ProvideConfig()
 	request := cli.newGentlemanRequest(config)
 	name := cli.newOperationName(config)
-	operation := cli.operationFactory(name, request)
+	operation := cli.operationFactory(name, cli, request)
 
 	request.Use(plugin.NewResponsePlugin(func(c *context.Context, h context.Handler) {
 		cli.logResponse(operation, c.Response)
@@ -139,7 +141,7 @@ func (cli *BkApiClient) NewOperation(
 func NewBkApiClient(
 	name string,
 	client *gentleman.Client,
-	factory func(name string, request *gentleman.Request) define.Operation,
+	factory func(name string, client define.BkApiClient, request *gentleman.Request) define.Operation,
 	config define.ClientConfig,
 ) *BkApiClient {
 

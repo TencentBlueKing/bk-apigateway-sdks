@@ -24,8 +24,13 @@ var (
 	ErrBkApiRequest = errors.New("bkapi request error")
 )
 
-// ErrorWrapf annotates err with the format specifier and arguments.
-var ErrorWrapf = pkgErrors.WithMessagef
+//
+var (
+	// ErrorWrapf annotates err with the format specifier and arguments.
+	ErrorWrapf = pkgErrors.WithMessagef
+	// ErrorCause returns the underlying cause of the error, if possible.
+	ErrorCause = pkgErrors.Cause
+)
 
 // EnableStackTraceErrorWrapf enables stack trace for ErrorWrapf.
 func EnableStackTraceErrorWrapf() {
