@@ -50,6 +50,9 @@ func Benchmark_Demo_Request(b *testing.B) {
 			_, _ = client.Anything().
 				SetResultProvider(bkapi.JsonResultProvider()).
 				SetResult(&result).
+				SetPathParams(map[string]string{}).
+				SetQueryParams(map[string]string{}).
+				SetHeaders(map[string]string{}).
 				Request()
 		}
 	})
