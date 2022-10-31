@@ -13,6 +13,7 @@ package bkapi_test
 
 import (
 	"net/http"
+	"testing"
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
@@ -20,6 +21,7 @@ import (
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"gopkg.in/h2non/gock.v1"
 )
 
 var _ = Describe("Client", func() {
@@ -268,3 +270,39 @@ var _ = Describe("Client", func() {
 		)
 	})
 })
+
+func Benchmark_Client_Do_Request(b *testing.B) {
+	defer gock.Off()
+
+	endpoint := "http://api.example.com/"
+	path := "/testing/"
+
+	gock.New(endpoint).
+		Get(path).
+		Reply(200).
+		BodyString(`{}`)
+
+	client, _ := bkapi.NewBkApiClient("benchmark", bkapi.ClientConfig{
+		Endpoint: endpoint,
+	},
+		bkapi.OptTransport(gock.NewTransport()),
+		bkapi.OptJsonBodyProvider(),
+		bkapi.JsonResultProvider(),
+	)
+
+	for i := 0; i < b.N; i++ {
+		result := make(map[string]interface{})
+
+		_, _ = client.NewOperation(bkapi.OperationConfig{
+			Name:   "testing",
+			Method: "GET",
+			Path:   path,
+		}).
+			SetBody(map[string]interface{}{}).
+			SetPathParams(map[string]string{}).
+			SetQueryParams(map[string]string{}).
+			SetHeaders(map[string]string{}).
+			SetResult(result).
+			Request()
+	}
+}
