@@ -69,8 +69,13 @@ type ClientConfig struct {
 	apiName string
 
 	// Endpoint is the url of the BkApi server.
+	// Default: "{BkApiUrlTmpl}/{Stage}"
 	Endpoint string
+	// BkApiUrlTmpl is the template for endpoint,
+	// Default: os.Getenv("BK_API_URL_TMPL")
+	BkApiUrlTmpl string
 	// Stage is the api stage name, defaults to "prod".
+	// Default: "prod"
 	Stage string
 
 	// AppCode is the blueking app code.
@@ -150,20 +155,23 @@ func (c *ClientConfig) initAppConfig() {
 }
 
 func (c *ClientConfig) initBkApiConfig() {
+	if c.Endpoint != "" {
+		return
+	}
+
 	if c.Stage == "" {
 		c.Stage = "prod"
 	}
 
-	endpoint := c.Endpoint
-	if endpoint == "" {
-		apiTmpl := c.getEnv("BK_API_URL_TMPL")
-		stageTmpl := c.getEnv("BK_API_STAGE_URL_TMPL")
+	if c.BkApiUrlTmpl == "" {
+		c.BkApiUrlTmpl = c.getEnv("BK_API_URL_TMPL")
+	}
 
-		if apiTmpl != "" {
-			endpoint = fmt.Sprintf("%s/{stage}", strings.TrimSuffix(apiTmpl, "/"))
-		} else if stageTmpl != "" {
-			endpoint = stageTmpl
-		}
+	var endpoint string
+	if c.BkApiUrlTmpl != "" {
+		endpoint = fmt.Sprintf("%s/{stage}", strings.TrimSuffix(c.BkApiUrlTmpl, "/"))
+	} else {
+		endpoint = c.getEnv("BK_API_STAGE_URL_TMPL")
 	}
 
 	c.Endpoint = internal.ReplacePlaceHolder(endpoint, map[string]string{
@@ -177,7 +185,7 @@ func (c *ClientConfig) initLogger() {
 		return
 	}
 
-	c.Logger = logging.GetLogger("github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi")
+	c.Logger = logging.GetLogger(loggerName)
 }
 
 func (c *ClientConfig) initConfig(apiName string) {

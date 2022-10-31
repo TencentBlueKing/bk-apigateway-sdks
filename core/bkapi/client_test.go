@@ -182,6 +182,27 @@ var _ = Describe("Client", func() {
 			Expect(providedConfig.Stage).To(Equal("prod"))
 		})
 
+		It("should use endpoint directly when it is not empty", func() {
+			config := bkapi.ClientConfig{
+				Endpoint: "http://api.example.com/",
+			}
+			providedConfig := config.ProvideConfig("testing").(*bkapi.ClientConfig)
+
+			Expect(providedConfig.Endpoint).To(Equal("http://api.example.com/"))
+			Expect(providedConfig.Stage).To(Equal(""))
+			Expect(providedConfig.BkApiUrlTmpl).To(Equal(""))
+		})
+
+		It("should set endpoint by BkApiUrlTmpl", func() {
+			config := bkapi.ClientConfig{
+				Stage:        "test",
+				BkApiUrlTmpl: "http://{api_name}.example.com/",
+			}
+			providedConfig := config.ProvideConfig("testing").(*bkapi.ClientConfig)
+
+			Expect(providedConfig.Endpoint).To(Equal("http://testing.example.com/test"))
+		})
+
 		It("should set endpoint by env BK_API_URL_TMPL", func() {
 			config := bkapi.ClientConfig{
 				Stage: "test",
@@ -197,7 +218,7 @@ var _ = Describe("Client", func() {
 			Expect(providedConfig.Endpoint).To(Equal("http://testing.example.com/test"))
 		})
 
-		It("should set endpoint by env BK_API_URL_TMPL", func() {
+		It("should set endpoint by env BK_API_STAGE_URL_TMPL", func() {
 			config := bkapi.ClientConfig{
 				Stage: "dev",
 				Getenv: func(k string) string {
