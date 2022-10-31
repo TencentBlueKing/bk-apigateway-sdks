@@ -188,8 +188,12 @@ func (c *ClientConfig) initLogger() {
 	c.Logger = logging.GetLogger(loggerName)
 }
 
-func (c *ClientConfig) initConfig(apiName string) {
+func (c *ClientConfig) setApiName(apiName string) {
 	c.apiName = apiName
+}
+
+func (c *ClientConfig) initConfig(apiName string) {
+	c.setApiName(apiName)
 
 	if c.Getenv == nil {
 		c.Getenv = os.Getenv

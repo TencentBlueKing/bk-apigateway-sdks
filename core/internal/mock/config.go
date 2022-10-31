@@ -63,6 +63,20 @@ func (mr *MockClientConfigMockRecorder) GetLogger() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLogger", reflect.TypeOf((*MockClientConfig)(nil).GetLogger))
 }
 
+// GetName mocks base method.
+func (m *MockClientConfig) GetName() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetName")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GetName indicates an expected call of GetName.
+func (mr *MockClientConfigMockRecorder) GetName() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetName", reflect.TypeOf((*MockClientConfig)(nil).GetName))
+}
+
 // GetUrl mocks base method.
 func (m *MockClientConfig) GetUrl() string {
 	m.ctrl.T.Helper()
