@@ -146,11 +146,11 @@ func (c *ClientConfig) getAuthParams() map[string]string {
 
 func (c *ClientConfig) initAppConfig() {
 	if c.AppCode == "" {
-		c.AppCode = c.getEnv("BK_APP_CODE", "APP_CODE")
+		c.AppCode = c.getEnv("BK_APP_CODE", "BKPAAS_APP_ID", "APP_CODE")
 	}
 
 	if c.AppSecret == "" {
-		c.AppSecret = c.getEnv("BK_APP_SECRET", "SECRET_KEY")
+		c.AppSecret = c.getEnv("BK_APP_SECRET", "BKPAAS_APP_SECRET", "SECRET_KEY")
 	}
 }
 

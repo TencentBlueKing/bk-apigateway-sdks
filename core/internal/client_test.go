@@ -12,6 +12,7 @@
 package internal_test
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -190,8 +191,8 @@ var _ = Describe("Client", func() {
 
 			It("should log 2xx response details", func() {
 				logger.EXPECT().
-					Debug(gomock.Any(), gomock.Any()).
-					DoAndReturn(func(msg string, fields ...map[string]interface{}) {
+					DebugContext(gomock.Any(), gomock.Any(), gomock.Any()).
+					DoAndReturn(func(_ context.Context, msg string, fields ...map[string]interface{}) {
 						Expect(msg).To(Equal("request success"))
 						Expect(fields).To(HaveLen(1))
 
@@ -216,8 +217,8 @@ var _ = Describe("Client", func() {
 
 			It("should log 4xx response details", func() {
 				logger.EXPECT().
-					Warn(gomock.Any(), gomock.Any()).
-					DoAndReturn(func(msg string, fields ...map[string]interface{}) {
+					WarnContext(gomock.Any(), gomock.Any(), gomock.Any()).
+					DoAndReturn(func(_ context.Context, msg string, fields ...map[string]interface{}) {
 						Expect(msg).To(Equal("request error caused by client"))
 						Expect(fields).To(HaveLen(1))
 
@@ -249,8 +250,8 @@ var _ = Describe("Client", func() {
 			})
 			It("should log 5xx response details", func() {
 				logger.EXPECT().
-					Error(gomock.Any(), gomock.Any()).
-					DoAndReturn(func(msg string, fields ...map[string]interface{}) {
+					ErrorContext(gomock.Any(), gomock.Any(), gomock.Any()).
+					DoAndReturn(func(_ context.Context, msg string, fields ...map[string]interface{}) {
 						Expect(msg).To(Equal("request error caused by server"))
 						Expect(fields).To(HaveLen(1))
 

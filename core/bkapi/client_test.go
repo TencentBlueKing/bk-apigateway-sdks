@@ -109,8 +109,8 @@ var _ = Describe("Client", func() {
 
 		It("should render endpoint with params", func() {
 			config := bkapi.ClientConfig{
-				Endpoint: "http://{api_name}.example.com/{stage}/",
-				Stage:    "prod",
+				BkApiUrlTmpl: "http://{api_name}.example.com/",
+				Stage:        "prod",
 			}
 
 			Expect(config.ProvideConfig("testing").GetUrl()).To(Equal("http://testing.example.com/prod/"))
@@ -248,6 +248,7 @@ var _ = Describe("Client", func() {
 		},
 			Entry("BK_APP_CODE", "BK_APP_CODE"),
 			Entry("APP_CODE", "APP_CODE"),
+			Entry("BKPAAS_APP_ID", "BKPAAS_APP_ID"),
 		)
 
 		DescribeTable("should get app secret from env", func(key string) {
@@ -265,6 +266,7 @@ var _ = Describe("Client", func() {
 		},
 			Entry("BK_APP_SECRET", "BK_APP_SECRET"),
 			Entry("SECRET_KEY", "SECRET_KEY"),
+			Entry("BKPAAS_APP_SECRET", "BKPAAS_APP_SECRET"),
 		)
 	})
 })
