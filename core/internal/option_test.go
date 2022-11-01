@@ -57,11 +57,12 @@ var _ = Describe("Option", func() {
 
 		It("should apply to client", func() {
 			clientConfig := mock.NewMockClientConfig(ctrl)
-			clientConfig.EXPECT().GetUrl().Return("").AnyTimes()
+			clientConfig.EXPECT().GetUrl().Return("http://api.example.com").AnyTimes()
 			clientConfig.EXPECT().GetAuthorizationHeaders().Return(nil).AnyTimes()
 			clientConfig.EXPECT().GetLogger().Return(logging.GetLogger("")).AnyTimes()
 
-			cli := internal.NewBkApiClient("", client, nil, clientConfig)
+			cli, err := internal.NewBkApiClient("", client, nil, clientConfig)
+			Expect(err).To(BeNil())
 
 			Expect(cli.Apply(option)).To(Succeed())
 

@@ -36,6 +36,7 @@ var _ = Describe("Client", func() {
 		)
 
 		BeforeEach(func() {
+			url = "http://api.example.com/"
 			ctrl = gomock.NewController(GinkgoT())
 			configProvider = mock.NewMockClientConfigProvider(ctrl)
 			config = mock.NewMockClientConfig(ctrl)

@@ -38,7 +38,7 @@ func NewBkApiClient(
 	configProvider define.ClientConfigProvider,
 	options ...define.BkApiClientOption,
 ) (define.BkApiClient, error) {
-	client := internal.NewBkApiClient(
+	client, err := internal.NewBkApiClient(
 		apiName,
 		gentleman.New(),
 		func(name string, client define.BkApiClient, request *gentleman.Request) define.Operation {
@@ -46,6 +46,9 @@ func NewBkApiClient(
 		},
 		configProvider.ProvideConfig(apiName),
 	)
+	if err != nil {
+		return nil, err
+	}
 
 	for phase, opts := range map[string][]define.BkApiClientOption{
 		"global": globalBkapiClientOptions,

@@ -31,71 +31,94 @@ import (
 
 var _ = Describe("Client", func() {
 	var (
-		ctrl                    *gomock.Controller
-		client                  *internal.BkApiClient
-		gentlemanClient         *gentleman.Client
-		operation               *mock.MockOperation
-		request                 *gentleman.Request
-		response                *http.Response
-		mockTransport           *mock.MockRoundTripper
-		clientConfig            *mock.MockClientConfig
-		operationConfig         *mock.MockOperationConfig
-		operationConfigProvider *mock.MockOperationConfigProvider
+		ctrl *gomock.Controller
 	)
 
 	BeforeEach(func() {
 		ctrl = gomock.NewController(GinkgoT())
-		mockTransport = mock.NewMockRoundTripper(ctrl)
-		operation = mock.NewMockOperation(ctrl)
-
-		gentlemanClient = gentleman.New()
-		gentlemanClient.Use(transport.Set(mockTransport))
-
-		clientConfig = mock.NewMockClientConfig(ctrl)
-		clientConfig.EXPECT().GetUrl().Return("").AnyTimes()
-		clientConfig.EXPECT().GetAuthorizationHeaders().Return(nil).AnyTimes()
-		clientConfig.EXPECT().GetLogger().Return(logging.GetLogger("")).AnyTimes()
-
-		client = internal.NewBkApiClient(
-			"testing", gentlemanClient,
-			func(name string, client define.BkApiClient, req *gentleman.Request) define.Operation {
-				operation.EXPECT().Name().Return(name).AnyTimes()
-
-				request = req
-				return operation
-			},
-			clientConfig,
-		)
-
-		operationConfig = mock.NewMockOperationConfig(ctrl)
-		operationConfig.EXPECT().GetName().Return("").AnyTimes()
-		operationConfig.EXPECT().GetPath().Return("").AnyTimes()
-		operationConfig.EXPECT().GetMethod().Return("").AnyTimes()
-
-		operationConfigProvider = mock.NewMockOperationConfigProvider(ctrl)
-		operationConfigProvider.EXPECT().ProvideConfig().Return(operationConfig).AnyTimes()
-
-		response = &http.Response{
-			Header: http.Header{},
-		}
 	})
 
 	AfterEach(func() {
 		ctrl.Finish()
 	})
 
-	mockTransportRoundTrip := func() {
-		mockTransport.EXPECT().RoundTrip(gomock.Any()).DoAndReturn(func(req *http.Request) (*http.Response, error) {
-			response.Request = req
+	It("should return error when config url is missing", func() {
+		clientConfig := mock.NewMockClientConfig(ctrl)
 
-			return response, nil
-		})
-	}
+		clientConfig.EXPECT().GetUrl().Return("").AnyTimes()
+		_, err := internal.NewBkApiClient(
+			"testing", gentleman.New(),
+			func(name string, client define.BkApiClient, req *gentleman.Request) define.Operation {
+				return nil
+			},
+			clientConfig,
+		)
+
+		Expect(err).NotTo(BeNil())
+	})
 
 	Context("BkApiClient", func() {
+		var (
+			client                  *internal.BkApiClient
+			gentlemanClient         *gentleman.Client
+			operation               *mock.MockOperation
+			request                 *gentleman.Request
+			response                *http.Response
+			mockTransport           *mock.MockRoundTripper
+			clientConfig            *mock.MockClientConfig
+			operationConfig         *mock.MockOperationConfig
+			operationConfigProvider *mock.MockOperationConfigProvider
+		)
+
+		BeforeEach(func() {
+			mockTransport = mock.NewMockRoundTripper(ctrl)
+			operation = mock.NewMockOperation(ctrl)
+
+			clientConfig = mock.NewMockClientConfig(ctrl)
+			clientConfig.EXPECT().GetUrl().Return("http://api.example.com").AnyTimes()
+			clientConfig.EXPECT().GetAuthorizationHeaders().Return(nil).AnyTimes()
+			clientConfig.EXPECT().GetLogger().Return(logging.GetLogger("")).AnyTimes()
+
+			gentlemanClient = gentleman.New()
+			gentlemanClient.Use(transport.Set(mockTransport))
+
+			var err error
+			client, err = internal.NewBkApiClient(
+				"testing", gentlemanClient,
+				func(name string, client define.BkApiClient, req *gentleman.Request) define.Operation {
+					operation.EXPECT().Name().Return(name).AnyTimes()
+
+					request = req
+					return operation
+				},
+				clientConfig,
+			)
+			Expect(err).To(BeNil())
+
+			operationConfig = mock.NewMockOperationConfig(ctrl)
+			operationConfig.EXPECT().GetName().Return("").AnyTimes()
+			operationConfig.EXPECT().GetPath().Return("").AnyTimes()
+			operationConfig.EXPECT().GetMethod().Return("").AnyTimes()
+
+			operationConfigProvider = mock.NewMockOperationConfigProvider(ctrl)
+			operationConfigProvider.EXPECT().ProvideConfig().Return(operationConfig).AnyTimes()
+
+			response = &http.Response{
+				Header: http.Header{},
+			}
+		})
+
 		AfterEach(func() {
 			ctrl.Finish()
 		})
+
+		mockTransportRoundTrip := func() {
+			mockTransport.EXPECT().RoundTrip(gomock.Any()).DoAndReturn(func(req *http.Request) (*http.Response, error) {
+				response.Request = req
+
+				return response, nil
+			})
+		}
 
 		It("should fail on apply", func() {
 			option := mock.NewMockBkApiClientOption(ctrl)
@@ -173,11 +196,12 @@ var _ = Describe("Client", func() {
 				logger = mock.NewMockLogger(ctrl)
 
 				clientConfig = mock.NewMockClientConfig(ctrl)
-				clientConfig.EXPECT().GetUrl().Return("").AnyTimes()
+				clientConfig.EXPECT().GetUrl().Return("http://api.example.com").AnyTimes()
 				clientConfig.EXPECT().GetAuthorizationHeaders().Return(nil).AnyTimes()
 				clientConfig.EXPECT().GetLogger().Return(logger).AnyTimes()
 
-				client = internal.NewBkApiClient(
+				var err error
+				client, err = internal.NewBkApiClient(
 					"testing", gentlemanClient,
 					func(name string, client define.BkApiClient, req *gentleman.Request) define.Operation {
 						operation.EXPECT().Name().Return(name).AnyTimes()
@@ -187,6 +211,7 @@ var _ = Describe("Client", func() {
 					},
 					clientConfig,
 				)
+				Expect(err).To(BeNil())
 			})
 
 			It("should log 2xx response details", func() {
