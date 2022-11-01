@@ -12,8 +12,6 @@
 package bkapi_test
 
 import (
-	"testing"
-
 	. "github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/internal/mock"
 	"github.com/golang/mock/gomock"
@@ -30,7 +28,7 @@ var _ = Describe("Config", func() {
 
 		BeforeEach(func() {
 			defaultConfig = ClientConfig{
-				Endpoint: "http://api.example.com/",
+				BkApiUrlTmpl: "http://{api_name}.example.com/",
 			}
 			registry = NewClientConfigRegistry()
 			Expect(registry.RegisterDefaultConfig(defaultConfig)).To(Succeed())
@@ -41,7 +39,7 @@ var _ = Describe("Config", func() {
 			config := registry.ProvideConfig(apiName)
 
 			Expect(config.GetName()).To(Equal(apiName))
-			Expect(config.GetUrl()).To(Equal(defaultConfig.Endpoint))
+			Expect(config.GetUrl()).To(Equal("http://do-not-exist.example.com/prod/"))
 		})
 
 		It("should return a registered config", func() {
@@ -50,7 +48,7 @@ var _ = Describe("Config", func() {
 				Endpoint: "http://special.example.com/",
 			}
 
-			registry.RegisterClientConfig(apiName, clientConfig)
+			Expect(registry.RegisterClientConfig(apiName, clientConfig)).To(Succeed())
 			config := registry.ProvideConfig(apiName)
 
 			Expect(config.GetName()).To(Equal(apiName))
@@ -66,28 +64,10 @@ var _ = Describe("Config", func() {
 			provider.EXPECT().ProvideConfig(gomock.Any()).Return(providedConfig)
 
 			apiName := "my-config"
-			registry.RegisterClientConfig(apiName, provider)
+			Expect(registry.RegisterClientConfig(apiName, provider)).To(Succeed())
 			config := registry.ProvideConfig(apiName)
 
 			Expect(config).To(Equal(providedConfig))
 		})
 	})
 })
-
-func Benchmark_ClientConfig_ProvideConfig(b *testing.B) {
-	var config ClientConfig
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		config.ProvideConfig("benchmark")
-	}
-}
-
-func Benchmark_ClientConfigRegistry_ProvideConfig(b *testing.B) {
-	registry := GetGlobalClientConfigRegistry()
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		registry.ProvideConfig("benchmark")
-	}
-}

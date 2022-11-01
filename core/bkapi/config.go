@@ -24,49 +24,28 @@ var (
 	ErrClientConfigRegistryValidationFailed = fmt.Errorf("client config validation failed")
 )
 
-const clientConfigRegistryDefaultKey = ""
-
 // ClientConfigRegistry manage multiple client configs.
 type ClientConfigRegistry struct {
-	configs sync.Map
-}
-
-func (r *ClientConfigRegistry) getConfig(apiName string) define.ClientConfig {
-	for _, key := range []string{apiName, clientConfigRegistryDefaultKey} {
-		config, ok := r.configs.Load(key)
-		if ok {
-			return config.(define.ClientConfig)
-		}
-	}
-
-	return nil
+	defaultConfigProvider define.ClientConfigProvider
+	configs               sync.Map
 }
 
 // ProvideConfig return a client config
 func (r *ClientConfigRegistry) ProvideConfig(apiName string) define.ClientConfig {
-	config := r.getConfig(apiName)
+	provider := r.defaultConfigProvider
 
-	switch realConfig := config.(type) {
-	case *ClientConfig:
-		// try to copy a new one
-		newConfig := *realConfig
-		// for default config
-		newConfig.setApiName(apiName)
-		return &newConfig
-	default:
-		return config
+	value, ok := r.configs.Load(apiName)
+	if ok {
+		provider = value.(define.ClientConfigProvider)
 	}
-}
 
-func (r *ClientConfigRegistry) registerClientConfig(apiName string, provider define.ClientConfigProvider) error {
-	config := provider.ProvideConfig(apiName)
-	r.configs.Store(apiName, config)
-	return nil
+	return provider.ProvideConfig(apiName)
 }
 
 // RegisterDefaultConfig register default client config
 func (r *ClientConfigRegistry) RegisterDefaultConfig(provider define.ClientConfigProvider) error {
-	return r.registerClientConfig(clientConfigRegistryDefaultKey, provider)
+	r.defaultConfigProvider = provider
+	return nil
 }
 
 // RegisterClientConfig register a initialized client config
@@ -75,7 +54,8 @@ func (r *ClientConfigRegistry) RegisterClientConfig(apiName string, provider def
 		return define.ErrorWrapf(ErrClientConfigRegistryValidationFailed, "api name is required")
 	}
 
-	return r.registerClientConfig(apiName, provider)
+	r.configs.Store(apiName, provider)
+	return nil
 }
 
 // NewClientConfigRegistry create a client config registry
