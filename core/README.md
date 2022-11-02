@@ -63,13 +63,13 @@ registry := bkapi.GetGlobalClientConfigRegistry()
 
 // 注册默认的配置（不区分网关）
 registry.RegisterDefaultConfig(bkapi.ClientConfig{
-    BkApiUrlTmpl: "http://{api_name}.example.com/",
-    Stage:        "prod",
+	BkApiUrlTmpl: "http://{api_name}.example.com/",
+	Stage:        "prod",
 })
 
 // 注册指定网关配置
 registry.RegisterDefaultConfig("my-gateway", bkapi.ClientConfig{
-    Endpoint:      "http://special-api.example.com/",
+	Endpoint:      "http://special-api.example.com/",
 	ClientOptions: []define.BkApiClientOption{bkapi.OptJsonResultProvider()},  // 声明这个网关的所有响应都是 JSON
 })
 
@@ -83,8 +83,8 @@ client, _ := New(registry)
 ```golang
 // 启用指标插件，可设置指标前缀
 prometheus.Enable(prometheus.PrometheusOptions{
-    Namespace: "project",
-    Subsystem: "module",
+	Namespace: "project",
+	Subsystem: "module",
 })
 ```
 
