@@ -131,16 +131,16 @@ BkApiClient 表示一个网关封装，方法定义：
 ### 客户端配置
 客户端配置通过 `bkapi.ClientConfig` 类型来传入，部分参数会自动填充：
 
-| 字段                | 类型                       | 含义         | 必须 | 缺省规则                                                                        |
-| ------------------- | -------------------------- | ------------ | ---- | ------------------------------------------------------------------------------- |
-| Endpoint            | string                     | 基础地址     | 是   | `"{BkApiUrlTmpl}/{Stage}"`                                                      |
-| BkApiUrlTmpl        | string                     | 网关地址模板 | 否   | 环境变量 `BK_API_URL_TMPL`                                                      |
-| Stage               | string                     | 环境名称     | 否   | `"prod"`                                                                        |
-| AppCode             | string                     | 应用代号     | 否   | 环境变量 `BK_APP_CODE`                                                          |
-| AppSecret           | string                     | 应用名称     | 否   | 环境变量 `BK_APP_SECRET`                                                        |
-| AccessToken         | string                     | 访问令牌     | 否   |                                                                                 |
-| AuthorizationParams | string                     | 额外认证参数 | 否   |                                                                                 |
-| Logger              | logging.Logger             | 日志实现     | 否   | `logging.GetLogger("github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi")` |
-| ClientOptions       | []define.BkApiClientOption | 否           |      |
+| 字段                | 类型                       | 含义           | 必须 | 缺省规则                                                                        |
+| ------------------- | -------------------------- | -------------- | ---- | ------------------------------------------------------------------------------- |
+| Endpoint            | string                     | 基础地址       | 是   | `"{BkApiUrlTmpl}/{Stage}"`                                                      |
+| BkApiUrlTmpl        | string                     | 网关地址模板   | 否   | 环境变量 `BK_API_URL_TMPL`                                                      |
+| Stage               | string                     | 环境名称       | 否   | `"prod"`                                                                        |
+| AppCode             | string                     | 应用代号       | 否   | 环境变量 `BK_APP_CODE`                                                          |
+| AppSecret           | string                     | 应用名称       | 否   | 环境变量 `BK_APP_SECRET`                                                        |
+| AccessToken         | string                     | 访问令牌       | 否   |                                                                                 |
+| AuthorizationParams | string                     | 额外认证参数   | 否   |                                                                                 |
+| Logger              | logging.Logger             | 日志实现       | 否   | `logging.GetLogger("github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi")` |
+| ClientOptions       | []define.BkApiClientOption | 通用客户端选项 | 否   |                                                                                 |
 
 注意，Endpoint 和 BkApiUrlTmpl/Stage 选择一种配置方式即可，推荐使用后者。
