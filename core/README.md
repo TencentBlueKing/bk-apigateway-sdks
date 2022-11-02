@@ -142,3 +142,5 @@ BkApiClient 表示一个网关封装，方法定义：
 | AuthorizationParams | string                     | 额外认证参数 | 否   |                                                                                 |
 | Logger              | logging.Logger             | 日志实现     | 否   | `logging.GetLogger("github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi")` |
 | ClientOptions       | []define.BkApiClientOption | 否           |      |
+
+注意，Endpoint 和 BkApiUrlTmpl/Stage 选择一种配置方式即可，推荐使用后者。
