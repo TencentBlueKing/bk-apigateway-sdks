@@ -49,6 +49,20 @@ func (mr *MockClientConfigMockRecorder) GetAuthorizationHeaders() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAuthorizationHeaders", reflect.TypeOf((*MockClientConfig)(nil).GetAuthorizationHeaders))
 }
 
+// GetClientOptions mocks base method.
+func (m *MockClientConfig) GetClientOptions() []define.BkApiClientOption {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetClientOptions")
+	ret0, _ := ret[0].([]define.BkApiClientOption)
+	return ret0
+}
+
+// GetClientOptions indicates an expected call of GetClientOptions.
+func (mr *MockClientConfigMockRecorder) GetClientOptions() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetClientOptions", reflect.TypeOf((*MockClientConfig)(nil).GetClientOptions))
+}
+
 // GetLogger mocks base method.
 func (m *MockClientConfig) GetLogger() logging.Logger {
 	m.ctrl.T.Helper()

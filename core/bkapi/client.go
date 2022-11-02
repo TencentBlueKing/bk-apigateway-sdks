@@ -38,13 +38,14 @@ func NewBkApiClient(
 	configProvider define.ClientConfigProvider,
 	options ...define.BkApiClientOption,
 ) (define.BkApiClient, error) {
+	config := configProvider.ProvideConfig(apiName)
 	client, err := internal.NewBkApiClient(
 		apiName,
 		gentleman.New(),
 		func(name string, client define.BkApiClient, request *gentleman.Request) define.Operation {
 			return internal.NewOperation(name, client, request)
 		},
-		configProvider.ProvideConfig(apiName),
+		config,
 	)
 	if err != nil {
 		return nil, err
@@ -52,6 +53,7 @@ func NewBkApiClient(
 
 	for phase, opts := range map[string][]define.BkApiClientOption{
 		"global": globalBkapiClientOptions,
+		"config": config.GetClientOptions(),
 		"client": options,
 	} {
 		if len(opts) == 0 {
@@ -100,6 +102,9 @@ type ClientConfig struct {
 
 	// Logger is used to log the request and response.
 	Logger logging.Logger
+
+	// ClientConfig will apply to the client.
+	ClientOptions []define.BkApiClientOption
 }
 
 func (c *ClientConfig) setAuthAccessTokenAuthParams(params map[string]string) bool {
@@ -265,4 +270,9 @@ func (c *ClientConfig) GetAuthorizationHeaders() map[string]string {
 // GetLogger method will return the logger.
 func (c *ClientConfig) GetLogger() logging.Logger {
 	return c.Logger
+}
+
+// GetClientOptions method will return the client options.
+func (c *ClientConfig) GetClientOptions() []define.BkApiClientOption {
+	return c.ClientOptions
 }

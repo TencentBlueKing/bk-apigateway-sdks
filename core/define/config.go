@@ -26,6 +26,8 @@ type ClientConfig interface {
 	GetAuthorizationHeaders() map[string]string
 	// GetLogger returns the client logger.
 	GetLogger() logging.Logger
+	// GetClientOptions returns the client options.
+	GetClientOptions() []BkApiClientOption
 }
 
 // ClientConfigProvider should provide a ClientConfig instance.

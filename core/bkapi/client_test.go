@@ -23,9 +23,18 @@ import (
 )
 
 var _ = Describe("Client", func() {
+	var ctrl *gomock.Controller
+
+	BeforeEach(func() {
+		ctrl = gomock.NewController(GinkgoT())
+	})
+
+	AfterEach(func() {
+		ctrl.Finish()
+	})
+
 	Context("BkApiClient", func() {
 		var (
-			ctrl                 *gomock.Controller
 			apiName              = "testing"
 			configProvider       *mock.MockClientConfigProvider
 			config               *mock.MockClientConfig
@@ -37,7 +46,6 @@ var _ = Describe("Client", func() {
 
 		BeforeEach(func() {
 			url = "http://api.example.com/"
-			ctrl = gomock.NewController(GinkgoT())
 			configProvider = mock.NewMockClientConfigProvider(ctrl)
 			config = mock.NewMockClientConfig(ctrl)
 			roundTripper = mock.NewMockRoundTripper(ctrl)
@@ -78,10 +86,22 @@ var _ = Describe("Client", func() {
 			return request
 		}
 
-		It("should apply option", func() {
+		It("should apply option by argument", func() {
 			config.EXPECT().GetLogger().Return(nil).AnyTimes()
+			config.EXPECT().GetClientOptions().Return(nil)
 
 			client, err := bkapi.NewBkApiClient(apiName, configProvider, roundTripperOpt)
+			Expect(err).To(BeNil())
+
+			request := getMockRequest(client)
+			Expect(request).NotTo(BeNil())
+		})
+
+		It("should apply option by config", func() {
+			config.EXPECT().GetLogger().Return(nil).AnyTimes()
+			config.EXPECT().GetClientOptions().Return([]define.BkApiClientOption{roundTripperOpt})
+
+			client, err := bkapi.NewBkApiClient(apiName, configProvider)
 			Expect(err).To(BeNil())
 
 			request := getMockRequest(client)
@@ -269,5 +289,16 @@ var _ = Describe("Client", func() {
 			Entry("SECRET_KEY", "SECRET_KEY"),
 			Entry("BKPAAS_APP_SECRET", "BKPAAS_APP_SECRET"),
 		)
+
+		It("should return the client options", func() {
+			option := mock.NewMockBkApiClientOption(ctrl)
+
+			config := bkapi.ClientConfig{
+				ClientOptions: []define.BkApiClientOption{option},
+			}
+
+			options := config.GetClientOptions()
+			Expect(options[0]).To(Equal(option))
+		})
 	})
 })
