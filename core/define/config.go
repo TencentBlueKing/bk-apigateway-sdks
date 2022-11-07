@@ -18,12 +18,16 @@ import "github.com/TencentBlueKing/gopkg/logging"
 
 // ClientConfig used to create a new BkApiClient.
 type ClientConfig interface {
+	// GetName returns the name of the api
+	GetName() string
 	// GetUrl returns the url of the client.
 	GetUrl() string
 	// GetAuthorizationHeaders returns the authorization headers of the client.
 	GetAuthorizationHeaders() map[string]string
 	// GetLogger returns the client logger.
 	GetLogger() logging.Logger
+	// GetClientOptions returns the client options.
+	GetClientOptions() []BkApiClientOption
 }
 
 // ClientConfigProvider should provide a ClientConfig instance.

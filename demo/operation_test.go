@@ -12,6 +12,8 @@
 package demo_test
 
 import (
+	"net/http"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
@@ -20,6 +22,11 @@ import (
 )
 
 var _ = Describe("Operation", func() {
+	response, err := http.Get("https://httpbin.org/")
+	if err != nil || response.StatusCode != 200 {
+		return
+	}
+
 	var (
 		client *demo.Client
 	)

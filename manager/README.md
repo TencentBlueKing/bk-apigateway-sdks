@@ -47,7 +47,7 @@ definition.yaml 中可以使用 Django 模块语法引用和渲染变量，内�
 manager, err := NewManagerFrom(
     "my-api",
     bkapi.ClientConfig{
-        Endpoint: "http://bkapi.example.com",
+        BkApiUrlTmpl: "https://{api_name}.example.com",
         AppCode: "my-app-code",
         AppSecret: "my-app-secret",
     },

@@ -23,9 +23,18 @@ import (
 )
 
 var _ = Describe("Client", func() {
+	var ctrl *gomock.Controller
+
+	BeforeEach(func() {
+		ctrl = gomock.NewController(GinkgoT())
+	})
+
+	AfterEach(func() {
+		ctrl.Finish()
+	})
+
 	Context("BkApiClient", func() {
 		var (
-			ctrl                 *gomock.Controller
 			apiName              = "testing"
 			configProvider       *mock.MockClientConfigProvider
 			config               *mock.MockClientConfig
@@ -36,7 +45,7 @@ var _ = Describe("Client", func() {
 		)
 
 		BeforeEach(func() {
-			ctrl = gomock.NewController(GinkgoT())
+			url = "http://api.example.com/"
 			configProvider = mock.NewMockClientConfigProvider(ctrl)
 			config = mock.NewMockClientConfig(ctrl)
 			roundTripper = mock.NewMockRoundTripper(ctrl)
@@ -77,10 +86,22 @@ var _ = Describe("Client", func() {
 			return request
 		}
 
-		It("should apply option", func() {
+		It("should apply option by argument", func() {
 			config.EXPECT().GetLogger().Return(nil).AnyTimes()
+			config.EXPECT().GetClientOptions().Return(nil)
 
 			client, err := bkapi.NewBkApiClient(apiName, configProvider, roundTripperOpt)
+			Expect(err).To(BeNil())
+
+			request := getMockRequest(client)
+			Expect(request).NotTo(BeNil())
+		})
+
+		It("should apply option by config", func() {
+			config.EXPECT().GetLogger().Return(nil).AnyTimes()
+			config.EXPECT().GetClientOptions().Return([]define.BkApiClientOption{roundTripperOpt})
+
+			client, err := bkapi.NewBkApiClient(apiName, configProvider)
 			Expect(err).To(BeNil())
 
 			request := getMockRequest(client)
@@ -109,8 +130,8 @@ var _ = Describe("Client", func() {
 
 		It("should render endpoint with params", func() {
 			config := bkapi.ClientConfig{
-				Endpoint: "http://{api_name}.example.com/{stage}/",
-				Stage:    "prod",
+				BkApiUrlTmpl: "http://{api_name}.example.com/",
+				Stage:        "prod",
 			}
 
 			Expect(config.ProvideConfig("testing").GetUrl()).To(Equal("http://testing.example.com/prod/"))
@@ -182,6 +203,27 @@ var _ = Describe("Client", func() {
 			Expect(providedConfig.Stage).To(Equal("prod"))
 		})
 
+		It("should use endpoint directly when it is not empty", func() {
+			config := bkapi.ClientConfig{
+				Endpoint: "http://api.example.com/",
+			}
+			providedConfig := config.ProvideConfig("testing").(*bkapi.ClientConfig)
+
+			Expect(providedConfig.Endpoint).To(Equal("http://api.example.com/"))
+			Expect(providedConfig.Stage).To(Equal(""))
+			Expect(providedConfig.BkApiUrlTmpl).To(Equal(""))
+		})
+
+		It("should set endpoint by BkApiUrlTmpl", func() {
+			config := bkapi.ClientConfig{
+				Stage:        "test",
+				BkApiUrlTmpl: "http://{api_name}.example.com/",
+			}
+			providedConfig := config.ProvideConfig("testing").(*bkapi.ClientConfig)
+
+			Expect(providedConfig.Endpoint).To(Equal("http://testing.example.com/test"))
+		})
+
 		It("should set endpoint by env BK_API_URL_TMPL", func() {
 			config := bkapi.ClientConfig{
 				Stage: "test",
@@ -197,7 +239,7 @@ var _ = Describe("Client", func() {
 			Expect(providedConfig.Endpoint).To(Equal("http://testing.example.com/test"))
 		})
 
-		It("should set endpoint by env BK_API_URL_TMPL", func() {
+		It("should set endpoint by env BK_API_STAGE_URL_TMPL", func() {
 			config := bkapi.ClientConfig{
 				Stage: "dev",
 				Getenv: func(k string) string {
@@ -227,6 +269,7 @@ var _ = Describe("Client", func() {
 		},
 			Entry("BK_APP_CODE", "BK_APP_CODE"),
 			Entry("APP_CODE", "APP_CODE"),
+			Entry("BKPAAS_APP_ID", "BKPAAS_APP_ID"),
 		)
 
 		DescribeTable("should get app secret from env", func(key string) {
@@ -244,6 +287,18 @@ var _ = Describe("Client", func() {
 		},
 			Entry("BK_APP_SECRET", "BK_APP_SECRET"),
 			Entry("SECRET_KEY", "SECRET_KEY"),
+			Entry("BKPAAS_APP_SECRET", "BKPAAS_APP_SECRET"),
 		)
+
+		It("should return the client options", func() {
+			option := mock.NewMockBkApiClientOption(ctrl)
+
+			config := bkapi.ClientConfig{
+				ClientOptions: []define.BkApiClientOption{option},
+			}
+
+			options := config.GetClientOptions()
+			Expect(options[0]).To(Equal(option))
+		})
 	})
 })

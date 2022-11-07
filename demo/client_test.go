@@ -27,11 +27,11 @@ var _ = Describe("Client", func() {
 
 	It("should create a client by config", func() {
 		client, err := demo.New(bkapi.ClientConfig{
-			Endpoint:    "https://{api_name}.example.com/{stage}/",
-			Stage:       "test",
-			AccessToken: "access_token",
-			AppCode:     "app_code",
-			AppSecret:   "app_secret",
+			BkApiUrlTmpl: "https://{api_name}.example.com/",
+			Stage:        "test",
+			AccessToken:  "access_token",
+			AppCode:      "app_code",
+			AppSecret:    "app_secret",
 		})
 		Expect(err).To(BeNil())
 

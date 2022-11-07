@@ -72,17 +72,18 @@ func (cli *BkApiClient) logResponse(op define.Operation, response *http.Response
 	details := NewBkApiResponseDetailFromResponse(response)
 	fields := details.Map()
 
+	ctx := response.Request.Context()
 	fields["operation"] = op
 	fields["status"] = response.Status
 	fields["status_code"] = response.StatusCode
 
 	switch response.StatusCode / 100 {
 	case 4:
-		logger.Warn("request error caused by client", fields)
+		logger.WarnContext(ctx, "request error caused by client", fields)
 	case 5:
-		logger.Error("request error caused by server", fields)
+		logger.ErrorContext(ctx, "request error caused by server", fields)
 	default:
-		logger.Debug("request success", fields)
+		logger.DebugContext(ctx, "request success", fields)
 	}
 
 }
@@ -143,9 +144,14 @@ func NewBkApiClient(
 	client *gentleman.Client,
 	factory func(name string, client define.BkApiClient, request *gentleman.Request) define.Operation,
 	config define.ClientConfig,
-) *BkApiClient {
+) (*BkApiClient, error) {
 
-	client.URL(config.GetUrl())
+	baseUrl := config.GetUrl()
+	if baseUrl == "" {
+		return nil, define.ErrorWrapf(define.ErrConfigInvalid, "base url is empty")
+	}
+
+	client.URL(baseUrl)
 
 	headers := config.GetAuthorizationHeaders()
 	if len(headers) > 0 {
@@ -158,7 +164,7 @@ func NewBkApiClient(
 		operationFactory: factory,
 		logger:           config.GetLogger(),
 		operationOptions: make([]define.OperationOption, 0),
-	}
+	}, nil
 }
 
 // BkApiClientOption is a wrapper for a client option.

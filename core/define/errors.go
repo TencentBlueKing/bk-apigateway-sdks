@@ -21,7 +21,10 @@ import (
 var (
 	// ErrTypeNotMatch defines the error which indicates the type of the value is not match.
 	ErrTypeNotMatch = errors.New("type not match")
+	// ErrBkApiRequest defines the error which indicates the api request error.
 	ErrBkApiRequest = errors.New("bkapi request error")
+	// ErrConfigInvalid defines the error which indicates the config is invalid.
+	ErrConfigInvalid = errors.New("config invalid")
 )
 
 //

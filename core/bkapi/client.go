@@ -38,17 +38,22 @@ func NewBkApiClient(
 	configProvider define.ClientConfigProvider,
 	options ...define.BkApiClientOption,
 ) (define.BkApiClient, error) {
-	client := internal.NewBkApiClient(
+	config := configProvider.ProvideConfig(apiName)
+	client, err := internal.NewBkApiClient(
 		apiName,
 		gentleman.New(),
 		func(name string, client define.BkApiClient, request *gentleman.Request) define.Operation {
 			return internal.NewOperation(name, client, request)
 		},
-		configProvider.ProvideConfig(apiName),
+		config,
 	)
+	if err != nil {
+		return nil, err
+	}
 
 	for phase, opts := range map[string][]define.BkApiClientOption{
 		"global": globalBkapiClientOptions,
+		"config": config.GetClientOptions(),
 		"client": options,
 	} {
 		if len(opts) == 0 {
@@ -69,8 +74,13 @@ type ClientConfig struct {
 	apiName string
 
 	// Endpoint is the url of the BkApi server.
+	// Default: "{BkApiUrlTmpl}/{Stage}"
 	Endpoint string
+	// BkApiUrlTmpl is the template for endpoint,
+	// Default: os.Getenv("BK_API_URL_TMPL")
+	BkApiUrlTmpl string
 	// Stage is the api stage name, defaults to "prod".
+	// Default: "prod"
 	Stage string
 
 	// AppCode is the blueking app code.
@@ -92,6 +102,9 @@ type ClientConfig struct {
 
 	// Logger is used to log the request and response.
 	Logger logging.Logger
+
+	// ClientConfig will apply to the client.
+	ClientOptions []define.BkApiClientOption
 }
 
 func (c *ClientConfig) setAuthAccessTokenAuthParams(params map[string]string) bool {
@@ -141,29 +154,32 @@ func (c *ClientConfig) getAuthParams() map[string]string {
 
 func (c *ClientConfig) initAppConfig() {
 	if c.AppCode == "" {
-		c.AppCode = c.getEnv("BK_APP_CODE", "APP_CODE")
+		c.AppCode = c.getEnv("BK_APP_CODE", "BKPAAS_APP_ID", "APP_CODE")
 	}
 
 	if c.AppSecret == "" {
-		c.AppSecret = c.getEnv("BK_APP_SECRET", "SECRET_KEY")
+		c.AppSecret = c.getEnv("BK_APP_SECRET", "BKPAAS_APP_SECRET", "SECRET_KEY")
 	}
 }
 
 func (c *ClientConfig) initBkApiConfig() {
+	if c.Endpoint != "" {
+		return
+	}
+
 	if c.Stage == "" {
 		c.Stage = "prod"
 	}
 
-	endpoint := c.Endpoint
-	if endpoint == "" {
-		apiTmpl := c.getEnv("BK_API_URL_TMPL")
-		stageTmpl := c.getEnv("BK_API_STAGE_URL_TMPL")
+	if c.BkApiUrlTmpl == "" {
+		c.BkApiUrlTmpl = c.getEnv("BK_API_URL_TMPL")
+	}
 
-		if apiTmpl != "" {
-			endpoint = fmt.Sprintf("%s/{stage}", strings.TrimSuffix(apiTmpl, "/"))
-		} else if stageTmpl != "" {
-			endpoint = stageTmpl
-		}
+	var endpoint string
+	if c.BkApiUrlTmpl != "" {
+		endpoint = fmt.Sprintf("%s/{stage}", strings.TrimSuffix(c.BkApiUrlTmpl, "/"))
+	} else {
+		endpoint = c.getEnv("BK_API_STAGE_URL_TMPL")
 	}
 
 	c.Endpoint = internal.ReplacePlaceHolder(endpoint, map[string]string{
@@ -177,11 +193,15 @@ func (c *ClientConfig) initLogger() {
 		return
 	}
 
-	c.Logger = logging.GetLogger("github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi")
+	c.Logger = logging.GetLogger(loggerName)
+}
+
+func (c *ClientConfig) setApiName(apiName string) {
+	c.apiName = apiName
 }
 
 func (c *ClientConfig) initConfig(apiName string) {
-	c.apiName = apiName
+	c.setApiName(apiName)
 
 	if c.Getenv == nil {
 		c.Getenv = os.Getenv
@@ -250,4 +270,9 @@ func (c *ClientConfig) GetAuthorizationHeaders() map[string]string {
 // GetLogger method will return the logger.
 func (c *ClientConfig) GetLogger() logging.Logger {
 	return c.Logger
+}
+
+// GetClientOptions method will return the client options.
+func (c *ClientConfig) GetClientOptions() []define.BkApiClientOption {
+	return c.ClientOptions
 }

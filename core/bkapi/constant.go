@@ -9,27 +9,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package apigateway_test
+package bkapi
 
-import (
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-
-	"github.com/TencentBlueKing/bk-apigateway-sdks/apigateway"
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi"
-)
-
-var _ = Describe("Client", func() {
-	It("should create a client by config", func() {
-		client, err := apigateway.New(bkapi.ClientConfig{
-			BkApiUrlTmpl: "https://{api_name}.example.com/",
-			Stage:        "prod",
-			AccessToken:  "access_token",
-			AppCode:      "app_code",
-			AppSecret:    "app_secret",
-		})
-		Expect(err).To(BeNil())
-
-		Expect(client.Name()).To(Equal("bk-apigateway"))
-	})
-})
+// This is the name of the default logger
+const loggerName = "github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi"
