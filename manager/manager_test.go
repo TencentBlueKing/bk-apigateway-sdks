@@ -63,10 +63,10 @@ var _ = Describe("Manager", func() {
 			[]byte(`key: {{ data.value }}`),
 			0644,
 		)).To(Succeed())
-
-		Expect(manager.LoadDefinition(definitionFile, map[string]interface{}{
+		manager.SetContexts(map[string]interface{}{
 			"value": "test",
-		})).To(Succeed())
+		})
+		Expect(manager.LoadDefinition(definitionFile)).To(Succeed())
 
 		definition := manager.GetDefinition()
 		Expect(definition.Get("")).To(Equal(map[string]interface{}{

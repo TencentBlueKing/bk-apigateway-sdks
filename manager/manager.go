@@ -34,6 +34,7 @@ type Manager struct {
 	definition *Definition
 	client     *apigateway.Client
 	config     *bkapi.ClientConfig
+	contexts   interface{}
 }
 
 func (m *Manager) requestWithBody(
@@ -69,7 +70,7 @@ func (m *Manager) request(operation define.Operation) (map[string]interface{}, e
 }
 
 // LoadDefinition will load the definition from the file.
-func (m *Manager) LoadDefinition(path string, data interface{}) error {
+func (m *Manager) LoadDefinition(path string) error {
 	template, err := pongo2.FromFile(path)
 	if err != nil {
 		return errors.Wrapf(err, "failed to load %s", path)
@@ -77,7 +78,7 @@ func (m *Manager) LoadDefinition(path string, data interface{}) error {
 
 	context := NewDefinitionContext(m.apiName, m.config)
 
-	rendered, err := template.ExecuteBytes(context.Context(data))
+	rendered, err := template.ExecuteBytes(context.Context(m.contexts))
 	if err != nil {
 		return errors.Wrapf(err, "failed to render %s", path)
 	}
@@ -89,6 +90,10 @@ func (m *Manager) LoadDefinition(path string, data interface{}) error {
 
 	m.definition = definition
 	return nil
+}
+
+func (m *Manager) SetContexts(contexts interface{}) {
+	m.contexts = contexts
 }
 
 // GetDefinition return the definition.
@@ -174,7 +179,18 @@ func (m *Manager) replaceIncludedResourcesContent(
 		return errors.Wrapf(err, "failed to read %s", resourceFile)
 	}
 
-	data[contentFileKey] = string(content)
+	template, err := pongo2.FromBytes(content)
+	if err != nil {
+		return errors.Wrapf(err, "failed to load resources")
+	}
+
+	context := NewDefinitionContext(m.apiName, m.config)
+
+	rendered, err := template.ExecuteBytes(context.Context(m.contexts))
+	if err != nil {
+		return errors.Wrapf(err, "failed to render resources")
+	}
+	data[contentFileKey] = string(rendered)
 	return nil
 }
 
@@ -280,6 +296,6 @@ func NewManagerFrom(
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create manager")
 	}
-
-	return manager, manager.LoadDefinition(path, data)
+	manager.contexts = data
+	return manager, manager.LoadDefinition(path)
 }
