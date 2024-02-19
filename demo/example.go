@@ -2,9 +2,9 @@ package demo
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi"
-	"github.com/google/martian/log"
 )
 
 func clientExample() {
@@ -20,7 +20,7 @@ func clientExample() {
 		Stage:        "prod",
 	})
 	if err != nil {
-		log.Errorf("registry default config error: %v", err)
+		log.Printf("registry default config error: %v", err)
 		return
 	}
 
@@ -39,7 +39,7 @@ func clientExample() {
 	}, bkapi.OptJsonResultProvider())
 
 	if err != nil {
-		log.Errorf("client init error: %v", err)
+		log.Printf("client init error: %v", err)
 		return
 	}
 	// 创建结果变量
