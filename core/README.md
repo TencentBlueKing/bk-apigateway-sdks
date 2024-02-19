@@ -21,7 +21,7 @@ go get -u github.com/TencentBlueKing/bk-apigateway-sdks/core@latest
 | bkapi.*ResultProvider | 结构 | 提供响应体反序列化封装的接口            | json.go   |
 
 ### 快速使用
-以下基于 [demo](./demo/) 包中的示例：
+以下基于 [demo](../demo/) 包中的部分示例(具体见: [example.go](../demo/example.go))：
 
 ```golang
 import (
@@ -68,7 +68,7 @@ registry.RegisterDefaultConfig(bkapi.ClientConfig{
 })
 
 // 注册指定网关配置
-registry.RegisterDefaultConfig("my-gateway", bkapi.ClientConfig{
+registry.RegisterClientConfig("my-gateway", bkapi.ClientConfig{
 	Endpoint:      "http://special-api.example.com/",
 	ClientOptions: []define.BkApiClientOption{bkapi.OptJsonResultProvider()},  // 声明这个网关的所有响应都是 JSON
 })
@@ -118,6 +118,35 @@ Operation 表示一个网关资源封装，方法定义：
 | Apply             | 增加额外选项                                     |
 | Request           | 发送请求                                         |
 
+
+```go
+// 传递路径参数
+_, _ = client.Anything(bkapi.OptSetRequestPathParams(map[string]string{
+"code": `200`,
+})).SetResult(&result).Request()
+
+// 传递query参数
+//_, _ = client.StatusCode(bkapi.OptSetRequestQueryParams(map[string]string{
+//	"code": `200`,
+//})).SetResult(&result).Request()
+
+// 传递单个query参数
+//_, _ = client.StatusCode(bkapi.OptSetRequestQueryParam("code", `200`)).SetResult(&result).Request()
+
+// 传递body参数
+_, _ = client.StatusCode(bkapi.OptSetRequestBody(map[string]string{
+"code": `200`,
+})).SetResult(&result).Request()
+
+_, _ = client.StatusCode(bkapi.OptSetRequestBody(
+AnythingRequest{Code: "200"})).SetResult(&result).Request()
+
+// 传递header参数
+_, _ = client.StatusCode(
+bkapi.OptSetRequestHeader(
+"X-BKAPI-VERSION", "v3",
+)).SetResult(&result).Request()
+```
 ### 客户端封装
 
 BkApiClient 表示一个网关封装，方法定义：

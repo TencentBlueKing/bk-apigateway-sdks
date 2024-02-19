@@ -23,3 +23,7 @@ type AnythingResponse struct {
 	Origin  string                 `json:"origin"`
 	URL     string                 `json:"url"`
 }
+
+type AnythingRequest struct {
+	Code string `json:"code"`
+}
