@@ -120,6 +120,11 @@ Operation 表示一个网关资源封装，方法定义：
 
 
 ```go
+/// 创建结果变量
+var result AnythingResponse
+
+// 调用接口(Request()的返回值是：*http.Response,err,看具体情况是否需要处理)
+
 // 传递路径参数
 _, _ = client.Anything(bkapi.OptSetRequestPathParams(map[string]string{
 "code": `200`,
@@ -146,6 +151,9 @@ _, _ = client.StatusCode(
 bkapi.OptSetRequestHeader(
 "X-BKAPI-VERSION", "v3",
 )).SetResult(&result).Request()
+
+// 结果将自动填充到 result 中
+fmt.Printf("%#v", result)
 ```
 ### 客户端封装
 
