@@ -49,8 +49,8 @@ type QueryUserDemoResponse struct {
 func clientExample() {
 
 	// 初始化client
-	
-	client,err:=bkapi.NewBkApiClient("demo", bkapi.ClientConfig{
+
+	client, err :=bkapi.NewBkApiClient("demo", bkapi.ClientConfig{
 		Endpoint: "http://special-api.example.com/prod",// 具体某个网关地址
 		ClientOptions: []define.BkApiClientOption{
 			// 设置一些通用的client配置,eg:
@@ -126,7 +126,7 @@ func clientExample() {
 ```golang
 // 通过ClientConfigRegistry初始化client
 
-// 使用默认的全局的注册配置来初始化
+// 使用默认的全局的配置中心来初始化
 registry: = bkapi.GetGlobalClientConfigRegistry()
 
 // 方式一：注册默认的配置（不区分网关）
