@@ -115,10 +115,6 @@ func clientExample() {
 	//	SetHeaders(map[string]string{"X-Bkapi-Header": "demo"}).
 	//	SetResult(&result).Request()
 
-	//_, _ = client.StatusCode(bkapi.OptSetRequestQueryParams(map[string]string{
-	//	"code": `200`,
-	//})).SetResult(&result).Request()
-
 	_, _ = apiOperation.SetResult(&result).Request()
 	// 结果将自动填充到 result 中
 	fmt.Printf("%#v", result)
