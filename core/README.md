@@ -50,7 +50,7 @@ func clientExample() {
 
 	// 初始化client
 
-	client, err :=bkapi.NewBkApiClient("demo", bkapi.ClientConfig{
+	client, err := bkapi.NewBkApiClient("demo", bkapi.ClientConfig{
 		Endpoint: "http://special-api.example.com/prod",// 具体某个网关地址
 		ClientOptions: []define.BkApiClientOption{
 			// 设置一些通用的client配置,eg:
@@ -213,38 +213,43 @@ Operation 表示一个网关资源封装，方法定义：
 
 
 ```go
-/// 创建结果变量
-var result AnythingResponse
+// 创建 api operation
+apiOperation := client.NewOperation(
+    // 填充接口配置
+    bkapi.OperationConfig{
+        Name:   "query_team_user_demo",
+        Method: "GET",
+        Path:   "/get/{team_id}/user/",
+    },
+    // 设置path参数
+    bkapi.OptSetRequestPathParams(
+        map[string]string{
+        "team_id": `1`,
+        },
+    ),
+    // 设置query参数
+    bkapi.OptSetRequestQueryParam("name", "demo"),
+    // 设置body参数: 自定义struct
+    bkapi.OptSetRequestBody(QueryUserDemoBodyRequest{Name: "demo"}),
+    // 设置body参数： map[string]string
+    bkapi.OptSetRequestBody(map[string]string{"name": "demo"}),
+    // 设置header参数
+    bkapi.OptSetRequestHeader("X-Bkapi-Header", "demo"),
+)
+
+// 创建结果变量
+var result QueryUserDemoResponse
 
 // 调用接口(Request()的返回值是：*http.Response,err,看具体情况是否需要处理)
 
-// 传递路径参数
-_, _ = client.Anything(bkapi.OptSetRequestPathParams(map[string]string{
-"code": `200`,
-})).SetResult(&result).Request()
+//// 直接通过 api operation传参
+//_,_=apiOperation.SetPathParams(map[string]string{"team_id": `1`}).
+//	SetBody(QueryUserDemoBodyRequest{Name: "demo"}).
+//	SetQueryParams(map[string]string{"name": "demo"}).
+//	SetHeaders(map[string]string{"X-Bkapi-Header": "demo"}).
+//	SetResult(&result).Request()
 
-// 传递query参数
-//_, _ = client.StatusCode(bkapi.OptSetRequestQueryParams(map[string]string{
-//	"code": `200`,
-//})).SetResult(&result).Request()
-
-// 传递单个query参数
-//_, _ = client.StatusCode(bkapi.OptSetRequestQueryParam("code", `200`)).SetResult(&result).Request()
-
-// 传递body参数
-_, _ = client.StatusCode(bkapi.OptSetRequestBody(map[string]string{
-"code": `200`,
-})).SetResult(&result).Request()
-
-_, _ = client.StatusCode(bkapi.OptSetRequestBody(
-AnythingRequest{Code: "200"})).SetResult(&result).Request()
-
-// 传递header参数
-_, _ = client.StatusCode(
-bkapi.OptSetRequestHeader(
-"X-BKAPI-VERSION", "v3",
-)).SetResult(&result).Request()
-
+_, _ = apiOperation.SetResult(&result).Request()
 // 结果将自动填充到 result 中
 fmt.Printf("%#v", result)
 ```
