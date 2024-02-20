@@ -53,10 +53,10 @@ func clientExample() {
 	client, err := bkapi.NewBkApiClient("demo", bkapi.ClientConfig{
 		Endpoint: "http://special-api.example.com/prod",// 具体某个网关地址
 		ClientOptions: []define.BkApiClientOption{
-			// 设置一些通用的client配置,eg:
-			bkapi.OptJsonResultProvider(),// 声明这个网关的所有响应都是JSON
-			bkapi.OptJsonBodyProvider(), // 声明这个网关的body请求都是JSON 
+			// 设置一些通用的client配置,eg: 
 			bkapi.OptSetRequestHeader("X-Api-Key", "123456"),// 设置统一的header
+			bkapi.OptJsonResultProvider(),// 声明这个网关的所有响应都是JSON
+			bkapi.OptJsonBodyProvider(), // 声明这个网关的body请求都是JSON
 		},
 	})
 	if err != nil {
@@ -73,7 +73,9 @@ func clientExample() {
 			Name:   "query_team_user_demo",
 			Method: "GET",
 			Path:   "/get/{team_id}/user/",
-		},
+		}, 
+		// 设置header参数 
+		bkapi.OptSetRequestHeader("X-Bkapi-Header", "demo"),
 		// 设置path参数
 		bkapi.OptSetRequestPathParams(
 			map[string]string{
@@ -86,8 +88,6 @@ func clientExample() {
 		bkapi.OptSetRequestBody(QueryUserDemoBodyRequest{Name: "demo"}),
 		// 设置body参数： map[string]string
 		bkapi.OptSetRequestBody(map[string]string{"name": "demo"}),
-		// 设置header参数
-		bkapi.OptSetRequestHeader("X-Bkapi-Header", "demo"),
 	)
 
 	// 创建结果变量
@@ -96,10 +96,10 @@ func clientExample() {
 	// 调用接口(Request()的返回值是：*http.Response,err,看具体情况是否需要处理)
 
 	//// 直接通过 api operation传参
-	//_,_=apiOperation.SetPathParams(map[string]string{"team_id": `1`}).
+	//_,_=apiOperation.SetHeaders(map[string]string{"X-Bkapi-Header": "demo"}).
+	//	SetPathParams(map[string]string{"team_id": `1`}).
 	//	SetBody(QueryUserDemoBodyRequest{Name: "demo"}).
 	//	SetQueryParams(map[string]string{"name": "demo"}).
-	//	SetHeaders(map[string]string{"X-Bkapi-Header": "demo"}).
 	//	SetResult(&result).Request()
 
 	//_, _ = client.StatusCode(bkapi.OptSetRequestQueryParams(map[string]string{
@@ -151,12 +151,13 @@ if err != nil {
 err = registry.RegisterClientConfig("my-gateway", bkapi.ClientConfig {
         Endpoint: "http://special-api.example.com/prod", // 具体某个网关地址
         ClientOptions: [] define.BkApiClientOption {
-        // 设置一些通用的client配置,eg:
-        bkapi.OptJsonResultProvider(), // 声明这个网关的所有响应都是JSON
-        bkapi.OptJsonBodyProvider(), // 声明这个网关的body请求都是JSON 
+        // 设置一些通用的client配置,eg: 
         bkapi.OptSetRequestHeader("X-Api-Key", "123456"), // 设置统一的header
-        },
-})
+        bkapi.OptJsonResultProvider(), // 声明这个网关的所有响应都是JSON
+        bkapi.OptJsonBodyProvider(), // 声明这个网关的body请求都是JSON
+       },
+    })
+
 if err != nil {
         log.Fatalf("set bkapi client config error: %v", err)
         return
@@ -221,6 +222,8 @@ apiOperation := client.NewOperation(
         Method: "GET",
         Path:   "/get/{team_id}/user/",
     },
+    // 设置header参数
+    bkapi.OptSetRequestHeader("X-Bkapi-Header", "demo"),
     // 设置path参数
     bkapi.OptSetRequestPathParams(
         map[string]string{
@@ -233,8 +236,6 @@ apiOperation := client.NewOperation(
     bkapi.OptSetRequestBody(QueryUserDemoBodyRequest{Name: "demo"}),
     // 设置body参数： map[string]string
     bkapi.OptSetRequestBody(map[string]string{"name": "demo"}),
-    // 设置header参数
-    bkapi.OptSetRequestHeader("X-Bkapi-Header", "demo"),
 )
 
 // 创建结果变量
@@ -243,10 +244,10 @@ var result QueryUserDemoResponse
 // 调用接口(Request()的返回值是：*http.Response,err,看具体情况是否需要处理)
 
 //// 直接通过 api operation传参
-//_,_=apiOperation.SetPathParams(map[string]string{"team_id": `1`}).
+//_,_=apiOperation.SetHeaders(map[string]string{"X-Bkapi-Header": "demo"}).
+//	SetPathParams(map[string]string{"team_id": `1`}).
 //	SetBody(QueryUserDemoBodyRequest{Name: "demo"}).
 //	SetQueryParams(map[string]string{"name": "demo"}).
-//	SetHeaders(map[string]string{"X-Bkapi-Header": "demo"}).
 //	SetResult(&result).Request()
 
 _, _ = apiOperation.SetResult(&result).Request()

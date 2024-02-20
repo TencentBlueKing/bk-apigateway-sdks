@@ -87,6 +87,8 @@ func clientExample() {
 			Method: "GET",
 			Path:   "/get/{team_id}/user/",
 		},
+		// 设置header参数
+		bkapi.OptSetRequestHeader("X-Bkapi-Header", "demo"),
 		// 设置path参数
 		bkapi.OptSetRequestPathParams(
 			map[string]string{
@@ -99,8 +101,6 @@ func clientExample() {
 		bkapi.OptSetRequestBody(QueryUserDemoBodyRequest{Name: "demo"}),
 		// 设置body参数： map[string]string
 		bkapi.OptSetRequestBody(map[string]string{"name": "demo"}),
-		// 设置header参数
-		bkapi.OptSetRequestHeader("X-Bkapi-Header", "demo"),
 	)
 
 	// 创建结果变量
@@ -109,10 +109,10 @@ func clientExample() {
 	// 调用接口(Request()的返回值是：*http.Response,err,看具体情况是否需要处理)
 
 	//// 直接通过 api operation传参
-	//_,_=apiOperation.SetPathParams(map[string]string{"team_id": `1`}).
+	//_,_=apiOperation.SetHeaders(map[string]string{"X-Bkapi-Header": "demo"}).
+	//	SetPathParams(map[string]string{"team_id": `1`}).
 	//	SetBody(QueryUserDemoBodyRequest{Name: "demo"}).
 	//	SetQueryParams(map[string]string{"name": "demo"}).
-	//	SetHeaders(map[string]string{"X-Bkapi-Header": "demo"}).
 	//	SetResult(&result).Request()
 
 	_, _ = apiOperation.SetResult(&result).Request()
