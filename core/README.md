@@ -68,7 +68,7 @@ registry.RegisterDefaultConfig(bkapi.ClientConfig{
 })
 
 // 注册指定网关配置
-registry.RegisterDefaultConfig("my-gateway", bkapi.ClientConfig{
+registry.RegisterClientConfig("my-gateway", bkapi.ClientConfig{
 	Endpoint:      "http://special-api.example.com/",
 	ClientOptions: []define.BkApiClientOption{bkapi.OptJsonResultProvider()},  // 声明这个网关的所有响应都是 JSON
 })
