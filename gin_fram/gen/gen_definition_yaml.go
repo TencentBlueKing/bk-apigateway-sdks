@@ -12,7 +12,7 @@ import (
 //go:embed definition.tpl
 var configTemplate []byte
 
-func GenDefinitionConfig(config *model.APIConfig) string {
+func GenDefinitionYaml(config *model.APIConfig) string {
 	// 创建模板
 	tmpl, err := template.New("config").Funcs(template.FuncMap{
 		"indent": func(n int, s string) string {

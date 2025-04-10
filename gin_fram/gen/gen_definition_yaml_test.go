@@ -41,6 +41,6 @@ func TestGenDefinitionConfig(t *testing.T) {
 		},
 	}
 	// 生成定义配置
-	definitionConfig := GenDefinitionConfig(config)
+	definitionConfig := GenDefinitionYaml(config)
 	t.Log(definitionConfig)
 }
