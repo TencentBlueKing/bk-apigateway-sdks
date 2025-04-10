@@ -1,8 +1,8 @@
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/KyleBanks/depth v1.2.1 h1:5h8fQADFrWtarTdtDudMmGsC7GPbOAu6RVB3ffsVFHc=
 github.com/KyleBanks/depth v1.2.1/go.mod h1:jzSb9d0L43HxTQfT+oSA1EEp2q+ne2uh6XgeJcm8brE=
-github.com/TencentBlueKing/gopkg v1.3.0 h1:WQbhfW87O8y0EW+DjvsDZ/3Z8Hfxg2pbD2KDD7OK0is=
-github.com/TencentBlueKing/gopkg v1.3.0/go.mod h1:C8xV79ap0bF2pR10YfhsxO5w5LtJlPakrRunkRbl2yw=
+github.com/TencentBlueKing/gopkg v1.2.0 h1:gtqlJU1IbBgnUzb4OILKnwpiZ71ybYQ+VW8heQm5QYE=
+github.com/TencentBlueKing/gopkg v1.2.0/go.mod h1:C8xV79ap0bF2pR10YfhsxO5w5LtJlPakrRunkRbl2yw=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
 github.com/beorn7/perks v1.0.1/go.mod h1:G2ZrVWU2WbWT9wwq4/hrbKbnv/1ERSJQ0ibhJ6rlkpw=
 github.com/bytedance/sonic v1.11.6 h1:oUp34TzMlL+OY1OUWxHqsdkgC/Zfc85zGqw9siXjrc0=

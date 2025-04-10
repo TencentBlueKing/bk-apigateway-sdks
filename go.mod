@@ -3,7 +3,7 @@ module github.com/TencentBlueKing/bk-apigateway-sdks
 go 1.23.0
 
 require (
-	github.com/TencentBlueKing/gopkg v1.3.0
+	github.com/TencentBlueKing/gopkg v1.2.0
 	github.com/flosch/pongo2/v5 v5.0.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-openapi/spec v0.21.0
