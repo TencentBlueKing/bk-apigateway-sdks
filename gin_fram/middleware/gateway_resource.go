@@ -3,13 +3,10 @@ package middleware
 import (
 	"fmt"
 	"log"
-	"math/rand"
-	"os"
 	"reflect"
 	"runtime"
 	"strings"
 	"sync/atomic"
-	"time"
 	"unsafe"
 
 	"github.com/gin-gonic/gin"
@@ -130,24 +127,12 @@ func extractHandlerConfig(handlerVal reflect.Value) (*model.APIGatewayResourceCo
 
 //go:noinline
 func genHandler() gin.HandlerFunc {
-	id := generateUUID()
 	counter := atomic.AddUint64(&funcCounter, 8)
 	handler := func(c *gin.Context) {
-		_ = counter // 阻止编译器优化
-		c.Set("id", id)
 		c.Next()
-		runtime.KeepAlive(counter)
 	}
 	runtime.KeepAlive(counter)
 	ptr := (*uintptr)(unsafe.Pointer(&handler))
 	*ptr += uintptr(counter) // 人为修改指针，防止优化
 	return handler
-}
-
-func generateUUID() string {
-	return fmt.Sprintf("mw-%d-%d-%d",
-		time.Now().UnixNano(),
-		os.Getpid(),
-		rand.Intn(1000),
-	)
 }
