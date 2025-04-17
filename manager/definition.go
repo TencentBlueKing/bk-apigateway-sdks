@@ -12,6 +12,7 @@
 package manager
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -43,12 +44,48 @@ func (d *Definition) Get(namespace string) (map[string]interface{}, error) {
 		switch realValue := value.(type) {
 		case map[string]interface{}:
 			current = realValue
+		case map[interface{}]interface{}:
+			// convert map[interface{}]interface{} to map[string]interface{}
+			current = make(map[string]interface{})
+			for k, v := range realValue {
+				current[fmt.Sprintf("%v", k)] = v
+			}
+			return current, nil
 		default:
 			return nil, errors.Wrapf(ErrNotFound, "namespace: %s", namespace)
 		}
 	}
 
 	return current, nil
+}
+
+// GetArray Get sub array definition.
+func (d *Definition) GetArray(namespace string) ([]map[string]interface{}, error) {
+	current := d.definition
+	for _, field := range strings.Split(namespace, ".") {
+		if current == nil {
+			return nil, errors.Wrapf(ErrNotFound, "namespace: %s", namespace)
+		}
+
+		value, fond := current[field]
+		if !fond {
+			return nil, errors.Wrapf(ErrNotFound, "namespace: %s", namespace)
+		}
+
+		switch realValue := value.(type) {
+		case []interface{}:
+			// convert []map[interface{}]interface{} to map[string]interface{}
+			result := make([]map[string]interface{}, len(realValue))
+			for i, v := range realValue {
+				result[i] = v.(map[string]interface{})
+			}
+			return result, nil
+		default:
+			return nil, errors.Wrapf(ErrNotFound, "namespace: %s", namespace)
+		}
+	}
+
+	return []map[string]interface{}{}, nil
 }
 
 // NewDefinition creates a new definition from the given map.

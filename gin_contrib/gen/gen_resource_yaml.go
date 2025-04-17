@@ -5,20 +5,20 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-openapi/spec"
 
-	"github.com/TencentBlueKing/bk-apigateway-sdks/gin_fram/middleware"
-	"github.com/TencentBlueKing/bk-apigateway-sdks/gin_fram/model"
-	"github.com/TencentBlueKing/bk-apigateway-sdks/gin_fram/util"
+	"github.com/TencentBlueKing/bk-apigateway-sdks/gin_contrib/model"
+	"github.com/TencentBlueKing/bk-apigateway-sdks/gin_contrib/util"
 )
 
 // GenResourceYamlFromSwaggerJson 生成资源配置yaml
 // 从swagger.json文件生成资源配置yaml
 func GenResourceYamlFromSwaggerJson(docPath string, engine *gin.Engine) string {
 	// 获取route 网关配置
-	routeConfigMap := middleware.GetRouteConfigMap(engine)
+	routeConfigMap := util.GetRouteConfigMap(engine)
 	// 解析 Swagger 文件
 	data, _ := os.ReadFile(docPath)
 	var swagger spec.Swagger
@@ -62,15 +62,15 @@ func mergeSwaggerConfig(swagger spec.Swagger, routeMap map[string]*model.APIGate
 		}
 		for method, operation := range operationMap {
 			// 构造匹配键
-			key := fmt.Sprintf("%s:%s",
-				path, method)
+			key := fmt.Sprintf("%s:%s", path, method)
 			// 合并配置
 			if c, exists := routeMap[key]; exists {
+				c.Backend.Method = strings.ToLower(method)
 				if c.Backend.Path == "" {
 					c.Backend.Path = path
 				}
 				if c.Backend.Method == "" {
-					c.Backend.Method = method
+					c.Backend.Method = strings.ToLower(method)
 				}
 				if operation.Extensions == nil {
 					operation.Extensions = spec.Extensions{}

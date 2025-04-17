@@ -18,18 +18,17 @@ type Pet struct {
 	Status    string   `json:"status"`
 }
 
-// GetStringByInt example
+// GetPetByID example
 //
-//	@Summary		Add a new pet to the store
-//	@Description	get string by ID
-//	@ID				get-string-by-int
+//	@Summary		get a  pet
+//	@Description	get pet by ID
+//	@ID				get_pet_by_id
 //	@Accept			json
 //	@Produce		json
-//	@Param			some_id	path		int		true	"Some ID"
-//	@Param			some_id	body		Pet		true	"Some ID"
-//	@Success		200		{string}	string	"ok"
-//	@Router			/testapi/get-string-by-int/{some_id} [get]
-func GetStringByInt(c *gin.Context) {
+//	@Param			pet_id	path		int	true	"pet id"
+//	@Success		200		{string}	Pet
+//	@Router			/testapi/pet/get-pet-by-id/{pet_id}/ [get]
+func GetPetByID(c *gin.Context) {
 	pet := Pet{
 		ID: 1,
 		Category: struct {

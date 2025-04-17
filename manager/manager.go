@@ -12,13 +12,21 @@
 package manager
 
 import (
+	"fmt"
 	"io/ioutil"
 
-	apigateway "github.com/TencentBlueKing/bk-apigateway-sdks/apigateway"
+	"github.com/pkg/errors"
+
+	"github.com/TencentBlueKing/bk-apigateway-sdks/apigateway"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
-	"github.com/flosch/pongo2/v5"
-	"github.com/pkg/errors"
+)
+
+const (
+	apiGatewayNamespace  = "apigateway"
+	stagesNamespace      = "stages"
+	PermissionsNamespace = "grant_permissions"
+	ReleaseNamespace     = "release"
 )
 
 type apiGatewayResult struct {
@@ -37,8 +45,8 @@ type Manager struct {
 }
 
 func (m *Manager) requestWithBody(
-	operation define.Operation,
-	body map[string]interface{},
+		operation define.Operation,
+		body map[string]interface{},
 ) (map[string]interface{}, error) {
 	return m.request(operation.SetBody(body))
 }
@@ -46,9 +54,9 @@ func (m *Manager) requestWithBody(
 func (m *Manager) request(operation define.Operation) (map[string]interface{}, error) {
 	var result apiGatewayResult
 	_, err := operation.
-		SetPathParams(map[string]string{
-			"api_name": m.apiName,
-		}).
+			SetPathParams(map[string]string{
+				"api_name": m.apiName,
+			}).
 		SetResult(&result).
 		Request()
 
@@ -69,19 +77,11 @@ func (m *Manager) request(operation define.Operation) (map[string]interface{}, e
 }
 
 // LoadDefinition will load the definition from the file.
-func (m *Manager) LoadDefinition(path string, data interface{}) error {
-	template, err := pongo2.FromFile(path)
+func (m *Manager) LoadDefinition(path string) error {
+	rendered, err := ioutil.ReadFile(path)
 	if err != nil {
-		return errors.Wrapf(err, "failed to load %s", path)
+		return errors.Wrapf(err, "failed to read %s", path)
 	}
-
-	context := NewDefinitionContext(m.apiName, m.config)
-
-	rendered, err := template.ExecuteBytes(context.Context(data))
-	if err != nil {
-		return errors.Wrapf(err, "failed to render %s", path)
-	}
-
 	definition, err := NewDefinitionFromYaml(rendered)
 	if err != nil {
 		return errors.Wrapf(err, "failed to parse %s", path)
@@ -130,23 +130,30 @@ func (m *Manager) GetLatestResourceVersion() (map[string]interface{}, error) {
 }
 
 // SyncBasicInfo sync the basic info from definition under the namespace to apigw.
-func (m *Manager) SyncBasicInfo(namespace string) (map[string]interface{}, error) {
-	data, err := m.definition.Get(namespace)
+func (m *Manager) SyncBasicInfo() (map[string]interface{}, error) {
+	data, err := m.definition.Get(apiGatewayNamespace)
 	if err != nil {
-		return nil, errors.WithMessagef(err, "failed to get %s", namespace)
+		return nil, errors.WithMessagef(err, "failed to get %s", apiGatewayNamespace)
 	}
 
 	return m.requestWithBody(m.client.SyncAPI(), data)
 }
 
-// SyncStageConfig sync the stage config from definition under the namespace to apigw.
-func (m *Manager) SyncStageConfig(namespace string) (map[string]interface{}, error) {
-	data, err := m.definition.Get(namespace)
+// SyncStagesConfig sync the stages config from definition under the namespace to apigw.
+func (m *Manager) SyncStagesConfig() (map[string]interface{}, error) {
+	stages, err := m.definition.GetArray(stagesNamespace)
 	if err != nil {
-		return nil, errors.WithMessagef(err, "failed to get %s", namespace)
+		return nil, errors.WithMessagef(err, "failed to get %s", stagesNamespace)
 	}
-
-	return m.requestWithBody(m.client.SyncStage(), data)
+	resultMap := make(map[string]interface{})
+	for _, stage := range stages {
+		result, err := m.requestWithBody(m.client.SyncStage(), stage)
+		if err != nil {
+			return nil, errors.WithMessagef(err, "failed to get %s", stagesNamespace)
+		}
+		resultMap[fmt.Sprintf("%v", stage["name"])] = result
+	}
+	return resultMap, nil
 }
 
 // SyncPluginConfig sync the plugin config from definition under the namespace to apigw.
@@ -160,8 +167,8 @@ func (m *Manager) SyncPluginConfig(namespace string) (map[string]interface{}, er
 }
 
 func (m *Manager) replaceIncludedResourcesContent(
-	data map[string]interface{},
-	resourceFileKey, contentFileKey string,
+		data map[string]interface{},
+		resourceFileKey, contentFileKey string,
 ) error {
 	resourceFile, ok := data[resourceFileKey]
 	if !ok {
@@ -179,17 +186,8 @@ func (m *Manager) replaceIncludedResourcesContent(
 }
 
 // SyncResourcesConfig sync the resources config from definition under the namespace to apigw.
-func (m *Manager) SyncResourcesConfig(namespace string) (map[string]interface{}, error) {
-	data, err := m.definition.Get(namespace)
-	if err != nil {
-		return nil, errors.WithMessagef(err, "failed to get %s", namespace)
-	}
-
-	err = m.replaceIncludedResourcesContent(data, "include_file", "content")
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to replace content from resourcefile")
-	}
-	return m.requestWithBody(m.client.SyncResources(), data)
+func (m *Manager) SyncResourcesConfig(resources map[string]interface{}) (map[string]interface{}, error) {
+	return m.requestWithBody(m.client.SyncResources(), resources)
 }
 
 // SyncResourceDocByArchive sync the resource doc from archive to apigw.
@@ -213,43 +211,64 @@ func (m *Manager) ApplyPermissions(namespace string) (map[string]interface{}, er
 }
 
 // GrantPermissions grant the permissions under the namespace to apigw.
-func (m *Manager) GrantPermissions(namespace string) (map[string]interface{}, error) {
-	data, err := m.definition.Get(namespace)
+func (m *Manager) GrantPermissions() (map[string]interface{}, error) {
+	datas, err := m.definition.GetArray(PermissionsNamespace)
 	if err != nil {
-		return nil, errors.WithMessagef(err, "failed to get %s", namespace)
+		return nil, errors.WithMessagef(err, "failed to get %s", PermissionsNamespace)
 	}
-
-	return m.requestWithBody(m.client.GrantPermissions(), data)
+	resultMap := make(map[string]interface{})
+	for i, data := range datas {
+		param := map[string]interface{}{
+			"target_app_code": data["bk_app_code"],
+			"grant_dimension": data["grant_dimension"],
+		}
+		resourceNames, ok := data["resource_names"]
+		if ok {
+			param["resource_names"] = resourceNames
+		}
+		result, err := m.requestWithBody(m.client.GrantPermissions(), param)
+		if err != nil {
+			return nil, err
+		}
+		resultMap[fmt.Sprintf("result_%d", i)] = result
+	}
+	return resultMap, nil
 }
 
 // CreateResourceVersion create a resource version defined in the namespace.
-func (m *Manager) CreateResourceVersion(namespace string) (map[string]interface{}, error) {
-	data, err := m.definition.Get(namespace)
-	if err != nil {
-		return nil, errors.WithMessagef(err, "failed to get %s", namespace)
+func (m *Manager) CreateResourceVersion(version string, comment string) (map[string]interface{}, error) {
+	data := map[string]interface{}{
+		"version": version,
+		"comment": comment,
 	}
-
 	return m.requestWithBody(m.client.CreateResourceVersion(), data)
 }
 
 // Release release the resource version defined in the namespace.
-func (m *Manager) Release(namespace string) (map[string]interface{}, error) {
-	data, err := m.definition.Get(namespace)
+func (m *Manager) Release(version string) (map[string]interface{}, error) {
+	stages, err := m.definition.GetArray(stagesNamespace)
 	if err != nil {
-		return nil, errors.WithMessagef(err, "failed to get %s", namespace)
+		return nil, errors.WithMessagef(err, "failed to get %s", PermissionsNamespace)
 	}
-
+	var stageNames []string
+	for _, stage := range stages {
+		stageNames = append(stageNames, stage["name"].(string))
+	}
+	data := map[string]interface{}{
+		"stage_names": stageNames,
+		"version":     version,
+	}
 	return m.requestWithBody(m.client.Release(), data)
 }
 
 // NewManager create a new manager.
 func NewManager(
-	apiName string,
-	config bkapi.ClientConfig,
-	definition *Definition,
-	clientFactory func(
+		apiName string,
+		config bkapi.ClientConfig,
+		definition *Definition,
+		clientFactory func(
 		configProvider define.ClientConfigProvider, opts ...define.BkApiClientOption,
-	) (*apigateway.Client, error),
+) (*apigateway.Client, error),
 ) (*Manager, error) {
 	client, err := clientFactory(config, bkapi.OptJsonBodyProvider(), bkapi.JsonResultProvider())
 	if err != nil {
@@ -271,15 +290,14 @@ func NewDefaultManager(apiName string, config bkapi.ClientConfig) (*Manager, err
 
 // NewManagerFrom file will create a new manager from the file.
 func NewManagerFrom(
-	apiName string,
-	config bkapi.ClientConfig,
-	path string,
-	data interface{},
+		apiName string,
+		config bkapi.ClientConfig,
+		path string,
 ) (*Manager, error) {
 	manager, err := NewDefaultManager(apiName, config)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create manager")
 	}
 
-	return manager, manager.LoadDefinition(path, data)
+	return manager, manager.LoadDefinition(path)
 }

@@ -10,9 +10,9 @@ apigateway:
   is_public: {{.APIGateway.IsPublic}}
   api_type: {{.APIGateway.APIType}}
   maintainers:{{if .APIGateway.Maintainers}}
-  {{- range .APIGateway.Maintainers}}
-  - "{{.}}"
-  {{- end}}
+    {{- range .APIGateway.Maintainers}}
+    - "{{.}}"
+    {{- end}}
   {{else}}
   - "admin"
   {{end}}
@@ -38,15 +38,15 @@ stages:
     plugin_configs:
       {{- range .Stage.PluginConfigs}}
       - type: {{.Type}}
-        yaml: |-
-  {{.ConfigYAML | indent 8}}  // 关键修改点
-  {{- end}}
+        yaml: |
+{{.YAML | indent 10}}
+{{- end}}
   {{- end}}
   {{- if or .GrantPermissions.GatewayApps .GrantPermissions.ResourceApps}}
 grant_permissions:
   {{- range .GrantPermissions.GatewayApps}}
   - bk_app_code: "{{.}}"
-    grant_dimension: "gateway"
+    grant_dimension: "api"
   {{- end}}
   {{- range $app_code, $resource_names := .GrantPermissions.ResourceApps}}
   - bk_app_code: "{{$app_code}}"
@@ -60,8 +60,6 @@ grant_permissions:
 related_apps:
   {{- if .RelatedApps}}
 - "{{index .RelatedApps 0}}"
-  {{- else}}
-- ""
   {{- end}}
 resource_docs:
   {{- if .ResourceDocs.BaseDir}}

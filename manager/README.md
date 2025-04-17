@@ -43,31 +43,97 @@ definition.yaml 中可以使用 Django 模块语法引用和渲染变量，内�
 
 ### 使用示例
 
-```golang
-manager, err := NewManagerFrom(
-    "my-api",
-    bkapi.ClientConfig{
-        BkApiUrlTmpl: "https://{api_name}.example.com",
-        AppCode: "my-app-code",
-        AppSecret: "my-app-secret",
-    },
-    "/path/to/definition.yaml",
-    map[string]interface{}{
-        "key": "value",
-    },
-)
+```go
 
-manager.SyncBasicInfo("apigateway")  // 同步网关基本信息
-manager.SyncStageConfig("stage")       // 同步环境信息
-manager.SyncPluginConfig("plugin_configs")  // 同步网关插件配置
-manager.SyncResourcesConfig("resources")  // 同步资源配置
-manager.SyncResourceDocByArchive("resource_docs")  // 同步资源文档
-manager.ApplyPermissions("apply_permissions")  // 申请网关权限
-manager.GrantPermissions("grant_permissions")  // 应用主动授权
-manager.CreateResourceVersion("resource_version")  // 创建资源版本
-manager.Release("release")  // 发布资源
-manager.GetPublicKey()  // 获取网关公钥
-manager.GetPublicKeyString()  // 获取网关公钥字符串
+func SyncGinGateway(baseDir string, apiGatewayName string,
+		config *model.APIConfig, delete bool) {
+	defaultManager, err := manager.NewManagerFrom(
+		apiGatewayName,
+		bkapi.ClientConfig{},
+		baseDir+"/definition.yaml",
+	)
+	if err != nil {
+		log.Fatal("Error creating default manager:", err)
+		return
+	}
+
+	// 同步网关基础信息
+	info, err := defaultManager.SyncBasicInfo()
+	if err != nil {
+		log.Fatalf("syncing gateway basic info: err:%v", err)
+		return
+	}
+	log.Printf("syncing gateway basic info success, info:%v\n", info)
+
+	// 同步网关环境信息
+	result, err := defaultManager.SyncStagesConfig()
+	if err != nil {
+		log.Fatalf("syncing gateway stage config: err:%v", err)
+		return
+	}
+	log.Printf("syncing gateway stage config success, result:%v\n", result)
+
+	// 同步网关资源信息
+	resourceFile, err := os.ReadFile(baseDir + "/resources.yaml")
+	if err != nil {
+		log.Fatal("Error reading resources file:", err)
+		return
+	}
+	log.Printf("call sync_apigw_resources with resources:%s\n", resourceFile)
+
+	result, err = defaultManager.SyncResourcesConfig(map[string]interface{}{
+		"content":  string(resourceFile),
+		"delete":   delete,
+		"language": config.ResourceDocs.Language,
+	})
+	if err != nil {
+		log.Fatalf("syncing gateway resource config: err:%v", err)
+		return
+	}
+	log.Printf("syncing gateway resource config success, result:%v\n", result)
+
+	// 同步授权信息
+	result, err = defaultManager.GrantPermissions()
+	if err != nil {
+		log.Fatalf("syncing gateway resource config: err:%v", err)
+		return
+	}
+	log.Printf("syncing gateway resource config success, result:%v\n", result)
+
+	// 生成资源版本
+	versionInfo, err := defaultManager.GetLatestResourceVersion()
+	if err != nil {
+		log.Fatalf("get  gateway resource version: err:%v", err)
+		return
+	}
+	fmt.Printf("gateway resource version:%+v\n", versionInfo)
+
+	newVersion := config.Release.Version
+
+	if len(versionInfo) >= 0 {
+		oldVersion := versionInfo["version"].(string)
+		if strings.Contains(oldVersion, newVersion) {
+			newVersion = fmt.Sprintf("%s+%s", newVersion, time.Now().Format("20060102150405"))
+		}
+	}
+	result, err = defaultManager.CreateResourceVersion(newVersion, config.Release.Comment)
+	if err != nil {
+		log.Fatalf("create gateway resource version: err:%v", err)
+		return
+	}
+	log.Printf("create gateway resource version success, result:%v\n", result)
+
+	// 发布资源版本
+	if !config.Release.NoPub {
+		result, err = defaultManager.Release(newVersion)
+		if err != nil {
+			log.Fatalf("release gateway resource version: err:%v", err)
+			return
+		}
+		log.Printf("release gateway resource version success, result:%v\n", result)
+
+	}
+}
 ```
 
 ## 解析网关 JWT token

@@ -6,7 +6,7 @@ import (
 	"html/template"
 	"strings"
 
-	"github.com/TencentBlueKing/bk-apigateway-sdks/gin_fram/model"
+	"github.com/TencentBlueKing/bk-apigateway-sdks/gin_contrib/model"
 )
 
 //go:embed definition.tpl
@@ -21,13 +21,13 @@ func GenDefinitionYaml(config *model.APIConfig) string {
 		},
 	}).Parse(string(configTemplate))
 	if err != nil {
-		panic(fmt.Sprintf("模板解析失败: %v", err))
+		panic(fmt.Sprintf("gen definition yaml error: %v", err))
 	}
 	// 渲染输出
 	var result strings.Builder
 	if err := tmpl.Execute(&result, config); err != nil {
-		panic(fmt.Sprintf("模板渲染失败: %v", err))
+		panic(fmt.Sprintf("gen definition yaml error: %v", err))
 	}
-	fmt.Println("生成的配置文件:\n" + result.String())
+	fmt.Println("gen definition yaml:\n" + result.String())
 	return result.String()
 }

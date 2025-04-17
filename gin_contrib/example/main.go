@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	"github.com/TencentBlueKing/bk-apigateway-sdks/gin_fram/example/router"
+	"github.com/TencentBlueKing/bk-apigateway-sdks/gin_contrib/example/router"
 )
 
 //	@title			Swagger Example API

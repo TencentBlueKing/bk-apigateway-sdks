@@ -1,6 +1,5 @@
 package model
 
-//
 type APIConfig struct {
 	Release          ReleaseConfig
 	APIGateway       GatewayConfig
@@ -13,6 +12,7 @@ type ReleaseConfig struct {
 	Version string
 	Title   string
 	Comment string
+	NoPub   bool // 是否不发布
 }
 type GatewayConfig struct {
 	Description   string
@@ -35,7 +35,8 @@ type GrantPermissionConfig struct {
 	ResourceApps map[string][]string
 }
 type ResourceDocConfig struct {
-	BaseDir string `validate:"required,startswith=/"` // 必须为绝对路径
+	BaseDir  string `validate:"required,startswith=/"` // 必须为绝对路径
+	Language string
 }
 
 // APIGatewayResourceConfig resource 配置结构体定义

@@ -3,7 +3,7 @@ package gen
 import (
 	"testing"
 
-	"github.com/TencentBlueKing/bk-apigateway-sdks/gin_fram/model"
+	"github.com/TencentBlueKing/bk-apigateway-sdks/gin_contrib/model"
 )
 
 func TestGenDefinitionConfig(t *testing.T) {
@@ -28,6 +28,18 @@ func TestGenDefinitionConfig(t *testing.T) {
 			BackendSubPath: "/api",
 			BackendTimeout: 30,
 			BackendHost:    "api.example.com",
+			PluginConfigs: []*model.PluginConfig{
+				model.BuildStagePluginConfigWithType(
+					model.PluginTypeHeaderRewrite,
+					model.HeaderRewriteConfig{
+						Set: []model.HeaderRewriteValue{
+							{Key: "X-Real-IP", Value: "123"},
+						},
+						Remove: []model.HeaderRewriteValue{
+							{Key: "X-Forwarded-For"},
+						},
+					}),
+			},
 		},
 		GrantPermissions: model.GrantPermissionConfig{
 			GatewayApps: []string{"app1"},
