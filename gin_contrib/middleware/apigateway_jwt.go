@@ -13,7 +13,6 @@ import (
 
 type JwtConfig struct {
 	CheckUser bool // 是否校验用户 verified
-	CheckApp  bool // 是否校验app verified
 }
 
 var once sync.Once
