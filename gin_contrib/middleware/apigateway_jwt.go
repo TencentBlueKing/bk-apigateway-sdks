@@ -11,10 +11,6 @@ import (
 	"github.com/TencentBlueKing/bk-apigateway-sdks/manager"
 )
 
-type JwtConfig struct {
-	CheckUser bool // 是否校验用户 verified
-}
-
 var (
 	once              sync.Once
 	publicMemoryCache *manager.PublicKeyMemoryCache
