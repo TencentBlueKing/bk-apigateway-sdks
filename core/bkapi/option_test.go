@@ -15,15 +15,16 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/golang/mock/gomock"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	gentleman "gopkg.in/h2non/gentleman.v2"
+	"gopkg.in/h2non/gentleman.v2/plugins/transport"
+
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/internal"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/internal/mock"
-	"github.com/golang/mock/gomock"
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-	"gopkg.in/h2non/gentleman.v2"
-	"gopkg.in/h2non/gentleman.v2/plugins/transport"
 )
 
 var _ = Describe("Option", func() {

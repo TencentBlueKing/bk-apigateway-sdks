@@ -63,7 +63,7 @@ related_apps:
   {{- end}}
 resource_docs:
   {{- if .ResourceDocs.BaseDir}}
-basedir: "{{.ResourceDocs.BaseDir}}"
+  basedir: "{{.ResourceDocs.BaseDir}}"
   {{- else}}
-basedir: ""
+  basedir: ""
   {{- end}}

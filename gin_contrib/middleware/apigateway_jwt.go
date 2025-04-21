@@ -15,12 +15,13 @@ type JwtConfig struct {
 	CheckUser bool // 是否校验用户 verified
 }
 
-var once sync.Once
-var publicMemoryCache *manager.PublicKeyMemoryCache
+var (
+	once              sync.Once
+	publicMemoryCache *manager.PublicKeyMemoryCache
+)
 
 const (
 	BkGatewayJWTHeaderKey = "X-Bkapi-Jwt"
-	BkGatewayJwtClaims    = "X-Bkapi-Jwt-Claims"
 )
 
 func init() {
@@ -28,10 +29,9 @@ func init() {
 		config := bkapi.ClientConfig{}
 		publicMemoryCache = manager.NewDefaultPublicKeyMemoryCache(config)
 	})
-
 }
 
-func GatewayJWTAuthMiddleware(config JwtConfig) func(c *gin.Context) {
+func GatewayJWTAuthMiddleware() func(c *gin.Context) {
 	return func(c *gin.Context) {
 		signedToken := c.GetHeader(BkGatewayJWTHeaderKey)
 		if signedToken == "" {
@@ -47,12 +47,30 @@ func GatewayJWTAuthMiddleware(config JwtConfig) func(c *gin.Context) {
 			c.Abort()
 			return
 		}
-		if config.CheckUser && !claims.User.Verified {
-			util.UnauthorizedJSONResponse(c, fmt.Sprintf("user:%s is not verified", claims.User.Username))
+		// 获取route网关配置:默认校验应用是否通过认证
+		config := util.GetRouteConfig(c.FullPath(), c.Request.Method)
+		if (config != nil && config.AuthConfig.AppVerifiedRequired && !claims.App.Verified) || config == nil {
+			util.UnauthorizedJSONResponse(c, fmt.Sprintf("app: %s is not verified", claims.App.BkAppCode))
 			c.Abort()
 			return
 		}
-		c.Set(BkGatewayJwtClaims, claims)
+		if config != nil && config.AuthConfig.UserVerifiedRequired && !claims.User.Verified {
+			util.UnauthorizedJSONResponse(c, fmt.Sprintf("user: %s is not verified", claims.User.Username))
+			c.Abort()
+			return
+		}
+		if claims.App != nil && claims.App.BkAppCode != "" {
+			util.SetJwtAppCode(c, claims.App.BkAppCode)
+		}
+
+		if claims.App != nil && claims.App.AppCode != "" {
+			util.SetJwtAppCode(c, claims.App.AppCode)
+		}
+
+		if claims.User != nil && claims.User.Username != "" {
+			util.SetJwtAppCode(c, claims.User.Username)
+		}
+
 		c.Next()
 	}
 }

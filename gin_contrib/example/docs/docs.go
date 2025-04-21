@@ -24,7 +24,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/testapi/pet/get-pet-by-id/{pet_id}/": {
+        "/testapi/pets/{id}/": {
             "get": {
                 "description": "get pet by ID",
                 "consumes": [
@@ -34,12 +34,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "summary": "get a  pet",
-                "operationId": "get-pet-by-id",
+                "operationId": "get_pet_by_id",
                 "parameters": [
                     {
                         "type": "integer",
                         "description": "pet id",
-                        "name": "pet_id",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -60,7 +60,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "summary": "Update product attributes",
-                "operationId": "update-product",
+                "operationId": "update_product",
                 "parameters": [
                     {
                         "type": "integer",

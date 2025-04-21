@@ -1,0 +1,51 @@
+version: "2"
+run:
+  concurrency: 4
+  issues-exit-code: 1
+  tests: false
+linters:
+  enable:
+    - gocritic
+    - gocyclo
+    - lll
+    - misspell
+    - nakedret
+    - nilerr
+    - staticcheck
+    - whitespace
+  disable:
+    - errcheck
+  settings:
+    lll:
+      line-length: 120
+    staticcheck:
+      checks:
+        - -ST1000
+        - -ST1016
+        - -ST1020
+        - -ST1021
+        - -ST1022
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/TencentBlueKing/bk-apigateway-sdks
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$

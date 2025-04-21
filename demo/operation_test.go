@@ -27,9 +27,7 @@ var _ = Describe("Operation", func() {
 		return
 	}
 
-	var (
-		client *demo.Client
-	)
+	var client *demo.Client
 
 	BeforeEach(func() {
 		var err error
@@ -77,9 +75,7 @@ var _ = Describe("Operation", func() {
 		})
 
 		Context("with request payload", func() {
-			var (
-				result *demo.AnythingResponse
-			)
+			var result *demo.AnythingResponse
 
 			BeforeEach(func() {
 				result = new(demo.AnythingResponse)

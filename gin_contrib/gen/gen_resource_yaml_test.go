@@ -88,5 +88,4 @@ func TestGenResourceYamlFromSwaggerJson(t *testing.T) {
 	//                X-Test: test
 	//            remove:
 	//                - X-Test2`
-
 }

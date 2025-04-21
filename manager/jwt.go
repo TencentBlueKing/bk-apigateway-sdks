@@ -12,15 +12,11 @@
 package manager
 
 import (
-	"github.com/golang-jwt/jwt/v4"
-
+	jwt "github.com/golang-jwt/jwt/v4"
 	"github.com/pkg/errors"
 )
 
-//
-var (
-	ErrKidInvalid = errors.New("kid is invalid")
-)
+var ErrKidInvalid = errors.New("kid is invalid")
 
 // ApigatewayJwtApp represents the request app.
 type ApigatewayJwtApp struct {
@@ -75,7 +71,6 @@ func (p *RsaJwtTokenParser) Parse(tokenString string) (ApigatewayJwtClaims, erro
 
 		return pubKey, nil
 	})
-
 	if err != nil {
 		return claims, errors.Wrapf(err, "failed to parse jwt token")
 	}

@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/go-playground/validator/v10"
-	"gopkg.in/yaml.v3"
+	validator "github.com/go-playground/validator/v10"
+	yaml "gopkg.in/yaml.v3"
 )
 
 type PluginType string

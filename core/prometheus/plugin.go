@@ -16,11 +16,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"gopkg.in/h2non/gentleman.v2/context"
+
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/internal"
-	"github.com/prometheus/client_golang/prometheus"
-	"gopkg.in/h2non/gentleman.v2/context"
 )
 
 // PrometheusOptions for common prometheus metrics options

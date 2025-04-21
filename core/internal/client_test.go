@@ -21,7 +21,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
-	"gopkg.in/h2non/gentleman.v2"
+	gentleman "gopkg.in/h2non/gentleman.v2"
 	"gopkg.in/h2non/gentleman.v2/plugins/transport"
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
@@ -30,9 +30,7 @@ import (
 )
 
 var _ = Describe("Client", func() {
-	var (
-		ctrl *gomock.Controller
-	)
+	var ctrl *gomock.Controller
 
 	BeforeEach(func() {
 		ctrl = gomock.NewController(GinkgoT())
@@ -113,11 +111,13 @@ var _ = Describe("Client", func() {
 		})
 
 		mockTransportRoundTrip := func() {
-			mockTransport.EXPECT().RoundTrip(gomock.Any()).DoAndReturn(func(req *http.Request) (*http.Response, error) {
-				response.Request = req
+			mockTransport.EXPECT().
+				RoundTrip(gomock.Any()).
+				DoAndReturn(func(req *http.Request) (*http.Response, error) {
+					response.Request = req
 
-				return response, nil
-			})
+					return response, nil
+				})
 		}
 
 		It("should fail on apply", func() {
@@ -188,9 +188,7 @@ var _ = Describe("Client", func() {
 		})
 
 		Context("Logger", func() {
-			var (
-				logger *mock.MockLogger
-			)
+			var logger *mock.MockLogger
 
 			BeforeEach(func() {
 				logger = mock.NewMockLogger(ctrl)

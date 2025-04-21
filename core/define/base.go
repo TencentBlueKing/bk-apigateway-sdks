@@ -11,7 +11,6 @@
 
 package define
 
-//
 const (
 	// UserAgent the default user agent header
 	UserAgent = "bkapi-client-golang"

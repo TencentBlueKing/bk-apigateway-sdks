@@ -12,9 +12,10 @@
 package bkapi
 
 import (
+	"gopkg.in/h2non/gentleman.v2/plugins/multipart"
+
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/internal"
-	"gopkg.in/h2non/gentleman.v2/plugins/multipart"
 )
 
 // MultipartFormFieldsBodyProvider provides request body as multipart form.

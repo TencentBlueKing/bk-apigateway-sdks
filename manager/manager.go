@@ -14,19 +14,21 @@ package manager
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 
 	"github.com/pkg/errors"
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/apigateway"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
+	"github.com/TencentBlueKing/bk-apigateway-sdks/gin_contrib/util"
 )
 
 const (
-	apiGatewayNamespace  = "apigateway"
-	stagesNamespace      = "stages"
-	PermissionsNamespace = "grant_permissions"
-	ReleaseNamespace     = "release"
+	apiGatewayNamespace   = "apigateway"
+	stagesNamespace       = "stages"
+	permissionsNamespace  = "grant_permissions"
+	resourceDocsNamespace = "resource_docs"
 )
 
 type apiGatewayResult struct {
@@ -51,6 +53,14 @@ func (m *Manager) requestWithBody(
 	return m.request(operation.SetBody(body))
 }
 
+func (m *Manager) requestWithFile(
+		operation define.Operation,
+		name string,
+		file *os.File,
+) (map[string]interface{}, error) {
+	return m.request(operation.SetFile(name, file))
+}
+
 func (m *Manager) request(operation define.Operation) (map[string]interface{}, error) {
 	var result apiGatewayResult
 	_, err := operation.
@@ -59,7 +69,6 @@ func (m *Manager) request(operation define.Operation) (map[string]interface{}, e
 			}).
 		SetResult(&result).
 		Request()
-
 	if err != nil {
 		return nil, errors.Wrapf(err, "request to %v failed", operation)
 	}
@@ -166,38 +175,28 @@ func (m *Manager) SyncPluginConfig(namespace string) (map[string]interface{}, er
 	return m.requestWithBody(m.client.SyncAccessStrategy(), data)
 }
 
-func (m *Manager) replaceIncludedResourcesContent(
-		data map[string]interface{},
-		resourceFileKey, contentFileKey string,
-) error {
-	resourceFile, ok := data[resourceFileKey]
-	if !ok {
-		return nil
-	}
-
-	delete(data, resourceFileKey)
-	content, err := ioutil.ReadFile(resourceFile.(string))
-	if err != nil {
-		return errors.Wrapf(err, "failed to read %s", resourceFile)
-	}
-
-	data[contentFileKey] = string(content)
-	return nil
-}
-
 // SyncResourcesConfig sync the resources config from definition under the namespace to apigw.
 func (m *Manager) SyncResourcesConfig(resources map[string]interface{}) (map[string]interface{}, error) {
 	return m.requestWithBody(m.client.SyncResources(), resources)
 }
 
 // SyncResourceDocByArchive sync the resource doc from archive to apigw.
-func (m *Manager) SyncResourceDocByArchive(namespace string) (map[string]interface{}, error) {
-	data, err := m.definition.Get(namespace)
+func (m *Manager) SyncResourceDocByArchive() (map[string]interface{}, error) {
+	data, err := m.definition.Get(resourceDocsNamespace)
 	if err != nil {
-		return nil, errors.WithMessagef(err, "failed to get %s", namespace)
+		return nil, errors.WithMessagef(err, "failed to get %s", resourceDocsNamespace)
 	}
-
-	return m.requestWithBody(m.client.ImportResourceDocsByArchive(), data)
+	baseDir := data["basedir"].(string)
+	err = util.ZipDirectory(baseDir, baseDir+"resources_docs.zip", ".md")
+	if err != nil {
+		return nil, errors.WithMessagef(err, "failed to zip %s", data["base_dir"].(string))
+	}
+	// 上传资源文档
+	resourceDocsFile, err := os.Open(baseDir + "/resources_docs.zip")
+	if err != nil {
+		return nil, errors.WithMessagef(err, "failed to read %s", baseDir+"/resources_docs.zip")
+	}
+	return m.requestWithFile(m.client.ImportResourceDocsByArchive(), "file", resourceDocsFile)
 }
 
 // ApplyPermissions apply the permissions under the namespace to apigw.
@@ -212,9 +211,9 @@ func (m *Manager) ApplyPermissions(namespace string) (map[string]interface{}, er
 
 // GrantPermissions grant the permissions under the namespace to apigw.
 func (m *Manager) GrantPermissions() (map[string]interface{}, error) {
-	datas, err := m.definition.GetArray(PermissionsNamespace)
+	datas, err := m.definition.GetArray(permissionsNamespace)
 	if err != nil {
-		return nil, errors.WithMessagef(err, "failed to get %s", PermissionsNamespace)
+		return nil, errors.WithMessagef(err, "failed to get %s", permissionsNamespace)
 	}
 	resultMap := make(map[string]interface{})
 	for i, data := range datas {
@@ -248,7 +247,7 @@ func (m *Manager) CreateResourceVersion(version string, comment string) (map[str
 func (m *Manager) Release(version string) (map[string]interface{}, error) {
 	stages, err := m.definition.GetArray(stagesNamespace)
 	if err != nil {
-		return nil, errors.WithMessagef(err, "failed to get %s", PermissionsNamespace)
+		return nil, errors.WithMessagef(err, "failed to get %s", permissionsNamespace)
 	}
 	var stageNames []string
 	for _, stage := range stages {

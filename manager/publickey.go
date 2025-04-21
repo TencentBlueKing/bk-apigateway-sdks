@@ -56,9 +56,9 @@ func (c *PublicKeyMemoryCache) ProvidePublicKey(apiName string) (string, error) 
 
 // NewPublicKeyMemoryCache creates a memory cache for public key.
 func NewPublicKeyMemoryCache(
-		config bkapi.ClientConfig,
-		expiration time.Duration,
-		clientFactory func(apiName string, config bkapi.ClientConfig) (*Manager, error),
+	config bkapi.ClientConfig,
+	expiration time.Duration,
+	clientFactory func(apiName string, config bkapi.ClientConfig) (*Manager, error),
 ) *PublicKeyMemoryCache {
 	return &PublicKeyMemoryCache{
 		cache: memory.NewCache(

@@ -14,10 +14,11 @@ package internal_test
 import (
 	"net/http"
 
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/internal"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
+	"github.com/TencentBlueKing/bk-apigateway-sdks/core/internal"
 )
 
 var _ = Describe("ResponseDetail", func() {

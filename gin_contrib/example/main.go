@@ -22,5 +22,5 @@ import (
 //	@BasePath	/v2
 
 func main() {
-	http.ListenAndServe(":8080", router.New())
+	_ = http.ListenAndServe(":8080", router.New())
 }

@@ -8,12 +8,14 @@ type APIConfig struct {
 	RelatedApps      []string
 	ResourceDocs     ResourceDocConfig
 }
+
 type ReleaseConfig struct {
 	Version string
 	Title   string
 	Comment string
 	NoPub   bool // 是否不发布
 }
+
 type GatewayConfig struct {
 	Description   string
 	DescriptionEn string
@@ -21,6 +23,7 @@ type GatewayConfig struct {
 	APIType       string
 	Maintainers   []string
 }
+
 type StageConfig struct {
 	Name           string          // 环境名称
 	Description    string          // 环境描述
@@ -30,10 +33,12 @@ type StageConfig struct {
 	BackendHost    string          // 后端服务地址
 	PluginConfigs  []*PluginConfig // 插件配置
 }
+
 type GrantPermissionConfig struct {
 	GatewayApps  []string
 	ResourceApps map[string][]string
 }
+
 type ResourceDocConfig struct {
 	BaseDir  string `validate:"required,startswith=/"` // 必须为绝对路径
 	Language string

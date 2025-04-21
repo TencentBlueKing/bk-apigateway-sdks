@@ -12,13 +12,14 @@
 package internal_test
 
 import (
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/internal"
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/internal/mock"
 	"github.com/TencentBlueKing/gopkg/logging"
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"gopkg.in/h2non/gentleman.v2"
+	gentleman "gopkg.in/h2non/gentleman.v2"
+
+	"github.com/TencentBlueKing/bk-apigateway-sdks/core/internal"
+	"github.com/TencentBlueKing/bk-apigateway-sdks/core/internal/mock"
 )
 
 var _ = Describe("Option", func() {

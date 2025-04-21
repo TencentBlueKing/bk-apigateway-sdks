@@ -14,12 +14,13 @@ package bkapi_test
 import (
 	"net/http"
 
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi"
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/internal/mock"
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi"
+	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
+	"github.com/TencentBlueKing/bk-apigateway-sdks/core/internal/mock"
 )
 
 var _ = Describe("Client", func() {

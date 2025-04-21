@@ -2,6 +2,7 @@ package gen
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/gin_contrib/example/router"
@@ -51,19 +52,26 @@ func TestSyncGinGateway(t *testing.T) {
 		},
 		RelatedApps: []string{"myapp"},
 		ResourceDocs: model.ResourceDocConfig{
-			BaseDir: "/data/docs",
+			BaseDir: "../example/docs/",
 		},
 	}
+
 	// 生成定义配置
 	definitionConfig := GenDefinitionYaml(config)
-	err := os.WriteFile("definition.yaml", []byte(definitionConfig), 0644)
+	definitionFilePath := filepath.Join("./example", "definition.yaml")
+	// 先创建目录（递归创建）
+	if err := os.MkdirAll(filepath.Dir(definitionFilePath), 0755); err != nil {
+		t.Fatal("创建目录失败: " + err.Error())
+	}
+	err := os.WriteFile(definitionFilePath, []byte(definitionConfig), 0644)
 	if err != nil {
 		t.Fatal(err)
 	}
 	// 生成resource配置
+	resourcesFilePath := filepath.Join("./example", "resources.yaml")
 	resourcesYaml := GenResourceYamlFromSwaggerJson("../example/docs/swagger.json", router.New())
-	err = os.WriteFile("resources.yaml", []byte(resourcesYaml), 0644)
+	err = os.WriteFile(resourcesFilePath, []byte(resourcesYaml), 0644)
 	//SyncGinGateway(
-	//	"xxxxx/docs/",
+	//	"./example/",
 	//	"custom-gateway-go-demo", config, true)
 }

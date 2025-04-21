@@ -39,16 +39,16 @@ info:
   title: Swagger Example API
   version: "1.0"
 paths:
-  /testapi/pet/get-pet-by-id/{pet_id}/:
+  /testapi/pets/{id}/:
     get:
       consumes:
       - application/json
       description: get pet by ID
-      operationId: get-pet-by-id
+      operationId: get_pet_by_id
       parameters:
       - description: pet id
         in: path
-        name: pet_id
+        name: id
         required: true
         type: integer
       produces:
@@ -63,7 +63,7 @@ paths:
     post:
       consumes:
       - application/json
-      operationId: update-product
+      operationId: update_product
       parameters:
       - description: Product ID
         in: path

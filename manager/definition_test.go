@@ -12,9 +12,10 @@
 package manager_test
 
 import (
-	manager "github.com/TencentBlueKing/bk-apigateway-sdks/manager"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	manager "github.com/TencentBlueKing/bk-apigateway-sdks/manager"
 )
 
 var _ = Describe("Definition", func() {

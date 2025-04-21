@@ -29,22 +29,18 @@ func New() *gin.Engine {
 			},
 			AuthConfig: model.AuthConfig{},
 		},
-		// 网关jwt中间件，校验用户和应用是否合法
-		middleware.GatewayJWTAuthMiddleware(middleware.JwtConfig{
-			CheckUser: true,
-		}),
 		api.UpdateProduct)
 
 	// group
-	petGroup := r.Group("/testapi/pet/")
-	util.RegisterBkAPIGatewayRouteWithGroup(petGroup, "GET", "/get-pet-by-id/:pet_id/",
+	petGroup := r.Group("/testapi/pets")
+	util.RegisterBkAPIGatewayRouteWithGroup(petGroup, "GET", "/:id/",
 		model.APIGatewayResourceConfig{
 			IsPublic:             false,
 			AllowApplyPermission: true,
 			MatchSubpath:         false,
 			EnableWebsocket:      false,
 			Backend: model.BackendConfig{
-				Path:   "/testapi/get-pet-by-id/{pet_id}/",
+				Path:   "/testapi/pets/{id}/",
 				Method: "get",
 			},
 			PluginConfigs: []*model.PluginConfig{
@@ -58,6 +54,9 @@ func New() *gin.Engine {
 				}),
 			},
 			AuthConfig: model.AuthConfig{},
-		}, api.GetPetByID)
+		},
+		// 网关jwt中间件，校验用户和应用是否合法
+		middleware.GatewayJWTAuthMiddleware(),
+		api.GetPetByID)
 	return r
 }

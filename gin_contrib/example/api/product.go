@@ -27,6 +27,5 @@ func UpdateProduct(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	// write your code
+	c.JSON(http.StatusCreated, gin.H{})
 }

@@ -15,13 +15,14 @@ import (
 	"net/http"
 	"time"
 
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	gock "gopkg.in/h2non/gock.v1"
+
 	apigateway "github.com/TencentBlueKing/bk-apigateway-sdks/apigateway"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
 	manager "github.com/TencentBlueKing/bk-apigateway-sdks/manager"
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-	"gopkg.in/h2non/gock.v1"
 )
 
 var _ = Describe("Publickey", func() {

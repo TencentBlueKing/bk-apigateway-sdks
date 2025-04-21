@@ -17,10 +17,11 @@ import (
 	"os"
 	"strings"
 
+	"github.com/TencentBlueKing/gopkg/logging"
+	gentleman "gopkg.in/h2non/gentleman.v2"
+
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/internal"
-	"github.com/TencentBlueKing/gopkg/logging"
-	"gopkg.in/h2non/gentleman.v2"
 )
 
 // the common options for all bkapi clients

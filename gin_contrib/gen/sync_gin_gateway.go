@@ -13,11 +13,12 @@ import (
 )
 
 func SyncGinGateway(baseDir string, apiGatewayName string,
-		config *model.APIConfig, delete bool) {
+		config *model.APIConfig, delete bool,
+) {
 	defaultManager, err := manager.NewManagerFrom(
 		apiGatewayName,
 		bkapi.ClientConfig{},
-		baseDir+"/definition.yaml",
+		strings.TrimSuffix(baseDir, "/")+"/definition.yaml",
 	)
 	if err != nil {
 		log.Fatal("Error creating default manager:", err)
@@ -67,6 +68,16 @@ func SyncGinGateway(baseDir string, apiGatewayName string,
 	}
 	log.Printf("syncing gateway resource config success, result:%v\n", result)
 
+	// 同步资源文档信息
+	if config.ResourceDocs.BaseDir != "" {
+		result, err = defaultManager.SyncResourceDocByArchive()
+		if err != nil {
+			log.Fatalf("syncing gateway resource doc: err:%v", err)
+			return
+		}
+		log.Printf("syncing gateway resource doc success, result:%v\n", result)
+	}
+
 	// 生成资源版本
 	versionInfo, err := defaultManager.GetLatestResourceVersion()
 	if err != nil {
@@ -77,7 +88,7 @@ func SyncGinGateway(baseDir string, apiGatewayName string,
 
 	newVersion := config.Release.Version
 
-	if len(versionInfo) >= 0 {
+	if len(versionInfo) > 0 {
 		oldVersion := versionInfo["version"].(string)
 		if strings.Contains(oldVersion, newVersion) {
 			newVersion = fmt.Sprintf("%s+%s", newVersion, time.Now().Format("20060102150405"))
@@ -89,7 +100,6 @@ func SyncGinGateway(baseDir string, apiGatewayName string,
 		return
 	}
 	log.Printf("create gateway resource version success, result:%v\n", result)
-
 	// 发布资源版本
 	if !config.Release.NoPub {
 		result, err = defaultManager.Release(newVersion)
@@ -98,6 +108,5 @@ func SyncGinGateway(baseDir string, apiGatewayName string,
 			return
 		}
 		log.Printf("release gateway resource version success, result:%v\n", result)
-
 	}
 }

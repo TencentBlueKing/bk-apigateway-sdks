@@ -20,8 +20,8 @@ type QueryUserDemoResponse struct {
 	Gender  string `json:"gender"`
 }
 
+// nolint:unused
 func clientExample() {
-
 	// 初始化client
 
 	// 使用默认的全局的注册配置来初始化
@@ -29,7 +29,7 @@ func clientExample() {
 
 	// 方式一：注册默认的配置（不区分网关）
 	err := registry.RegisterDefaultConfig(bkapi.ClientConfig{
-		BkApiUrlTmpl: "http://{api_name}.example.com/", //网关通用地址
+		BkApiUrlTmpl: "http://{api_name}.example.com/", // 网关通用地址
 		Stage:        "prod",
 	})
 	if err != nil {
@@ -109,7 +109,7 @@ func clientExample() {
 	// 调用接口(Request()的返回值是：*http.Response,err,看具体情况是否需要处理)
 
 	//// 直接通过 api operation传参
-	//_,_=apiOperation.SetHeaders(map[string]string{"X-Bkapi-Header": "demo"}).
+	// _,_=apiOperation.SetHeaders(map[string]string{"X-Bkapi-Header": "demo"}).
 	//	SetPathParams(map[string]string{"team_id": `1`}).
 	//	SetBody(QueryUserDemoBodyRequest{Name: "demo"}).
 	//	SetQueryParams(map[string]string{"name": "demo"}).
@@ -118,5 +118,4 @@ func clientExample() {
 	_, _ = apiOperation.SetResult(&result).Request()
 	// 结果将自动填充到 result 中
 	fmt.Printf("%#v", result)
-
 }

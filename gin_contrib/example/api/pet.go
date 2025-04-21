@@ -25,9 +25,9 @@ type Pet struct {
 //	@ID				get_pet_by_id
 //	@Accept			json
 //	@Produce		json
-//	@Param			pet_id	path		int	true	"pet id"
-//	@Success		200		{string}	Pet
-//	@Router			/testapi/pet/get-pet-by-id/{pet_id}/ [get]
+//	@Param			id	path		int	true	"pet id"
+//	@Success		200	{string}	Pet
+//	@Router			/testapi/pets/{id}/ [get]
 func GetPetByID(c *gin.Context) {
 	pet := Pet{
 		ID: 1,

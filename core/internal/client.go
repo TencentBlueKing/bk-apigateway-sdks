@@ -16,12 +16,13 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
 	"github.com/TencentBlueKing/gopkg/logging"
-	"gopkg.in/h2non/gentleman.v2"
+	gentleman "gopkg.in/h2non/gentleman.v2"
 	"gopkg.in/h2non/gentleman.v2/context"
 	"gopkg.in/h2non/gentleman.v2/plugin"
 	"gopkg.in/h2non/gentleman.v2/plugins/headers"
+
+	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
 )
 
 //go:generate mockgen -destination=../internal/mock/logging.go -package=mock github.com/TencentBlueKing/gopkg/logging Logger
@@ -85,7 +86,6 @@ func (cli *BkApiClient) logResponse(op define.Operation, response *http.Response
 	default:
 		logger.DebugContext(ctx, "request success", fields)
 	}
-
 }
 
 func (cli *BkApiClient) newGentlemanRequest(config define.OperationConfig) *gentleman.Request {
@@ -145,7 +145,6 @@ func NewBkApiClient(
 	factory func(name string, client define.BkApiClient, request *gentleman.Request) define.Operation,
 	config define.ClientConfig,
 ) (*BkApiClient, error) {
-
 	baseUrl := config.GetUrl()
 	if baseUrl == "" {
 		return nil, define.ErrorWrapf(define.ErrConfigInvalid, "base url is empty")

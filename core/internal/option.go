@@ -12,8 +12,9 @@
 package internal
 
 import (
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
 	"gopkg.in/h2non/gentleman.v2/plugin"
+
+	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
 )
 
 // PluginOption wraps a plugin for a client or an operation.
