@@ -11,39 +11,44 @@ import (
 
 func New() *gin.Engine {
 	r := gin.Default()
+	basicConfig := model.ResourceBasicConfig{
+		IsPublic:             true,
+		AllowApplyPermission: true,
+		MatchSubpath:         false,
+		EnableWebsocket:      false,
+	}
+	// 共用的插件配置
+	headerWriterPlugin := model.BuildResourcePluginConfigWithType(
+		model.PluginTypeHeaderRewrite, model.HeaderRewriteConfig{
+			Set:    []model.HeaderRewriteValue{{Key: "X-Test", Value: "test"}},
+			Remove: []model.HeaderRewriteValue{{Key: "X-Test2"}},
+		})
 	util.RegisterBkAPIGatewayRoute(r, "POST", "/testapi/update-product/:product_id",
-		model.APIGatewayResourceConfig{
-			IsPublic:             true,
-			AllowApplyPermission: true,
-			MatchSubpath:         false,
-			EnableWebsocket:      false,
-			Backend: model.BackendConfig{
-				Path:   "/testapi/product/",
-				Method: "POST",
-			},
-			PluginConfigs: []*model.PluginConfig{
-				model.BuildResourcePluginConfigWithType(model.PluginTypeHeaderRewrite, model.HeaderRewriteConfig{
-					Set:    []model.HeaderRewriteValue{{Key: "X-Test", Value: "test"}},
-					Remove: []model.HeaderRewriteValue{{Key: "X-Test2"}},
-				}),
-			},
-			AuthConfig: model.AuthConfig{},
-		},
+		model.NewAPIGatewayResourceConfig(
+			basicConfig,
+			basicConfig.WithBackend(model.BackendConfig{
+				Path:   "/testapi/update-product/{product_id}",
+				Method: "post",
+			}),
+			basicConfig.WithPluginConfig(
+				headerWriterPlugin,
+			)),
 		api.UpdateProduct)
 
 	// group
 	petGroup := r.Group("/testapi/pets")
 	util.RegisterBkAPIGatewayRouteWithGroup(petGroup, "GET", "/:id/",
-		model.APIGatewayResourceConfig{
-			IsPublic:             false,
-			AllowApplyPermission: true,
-			MatchSubpath:         false,
-			EnableWebsocket:      false,
-			Backend: model.BackendConfig{
+		model.NewAPIGatewayResourceConfig(
+			basicConfig,
+			basicConfig.WithBackend(model.BackendConfig{
 				Path:   "/testapi/pets/{id}/",
 				Method: "get",
-			},
-			PluginConfigs: []*model.PluginConfig{
+			}),
+			// 覆盖基础的通用配置
+			basicConfig.WithPublic(false),
+			basicConfig.WithPluginConfig(
+				headerWriterPlugin,
+				// 独自的插件配置
 				model.BuildResourcePluginConfigWithType(model.PluginTypeBKCors, model.CorsConfig{
 					AllowOrigins:    "*",
 					AllowMethods:    "**",
@@ -51,10 +56,7 @@ func New() *gin.Engine {
 					ExposeHeaders:   "",
 					MaxAge:          0,
 					AllowCredential: false,
-				}),
-			},
-			AuthConfig: model.AuthConfig{},
-		},
+				}))),
 		// 网关jwt中间件，校验用户和应用是否合法
 		middleware.GatewayJWTAuthMiddleware(),
 		api.GetPetByID)

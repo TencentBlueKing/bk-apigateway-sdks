@@ -27,6 +27,8 @@ func init() {
 	})
 }
 
+// GatewayJWTAuthMiddleware 网关JWT鉴权中间件: 用于校验网关JWT,会进行应用、用户认证结构校验，需要使用网关
+// RegisterBkAPIGatewayRoute 或者 RegisterBkAPIGatewayRouteWithGroup 注册路由
 func GatewayJWTAuthMiddleware() func(c *gin.Context) {
 	return func(c *gin.Context) {
 		signedToken := c.GetHeader(BkGatewayJWTHeaderKey)
@@ -55,6 +57,7 @@ func GatewayJWTAuthMiddleware() func(c *gin.Context) {
 			c.Abort()
 			return
 		}
+
 		if claims.App != nil && claims.App.BkAppCode != "" {
 			util.SetJwtAppCode(c, claims.App.BkAppCode)
 		}

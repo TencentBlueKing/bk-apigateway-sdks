@@ -17,7 +17,7 @@ const (
 type Error struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`
-	System  string `json:"system"`
+	System  string `json:"system"` // 错误来源系统
 }
 
 // ErrorResponse  ...
@@ -31,8 +31,8 @@ var (
 )
 
 func NewErrorJSONResponse(
-	errorCode string,
-	statusCode int,
+		errorCode string,
+		statusCode int,
 ) func(c *gin.Context, message string) {
 	return func(c *gin.Context, message string) {
 		c.JSON(statusCode, ErrorResponse{Error: Error{

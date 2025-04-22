@@ -66,12 +66,10 @@ func (d *Definition) GetArray(namespace string) ([]map[string]interface{}, error
 		if current == nil {
 			return nil, errors.Wrapf(ErrNotFound, "namespace: %s", namespace)
 		}
-
-		value, fond := current[field]
-		if !fond {
+		value, found := current[field]
+		if !found {
 			return nil, errors.Wrapf(ErrNotFound, "namespace: %s", namespace)
 		}
-
 		switch realValue := value.(type) {
 		case []interface{}:
 			// convert []map[interface{}]interface{} to map[string]interface{}
@@ -81,7 +79,7 @@ func (d *Definition) GetArray(namespace string) ([]map[string]interface{}, error
 			}
 			return result, nil
 		default:
-			return nil, errors.Wrapf(ErrNotFound, "namespace: %s", namespace)
+			return nil, errors.Wrapf(errors.New("not supported type"), "namespace: %s", namespace)
 		}
 	}
 

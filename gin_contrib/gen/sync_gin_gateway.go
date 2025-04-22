@@ -12,9 +12,7 @@ import (
 	"github.com/TencentBlueKing/bk-apigateway-sdks/manager"
 )
 
-func SyncGinGateway(baseDir string, apiGatewayName string,
-		config *model.APIConfig, delete bool,
-) {
+func SyncGinGateway(baseDir string, apiGatewayName string, config *model.APIConfig, delete bool) {
 	defaultManager, err := manager.NewManagerFrom(
 		apiGatewayName,
 		bkapi.ClientConfig{},
