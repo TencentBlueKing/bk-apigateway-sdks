@@ -3,6 +3,7 @@ package util
 import (
 	"fmt"
 	"path"
+	"regexp"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -14,6 +15,11 @@ const (
 	BkGatewayJwtClaimsUserName = "X-Bkapi-Jwt-Username"
 	BkGatewayJwtClaimsAppCode  = "X-Bkapi-Jwt-Appcode"
 )
+
+type RouteConfig struct {
+	OperationID string
+	Config      *model.APIGatewayResourceConfig
+}
 
 // apiResourceConfigs 用于网关相关配置
 var apiResourceConfigs = make(map[string]*model.APIGatewayResourceConfig)
@@ -46,18 +52,60 @@ func RegisterBkAPIGatewayRouteWithGroup(
 	group.Handle(method, path, handlers...)
 }
 
-func GetRouteConfigMap(engine *gin.Engine) map[string]*model.APIGatewayResourceConfig {
-	result := make(map[string]*model.APIGatewayResourceConfig)
+func GetRouteConfigMap(engine *gin.Engine) map[string]*RouteConfig {
+	result := make(map[string]*RouteConfig)
 	for _, route := range engine.Routes() {
 		// 生成标准路由标识
 		normalizedPath := ConvertExpressPathToSwagger(route.Path)
 		key := fmt.Sprintf("%s:%s", normalizedPath, strings.ToLower(route.Method))
+		routeConfig := &RouteConfig{
+			OperationID: GenerateOperationID(route.Handler),
+		}
 		// 直接从同步Map获取配置
 		if val, ok := apiResourceConfigs[key]; ok {
-			result[key] = val
+			routeConfig.Config = val
 		}
+		result[key] = routeConfig
 	}
 	return result
+}
+
+// GenerateOperationID 从 handler 路径生成蛇形 OperationID
+// 示例输入: "github.com/TencentBlueKing/bk-apigateway-sdks/gin_contrib/example/api.UpdateProduct"
+// 示例输出: "api_update_product"
+func GenerateOperationID(operation string) string {
+	pkgName, funcName := splitPackageAndFunc(operation)
+	return fmt.Sprintf("%s_%s", strings.ToLower(pkgName), toSnakeCase(funcName))
+}
+
+// splitPackageAndFunc 分离包名和函数名（支持多级包名）
+func splitPackageAndFunc(s string) (pkg, funcName string) {
+	// 处理多级包名
+	if idx := strings.LastIndex(s, "/"); idx != -1 {
+		pkg = s[:idx]
+		s = s[idx+1:]
+	}
+	if idx := strings.LastIndex(s, "."); idx != -1 {
+		return s[:idx], s[idx+1:]
+	}
+	return "", s
+}
+
+// toSnakeCase大驼峰转蛇形命名
+func toSnakeCase(str string) string {
+	// Step 1: 处理连续大写后跟小写 (如 HTTPHandler → HTTP_Handler)
+	snake := regexp.MustCompile("([A-Z]+)([A-Z][a-z])").ReplaceAllString(str, "${1}_${2}")
+
+	// Step 2: 处理小写/数字后跟大写 (如 UpdateProduct → Update_Product)
+	snake = regexp.MustCompile("([a-z0-9])([A-Z])").ReplaceAllString(snake, "${1}_${2}")
+
+	// Step 4: 处理数字后跟字母 (如 JSON2XML → JSON_2_XML)
+	snake = regexp.MustCompile("([0-9])([A-Za-z])").ReplaceAllString(snake, "${1}_${2}")
+
+	// 最终处理
+	snake = strings.ToLower(snake)
+	snake = regexp.MustCompile("__+").ReplaceAllString(snake, "_") // 合并连续下划线
+	return strings.Trim(snake, "_")
 }
 
 func GetRouteConfig(path string, method string) *model.APIGatewayResourceConfig {

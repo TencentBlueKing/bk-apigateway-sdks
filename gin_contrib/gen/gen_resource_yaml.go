@@ -10,7 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-openapi/spec"
 
-	"github.com/TencentBlueKing/bk-apigateway-sdks/gin_contrib/model"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/gin_contrib/util"
 )
 
@@ -36,7 +35,7 @@ func GenResourceYamlFromSwaggerJson(docPath string, engine *gin.Engine) string {
 	return string(config)
 }
 
-func mergeSwaggerConfig(swagger spec.Swagger, routeMap map[string]*model.APIGatewayResourceConfig) spec.Swagger {
+func mergeSwaggerConfig(swagger spec.Swagger, routeMap map[string]*util.RouteConfig) spec.Swagger {
 	for path, pathItem := range swagger.Paths.Paths {
 		operationMap := make(map[string]*spec.Operation)
 		if pathItem.PathItemProps.Get != nil {
@@ -65,17 +64,24 @@ func mergeSwaggerConfig(swagger spec.Swagger, routeMap map[string]*model.APIGate
 			key := fmt.Sprintf("%s:%s", path, method)
 			// 合并配置
 			if c, exists := routeMap[key]; exists {
-				c.Backend.Method = strings.ToLower(method)
-				if c.Backend.Path == "" {
-					c.Backend.Path = path
+				if c.Config != nil {
+					c.Config.Backend.Method = strings.ToLower(method)
+					if c.Config.Backend.Path == "" {
+						c.Config.Backend.Path = path
+					}
+					if c.Config.Backend.Method == "" {
+						c.Config.Backend.Method = strings.ToLower(method)
+					}
+					if operation.Extensions == nil {
+						operation.Extensions = spec.Extensions{}
+					}
+					operation.Extensions.Add("x-bk-apigateway-resource", c)
 				}
-				if c.Backend.Method == "" {
-					c.Backend.Method = strings.ToLower(method)
+				// 使用生成的OperationID作为路由ID
+				if operation.ID == "" {
+					operation.ID = c.OperationID
 				}
-				if operation.Extensions == nil {
-					operation.Extensions = spec.Extensions{}
-				}
-				operation.Extensions.Add("x-bk-apigateway-resource", c)
+
 			}
 		}
 	}
