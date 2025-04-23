@@ -3,8 +3,8 @@ package gen
 import (
 	_ "embed"
 	"fmt"
-	"html/template"
 	"strings"
+	"text/template"
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/gin_contrib/model"
 )

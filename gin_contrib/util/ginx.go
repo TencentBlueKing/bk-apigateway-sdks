@@ -25,11 +25,11 @@ type RouteConfig struct {
 var apiResourceConfigs = make(map[string]*model.APIGatewayResourceConfig)
 
 func RegisterBkAPIGatewayRoute(
-		engine *gin.Engine,
-		method string,
-		path string,
-		config model.APIGatewayResourceConfig,
-		handlers ...gin.HandlerFunc,
+	engine *gin.Engine,
+	method string,
+	path string,
+	config model.APIGatewayResourceConfig,
+	handlers ...gin.HandlerFunc,
 ) {
 	// 生成标准化的路由标识
 	normalizedPath := ConvertExpressPathToSwagger(path)
@@ -39,11 +39,11 @@ func RegisterBkAPIGatewayRoute(
 }
 
 func RegisterBkAPIGatewayRouteWithGroup(
-		group *gin.RouterGroup,
-		method string,
-		path string,
-		config model.APIGatewayResourceConfig,
-		handlers ...gin.HandlerFunc,
+	group *gin.RouterGroup,
+	method string,
+	path string,
+	config model.APIGatewayResourceConfig,
+	handlers ...gin.HandlerFunc,
 ) {
 	// 生成标准化的路由标识
 	normalizedPath := ConvertExpressPathToSwagger(joinPaths(group.BasePath(), path))

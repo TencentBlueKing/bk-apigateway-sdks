@@ -13,7 +13,7 @@ func TestSyncGinGateway(t *testing.T) {
 	// 初始化配置
 	config := &model.APIConfig{
 		Release: model.ReleaseConfig{
-			Version: "1.0.0",
+			Version: "1.0.0+prod",
 			Title:   "初始版本",
 			Comment: "首次发布",
 		},
