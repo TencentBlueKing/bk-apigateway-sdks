@@ -47,9 +47,9 @@ type ResourceDocConfig struct {
 // APIGatewayResourceConfig resource 配置结构体定义
 type APIGatewayResourceConfig struct {
 	ResourceBasicConfig                 // 资源基础配置
-	Backend             BackendConfig   `json:"backend" yaml:"backend"` // 后端配置
+	Backend             BackendConfig   `json:"backend" yaml:"backend"`                                 // 后端配置
 	PluginConfigs       []*PluginConfig `json:"pluginConfigs,omitempty" yaml:"pluginConfigs,omitempty"` // 插件配置
-	AuthConfig          AuthConfig      `json:"authConfig" yaml:"authConfig"` // 认证配置
+	AuthConfig          AuthConfig      `json:"authConfig" yaml:"authConfig"`                           // 认证配置
 }
 
 type ResourceBasicConfig struct {
@@ -109,7 +109,7 @@ func (c *ResourceBasicConfig) WithEnableWebsocket(enableWebsocket bool) Option {
 // WithPluginConfig 设置资源插件配置
 func (c *ResourceBasicConfig) WithPluginConfig(pluginConfigs ...*PluginConfig) Option {
 	return func(config *APIGatewayResourceConfig) {
-		//需要校验插件是否重复
+		// 需要校验插件是否重复
 		for _, pluginConfig := range pluginConfigs {
 			for _, existPluginConfig := range config.PluginConfigs {
 				if existPluginConfig.Type == pluginConfig.Type {

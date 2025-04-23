@@ -31,8 +31,8 @@ var (
 )
 
 func NewErrorJSONResponse(
-		errorCode string,
-		statusCode int,
+	errorCode string,
+	statusCode int,
 ) func(c *gin.Context, message string) {
 	return func(c *gin.Context, message string) {
 		c.JSON(statusCode, ErrorResponse{Error: Error{

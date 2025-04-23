@@ -82,7 +82,6 @@ func GenerateOperationID(operation string) string {
 func splitPackageAndFunc(s string) (pkg, funcName string) {
 	// 处理多级包名
 	if idx := strings.LastIndex(s, "/"); idx != -1 {
-		pkg = s[:idx]
 		s = s[idx+1:]
 	}
 	if idx := strings.LastIndex(s, "."); idx != -1 {

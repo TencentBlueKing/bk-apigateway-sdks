@@ -81,7 +81,6 @@ func mergeSwaggerConfig(swagger spec.Swagger, routeMap map[string]*util.RouteCon
 				if operation.ID == "" {
 					operation.ID = c.OperationID
 				}
-
 			}
 		}
 	}

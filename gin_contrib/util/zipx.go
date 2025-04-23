@@ -10,7 +10,6 @@ import (
 
 // ZipDirectory 将指定目录压缩为ZIP文件
 func ZipDirectory(srcDir, dstZip string, includeExt ...string) error {
-
 	// 转换排除后缀为统一格式（带点的小写）
 	includeMap := make(map[string]struct{})
 	for _, ext := range includeExt {

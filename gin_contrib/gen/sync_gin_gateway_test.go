@@ -60,18 +60,18 @@ func TestSyncGinGateway(t *testing.T) {
 	definitionConfig := GenDefinitionYaml(config)
 	definitionFilePath := filepath.Join("./example", "definition.yaml")
 	// 先创建目录（递归创建）
-	if err := os.MkdirAll(filepath.Dir(definitionFilePath), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(definitionFilePath), 0o755); err != nil {
 		t.Fatal("创建目录失败: " + err.Error())
 	}
-	err := os.WriteFile(definitionFilePath, []byte(definitionConfig), 0644)
+	err := os.WriteFile(definitionFilePath, []byte(definitionConfig), 0o644)
 	if err != nil {
 		t.Fatal(err)
 	}
 	// 生成resource配置
 	resourcesFilePath := filepath.Join("./example", "resources.yaml")
 	resourcesYaml := GenResourceYamlFromSwaggerJson("../example/docs/swagger.json", router.New())
-	err = os.WriteFile(resourcesFilePath, []byte(resourcesYaml), 0644)
-	//SyncGinGateway(
+	err = os.WriteFile(resourcesFilePath, []byte(resourcesYaml), 0o644)
+	// SyncGinGateway(
 	//	"./example/",
 	//	"custom-gateway-go-demo", config, true)
 }
