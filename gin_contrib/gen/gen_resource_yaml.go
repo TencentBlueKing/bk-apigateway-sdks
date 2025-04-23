@@ -75,6 +75,8 @@ func mergeSwaggerConfig(swagger spec.Swagger, routeMap map[string]*util.RouteCon
 					if operation.Extensions == nil {
 						operation.Extensions = spec.Extensions{}
 					}
+					// 保持一致
+					c.Config.Backend.MatchSubpath = c.Config.MatchSubpath
 					operation.Extensions.Add("x-bk-apigateway-resource", c.Config)
 				}
 				// 使用生成的OperationID作为路由ID
