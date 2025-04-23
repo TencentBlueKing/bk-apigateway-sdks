@@ -70,6 +70,11 @@ func TestGenerateOperationID(t *testing.T) {
 			input:    "manager.InitVIPConfig",
 			expected: "manager_init_vip_config",
 		},
+		{
+			name:     "complex camelcase with numbers",
+			input:    "github.com/gin-gonic/gin.WrapH.func1",
+			expected: "gin_wraph_func1",
+		},
 	}
 
 	for _, tt := range tests {

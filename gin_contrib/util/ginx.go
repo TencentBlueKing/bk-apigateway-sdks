@@ -75,7 +75,7 @@ func GetRouteConfigMap(engine *gin.Engine) map[string]*RouteConfig {
 // 示例输出: "api_update_product"
 func GenerateOperationID(operation string) string {
 	pkgName, funcName := splitPackageAndFunc(operation)
-	return fmt.Sprintf("%s_%s", strings.ToLower(pkgName), toSnakeCase(funcName))
+	return fmt.Sprintf("%s_%s", strings.ToLower(strings.ReplaceAll(pkgName, ".", "_")), toSnakeCase(funcName))
 }
 
 // splitPackageAndFunc 分离包名和函数名（支持多级包名）
