@@ -8,6 +8,7 @@
 - [manager](manager)：网关管理工具集
 - [apigateway](apigateway)：网关客户端 SDK
 - [core](core)：网关客户端核心库
+- [gin_contrib](gin_contrib)：基于gin的网关编程框架
 
 
 ## 蓝鲸社区
