@@ -15,6 +15,7 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"os"
 )
 
 //go:generate mockgen -source=$GOFILE -destination=../internal/mock/$GOFILE -package=mock Operation,OperationOption
@@ -70,6 +71,9 @@ type Operation interface {
 
 	// SetContentEncoding method sets the request content encoding.
 	SetContentLength(contentLength int64) Operation
+
+	// SetFile
+	SetFile(name string, file *os.File) Operation
 
 	// Request method sends the operation request and returns the response.
 	Request() (*http.Response, error)

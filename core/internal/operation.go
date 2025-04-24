@@ -18,11 +18,13 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
 
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
-	"gopkg.in/h2non/gentleman.v2"
+	gentleman "gopkg.in/h2non/gentleman.v2"
 	gmctx "gopkg.in/h2non/gentleman.v2/context"
 	"gopkg.in/h2non/gentleman.v2/plugin"
+
+	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
 )
 
 // Operation is a wrapper for a request, it allows to set the request options
@@ -154,6 +156,11 @@ func (op *Operation) SetContentType(contentType string) define.Operation {
 func (op *Operation) SetContentLength(length int64) define.Operation {
 	op.request.Context.Request.ContentLength = length
 
+	return op
+}
+
+func (op *Operation) SetFile(name string, file *os.File) define.Operation {
+	op.request.File(name, file)
 	return op
 }
 

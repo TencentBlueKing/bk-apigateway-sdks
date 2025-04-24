@@ -17,7 +17,6 @@ import (
 	pkgErrors "github.com/pkg/errors"
 )
 
-//
 var (
 	// ErrTypeNotMatch defines the error which indicates the type of the value is not match.
 	ErrTypeNotMatch = errors.New("type not match")
@@ -27,7 +26,6 @@ var (
 	ErrConfigInvalid = errors.New("config invalid")
 )
 
-//
 var (
 	// ErrorWrapf annotates err with the format specifier and arguments.
 	ErrorWrapf = pkgErrors.WithMessagef

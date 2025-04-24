@@ -8,6 +8,7 @@ import (
 	context "context"
 	io "io"
 	http "net/http"
+	os "os"
 	reflect "reflect"
 
 	define "github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
@@ -194,6 +195,20 @@ func (m *MockOperation) SetContext(ctx context.Context) define.Operation {
 func (mr *MockOperationMockRecorder) SetContext(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetContext", reflect.TypeOf((*MockOperation)(nil).SetContext), ctx)
+}
+
+// SetFile mocks base method.
+func (m *MockOperation) SetFile(name string, file *os.File) define.Operation {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetFile", name, file)
+	ret0, _ := ret[0].(define.Operation)
+	return ret0
+}
+
+// SetFile indicates an expected call of SetFile.
+func (mr *MockOperationMockRecorder) SetFile(name, file interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetFile", reflect.TypeOf((*MockOperation)(nil).SetFile), name, file)
 }
 
 // SetHeaders mocks base method.

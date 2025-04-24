@@ -15,10 +15,11 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi"
 	"github.com/TencentBlueKing/gopkg/cache"
 	"github.com/TencentBlueKing/gopkg/cache/memory"
 	"github.com/pkg/errors"
+
+	"github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi"
 )
 
 // PublicKeyProvider is the interface for public key provider.

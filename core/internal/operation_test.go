@@ -20,15 +20,16 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/internal"
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/internal/mock"
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
-	"gopkg.in/h2non/gentleman.v2"
+	gentleman "gopkg.in/h2non/gentleman.v2"
 	"gopkg.in/h2non/gentleman.v2/plugins/transport"
+
+	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
+	"github.com/TencentBlueKing/bk-apigateway-sdks/core/internal"
+	"github.com/TencentBlueKing/bk-apigateway-sdks/core/internal/mock"
 )
 
 var _ = Describe("operation", func() {
@@ -62,10 +63,12 @@ var _ = Describe("operation", func() {
 		})
 
 		mockTransportRoundTrip := func() {
-			mockTransport.EXPECT().RoundTrip(gomock.Any()).DoAndReturn(func(req *http.Request) (*http.Response, error) {
-				response.Request = req
-				return response, nil
-			})
+			mockTransport.EXPECT().
+				RoundTrip(gomock.Any()).
+				DoAndReturn(func(req *http.Request) (*http.Response, error) {
+					response.Request = req
+					return response, nil
+				})
 		}
 
 		It("should return correct names", func() {

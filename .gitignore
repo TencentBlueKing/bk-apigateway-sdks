@@ -81,3 +81,5 @@ vendor/
 .idea
 .vscode
 .envrc
+bin/
+gin_contrib/gen/example/

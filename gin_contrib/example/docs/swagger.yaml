@@ -1,0 +1,81 @@
+basePath: /v2
+definitions:
+  api.ProductUpdates:
+    properties:
+      description:
+        $ref: '#/definitions/sql.NullString'
+      stock:
+        $ref: '#/definitions/sql.NullInt64'
+      type:
+        $ref: '#/definitions/sql.NullString'
+    type: object
+  sql.NullInt64:
+    properties:
+      int64:
+        type: integer
+      valid:
+        description: Valid is true if Int64 is not NULL
+        type: boolean
+    type: object
+  sql.NullString:
+    properties:
+      string:
+        type: string
+      valid:
+        description: Valid is true if String is not NULL
+        type: boolean
+    type: object
+host: petstore.swagger.io
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a sample server Petstore server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Swagger Example API
+  version: "1.0"
+paths:
+  /testapi/pets/{id}/:
+    get:
+      consumes:
+      - application/json
+      description: get pet by ID
+      operationId: get_pet_by_id
+      parameters:
+      - description: pet id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: get a  pet
+  /testapi/update-product/{product_id}:
+    post:
+      consumes:
+      - application/json
+      operationId: update_product
+      parameters:
+      - description: Product ID
+        in: path
+        name: product_id
+        required: true
+        type: integer
+      - description: ' '
+        in: body
+        name: productInfo
+        required: true
+        schema:
+          $ref: '#/definitions/api.ProductUpdates'
+      responses: {}
+      summary: Update product attributes
+swagger: "2.0"

@@ -12,17 +12,16 @@
 package bkapi_test
 
 import (
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi"
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/internal/mock"
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi"
+	"github.com/TencentBlueKing/bk-apigateway-sdks/core/internal/mock"
 )
 
 var _ = Describe("Multipart", func() {
-	var (
-		ctrl *gomock.Controller
-	)
+	var ctrl *gomock.Controller
 
 	BeforeEach(func() {
 		ctrl = gomock.NewController(GinkgoT())

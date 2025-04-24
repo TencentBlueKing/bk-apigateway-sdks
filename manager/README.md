@@ -42,33 +42,10 @@ definition.yaml 中可以使用 Django 模块语法引用和渲染变量，内�
 - `resource_docs`：定义资源文档；
 
 ### 使用示例
+具体使用可以参考：[SyncGinGateway.go](../gin_contrib/gen/sync_gin_gateway.go)
 
-```golang
-manager, err := NewManagerFrom(
-    "my-api",
-    bkapi.ClientConfig{
-        BkApiUrlTmpl: "https://{api_name}.example.com",
-        AppCode: "my-app-code",
-        AppSecret: "my-app-secret",
-    },
-    "/path/to/definition.yaml",
-    map[string]interface{}{
-        "key": "value",
-    },
-)
 
-manager.SyncBasicInfo("apigateway")  // 同步网关基本信息
-manager.SyncStageConfig("stage")       // 同步环境信息
-manager.SyncPluginConfig("plugin_configs")  // 同步网关插件配置
-manager.SyncResourcesConfig("resources")  // 同步资源配置
-manager.SyncResourceDocByArchive("resource_docs")  // 同步资源文档
-manager.ApplyPermissions("apply_permissions")  // 申请网关权限
-manager.GrantPermissions("grant_permissions")  // 应用主动授权
-manager.CreateResourceVersion("resource_version")  // 创建资源版本
-manager.Release("release")  // 发布资源
-manager.GetPublicKey()  // 获取网关公钥
-manager.GetPublicKeyString()  // 获取网关公钥字符串
-```
+
 
 ## 解析网关 JWT token
 ### 选择获取网关公钥方式

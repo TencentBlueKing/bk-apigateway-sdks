@@ -16,8 +16,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/internal"
 	"gopkg.in/h2non/gentleman.v2/plugins/auth"
 	"gopkg.in/h2non/gentleman.v2/plugins/cookies"
 	"gopkg.in/h2non/gentleman.v2/plugins/headers"
@@ -27,6 +25,9 @@ import (
 	"gopkg.in/h2non/gentleman.v2/plugins/timeout"
 	tlsplugin "gopkg.in/h2non/gentleman.v2/plugins/tls"
 	"gopkg.in/h2non/gentleman.v2/plugins/transport"
+
+	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
+	"github.com/TencentBlueKing/bk-apigateway-sdks/core/internal"
 )
 
 // OptTimeout defines the maximum amount of time a whole request process

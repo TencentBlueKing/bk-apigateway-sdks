@@ -77,7 +77,6 @@ func (detail *BkApiResponseDetail) Map() map[string]interface{} {
 	}
 
 	return result
-
 }
 
 // NewBkApiResponseDetail creates a new BkApiResponseDetail.

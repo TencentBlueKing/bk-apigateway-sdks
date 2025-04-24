@@ -18,11 +18,8 @@ import (
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
 )
 
-//
-var (
-	// ErrClientConfigRegistryValidationFailed for register validation
-	ErrClientConfigRegistryValidationFailed = fmt.Errorf("client config validation failed")
-)
+// ErrClientConfigRegistryValidationFailed for register validation
+var ErrClientConfigRegistryValidationFailed = fmt.Errorf("client config validation failed")
 
 // ClientConfigRegistry manage multiple client configs.
 type ClientConfigRegistry struct {
