@@ -8,7 +8,7 @@ This repository contains the SDKs and tools for the Blueking API Gateway, simpli
 - [manager](manager)：Gateway management toolset
 - [apigateway](apigateway)：Blueking API Gateway client SDK
 - [core](core)：Blueking API Gateway client core library
-
+- [gin_contrib](gin_contrib): A gateway programming framework based on gin
 ## BlueKing Community
 
 - [BK-CI](https://github.com/Tencent/bk-ci)：a continuous integration and continuous delivery system that can easily present your R & D process to you.
