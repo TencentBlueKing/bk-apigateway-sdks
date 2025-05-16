@@ -23,8 +23,20 @@ stages:
     {{- if .Stage.BackendSubPath}}
     vars:
       api_sub_path: {{.Stage.BackendSubPath}}
+      {{- if .Stage.EnvVars }}
+      {{- range $key, $value := .Stage.EnvVars}}
+      {{$key}}: "{{$value}}"
+      {{- end}}
+      {{- end}}
     {{- else}}
+    {{- if .Stage.EnvVars }}
+    vars:
+      {{- range $key, $value := .Stage.EnvVars}}
+      {{$key}}: "{{$value}}"
+      {{- end}}
+    {{else}}
     vars: {}
+    {{- end}}
     {{- end}}
     backends:
       - name: "default"

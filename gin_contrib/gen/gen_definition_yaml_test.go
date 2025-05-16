@@ -40,6 +40,9 @@ func TestGenDefinitionConfig(t *testing.T) {
 						},
 					}),
 			},
+			EnvVars: map[string]string{
+				"foo": "bar",
+			},
 		},
 		GrantPermissions: model.GrantPermissionConfig{
 			GatewayApps: []string{"app1"},

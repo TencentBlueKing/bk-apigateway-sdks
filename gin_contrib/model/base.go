@@ -25,13 +25,14 @@ type GatewayConfig struct {
 }
 
 type StageConfig struct {
-	Name           string          // 环境名称
-	Description    string          // 环境描述
-	DescriptionEn  string          // 环境描述英文
-	BackendSubPath string          // 后端服务前缀路径
-	BackendTimeout int             // 后端服务超时时间
-	BackendHost    string          // 后端服务地址
-	PluginConfigs  []*PluginConfig // 插件配置
+	Name           string            // 环境名称
+	Description    string            // 环境描述
+	DescriptionEn  string            // 环境描述英文
+	BackendSubPath string            // 后端服务前缀路径
+	BackendTimeout int               // 后端服务超时时间
+	BackendHost    string            // 后端服务地址
+	PluginConfigs  []*PluginConfig   // 插件配置
+	EnvVars        map[string]string // 环境变量
 }
 
 type GrantPermissionConfig struct {
