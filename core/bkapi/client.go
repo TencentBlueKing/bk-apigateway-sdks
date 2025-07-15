@@ -14,6 +14,7 @@ package bkapi
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"os"
 	"strings"
 
@@ -35,9 +36,9 @@ func RegisterGlobalBkapiClientOption(opt define.BkApiClientOption) {
 
 // NewBkApiClient creates a new BkApiClient.
 func NewBkApiClient(
-apiName string,
-configProvider define.ClientConfigProvider,
-options ...define.BkApiClientOption,
+	apiName string,
+	configProvider define.ClientConfigProvider,
+	options ...define.BkApiClientOption,
 ) (define.BkApiClient, error) {
 	config := configProvider.ProvideConfig(apiName)
 	client, err := internal.NewBkApiClient(
@@ -151,6 +152,14 @@ func (c *ClientConfig) getTenantID() string {
 		}
 		return paasAppTenantID
 	}
+	slog.Warn(
+		fmt.Sprintf(
+			"the [X-Bk-Tenant-Id=%s], if the syncing to apigateway failed, and your app(%s) is a global tenant "+
+				"app, please set the environment variable BK_APP_TENANT_ID "+
+				"to `system` (or set django settings.BK_APP_TENANT_ID to `system`) and try again",
+			paasAppTenantID,
+			c.AppCode),
+	)
 	return c.AppTenantID
 }
 
