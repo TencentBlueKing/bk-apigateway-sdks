@@ -14,6 +14,7 @@ package bkapi
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -151,7 +152,7 @@ func (c *ClientConfig) getTenantID() string {
 		}
 		return paasAppTenantID
 	}
-	c.Logger.Warn(
+	log.Println(
 		fmt.Sprintf(
 			"the [X-Bk-Tenant-Id=%s], if the syncing to apigateway failed, and your app(%s) is a global tenant "+
 				"app, please set the environment variable BK_APP_TENANT_ID "+
