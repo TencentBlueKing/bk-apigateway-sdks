@@ -14,12 +14,10 @@ package bkapi
 import (
 	"encoding/json"
 	"fmt"
-	"log/slog"
-	"os"
-	"strings"
-
 	"github.com/TencentBlueKing/gopkg/logging"
 	"gopkg.in/h2non/gentleman.v2"
+	"os"
+	"strings"
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/internal"
@@ -152,7 +150,7 @@ func (c *ClientConfig) getTenantID() string {
 		}
 		return paasAppTenantID
 	}
-	slog.Warn(
+	c.Logger.Warn(
 		fmt.Sprintf(
 			"the [X-Bk-Tenant-Id=%s], if the syncing to apigateway failed, and your app(%s) is a global tenant "+
 				"app, please set the environment variable BK_APP_TENANT_ID "+
