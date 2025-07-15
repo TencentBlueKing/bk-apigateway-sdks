@@ -47,16 +47,16 @@ type Manager struct {
 }
 
 func (m *Manager) requestWithBody(
-	operation define.Operation,
-	body map[string]interface{},
+operation define.Operation,
+body map[string]interface{},
 ) (map[string]interface{}, error) {
 	return m.request(operation.SetBody(body))
 }
 
 func (m *Manager) requestWithFile(
-	operation define.Operation,
-	name string,
-	file *os.File,
+operation define.Operation,
+name string,
+file *os.File,
 ) (map[string]interface{}, error) {
 	return m.request(operation.SetFile(name, file))
 }
@@ -64,9 +64,9 @@ func (m *Manager) requestWithFile(
 func (m *Manager) request(operation define.Operation) (map[string]interface{}, error) {
 	var result apiGatewayResult
 	_, err := operation.
-		SetPathParams(map[string]string{
-			"api_name": m.apiName,
-		}).
+	SetPathParams(map[string]string{
+		"api_name": m.apiName,
+	}).
 		SetResult(&result).
 		Request()
 	if err != nil {
@@ -119,7 +119,7 @@ func (m *Manager) GetPublicKeyString() (string, error) {
 
 	value, ok := info["public_key"]
 	if !ok {
-		return "", errors.Wrapf(ErrApiGatewayPublicKeyNotFound, m.apiName)
+		return "", errors.Wrap(ErrApiGatewayPublicKeyNotFound, m.apiName)
 	}
 
 	publicKey, ok := value.(string)
@@ -262,12 +262,12 @@ func (m *Manager) Release(version string) (map[string]interface{}, error) {
 
 // NewManager create a new manager.
 func NewManager(
-	apiName string,
-	config bkapi.ClientConfig,
-	definition *Definition,
-	clientFactory func(
-		configProvider define.ClientConfigProvider, opts ...define.BkApiClientOption,
-	) (*apigateway.Client, error),
+apiName string,
+config bkapi.ClientConfig,
+definition *Definition,
+clientFactory func(
+configProvider define.ClientConfigProvider, opts ...define.BkApiClientOption,
+) (*apigateway.Client, error),
 ) (*Manager, error) {
 	client, err := clientFactory(config, bkapi.OptJsonBodyProvider(), bkapi.JsonResultProvider())
 	if err != nil {
@@ -289,9 +289,9 @@ func NewDefaultManager(apiName string, config bkapi.ClientConfig) (*Manager, err
 
 // NewManagerFrom file will create a new manager from the file.
 func NewManagerFrom(
-	apiName string,
-	config bkapi.ClientConfig,
-	path string,
+apiName string,
+config bkapi.ClientConfig,
+path string,
 ) (*Manager, error) {
 	manager, err := NewDefaultManager(apiName, config)
 	if err != nil {
