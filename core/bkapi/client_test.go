@@ -158,6 +158,7 @@ var _ = Describe("Client", func() {
 
 			Expect(config.GetAuthorizationHeaders()).To(Equal(map[string]string{
 				"X-Bkapi-Authorization": `{"access_token":"access_token","jwt":"jwt"}`,
+				"X-Bk-Tenant-Id":        "",
 			}))
 		})
 
@@ -169,6 +170,7 @@ var _ = Describe("Client", func() {
 
 			Expect(config.GetAuthorizationHeaders()).To(Equal(map[string]string{
 				"X-Bkapi-Authorization": `{"bk_app_code":"app_code","bk_app_secret":"app_secret"}`,
+				"X-Bk-Tenant-Id":        "",
 			}))
 		})
 
@@ -181,6 +183,7 @@ var _ = Describe("Client", func() {
 
 			Expect(config.GetAuthorizationHeaders()).To(Equal(map[string]string{
 				"X-Bkapi-Authorization": `{"bk_token":"token"}`,
+				"X-Bk-Tenant-Id":        "",
 			}))
 		})
 
@@ -194,6 +197,7 @@ var _ = Describe("Client", func() {
 
 			Expect(config.GetAuthorizationHeaders()).To(Equal(map[string]string{
 				"X-Bkapi-Authorization": `{"access_token": "access_token"}`,
+				"X-Bk-Tenant-Id":        "",
 			}))
 		})
 

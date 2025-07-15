@@ -14,11 +14,12 @@ package bkapi
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
 	"github.com/TencentBlueKing/gopkg/logging"
-	gentleman "gopkg.in/h2non/gentleman.v2"
+	"gopkg.in/h2non/gentleman.v2"
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/internal"
@@ -89,6 +90,8 @@ type ClientConfig struct {
 	// AppSecret is the secret key of the blueking app.
 	AppSecret string
 
+	AppTenantID string
+
 	// AccessToken is the access token of the user and app, optional.
 	AccessToken string
 	// AuthorizationParams is the authorization params of the user and app, optional.
@@ -134,6 +137,32 @@ func (c *ClientConfig) setAppAuthParams(params map[string]string) {
 	}
 }
 
+func (c *ClientConfig) getTenantID() string {
+	/***
+	 * BKPAAS_APP_TENANT_ID 和 BK_APP_TENANT_ID 的含义不一样
+	 * - BKPAAS_APP_TENANT_ID 是应用的租户模式标识，表示应用是全租户还是单租户
+	 * - BK_APP_TENANT_ID 是应用所属的租户 ID，表示应用是属于哪个租户的，即由哪个租户产生的
+	 */
+
+	// [大多数是外部 SaaS 场景] PaaS 平台上部署运行的应用，会自动内置 BKPAAS_APP_TENANT_ID 环境变量，表示应用是全租户的还是单租户的
+	paasAppTenantID, ok := os.LookupEnv("BKPAAS_APP_TENANT_ID")
+	if ok {
+		if paasAppTenantID == "" {
+			return "system"
+		}
+		return paasAppTenantID
+	}
+	log.Println(
+		fmt.Sprintf(
+			"the [X-Bk-Tenant-Id=%s], if the syncing to apigateway failed, and your app(%s) is a global tenant "+
+				"app, please set the environment variable BK_APP_TENANT_ID "+
+				"to `system` (or set django settings.BK_APP_TENANT_ID to `system`) and try again",
+			paasAppTenantID,
+			c.AppCode),
+	)
+	return c.AppTenantID
+}
+
 func (c *ClientConfig) setCommonAuthParams(params map[string]string) {
 	for k, v := range c.AuthorizationParams {
 		params[k] = v
@@ -160,6 +189,10 @@ func (c *ClientConfig) initAppConfig() {
 
 	if c.AppSecret == "" {
 		c.AppSecret = c.getEnv("BK_APP_SECRET", "BKPAAS_APP_SECRET", "SECRET_KEY")
+	}
+
+	if c.AppTenantID == "" {
+		c.AppTenantID = c.getEnv("BK_APP_TENANT_ID")
 	}
 }
 
@@ -264,8 +297,10 @@ func (c *ClientConfig) GetAuthorizationHeaders() map[string]string {
 		// params contains basic type only, so this should never happen.
 		panic(define.ErrorWrapf(err, "failed to marshal bkapi authorization"))
 	}
-
-	return map[string]string{"X-Bkapi-Authorization": string(value)}
+	return map[string]string{
+		"X-Bkapi-Authorization": string(value),
+		"X-Bk-Tenant-Id":        c.getTenantID(),
+	}
 }
 
 // GetLogger method will return the logger.

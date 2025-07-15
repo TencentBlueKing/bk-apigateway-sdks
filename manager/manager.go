@@ -119,7 +119,7 @@ func (m *Manager) GetPublicKeyString() (string, error) {
 
 	value, ok := info["public_key"]
 	if !ok {
-		return "", errors.Wrapf(ErrApiGatewayPublicKeyNotFound, m.apiName)
+		return "", errors.Wrap(ErrApiGatewayPublicKeyNotFound, m.apiName)
 	}
 
 	publicKey, ok := value.(string)
