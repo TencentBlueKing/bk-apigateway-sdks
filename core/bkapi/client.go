@@ -14,10 +14,11 @@ package bkapi
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/TencentBlueKing/gopkg/logging"
-	"gopkg.in/h2non/gentleman.v2"
 	"os"
 	"strings"
+
+	"github.com/TencentBlueKing/gopkg/logging"
+	"gopkg.in/h2non/gentleman.v2"
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/internal"
