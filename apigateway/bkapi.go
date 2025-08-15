@@ -264,6 +264,16 @@ func (c *Client) SyncStage(opts ...define.OperationOption) define.Operation {
 	}, opts...)
 }
 
+// SyncStageMcpServers for bkapi resource sync_stage
+// 同步环境 MCP Servers
+func (c *Client) SyncStageMcpServers(opts ...define.OperationOption) define.Operation {
+	return c.BkApiClient.NewOperation(bkapi.OperationConfig{
+		Name:   "v2_sync_stage_mcp_servers",
+		Method: "POST",
+		Path:   "/api/v2/sync/gateways/{gateway_name}/stages/{stage_name}/mcp-servers/", // The API endpoint path for the operation
+	}, opts...)
+}
+
 // UpdateMicroGatewayStatus for bkapi resource update_micro_gateway_status
 // 更新微网关实例状态
 func (c *Client) UpdateMicroGatewayStatus(opts ...define.OperationOption) define.Operation {

@@ -45,7 +45,11 @@ func clientExample() {
 
 	// 方式二：注册指定的网关配置
 	err = registry.RegisterClientConfig("my-gateway", bkapi.ClientConfig{
-		Endpoint: "http://special-api.example.com/prod", // 具体某个网关地址
+		// 不设置默认从环境变量中获取
+		AppCode:     "app_code",
+		AppSecret:   "app_secret",
+		AccessToken: "access_token",
+		Endpoint:    "http://special-api.example.com/prod", // 具体某个网关地址
 		ClientOptions: []define.BkApiClientOption{
 			// 设置一些通用的client配置,eg:
 			bkapi.OptJsonResultProvider(),                    // 声明这个网关的所有响应都是JSON

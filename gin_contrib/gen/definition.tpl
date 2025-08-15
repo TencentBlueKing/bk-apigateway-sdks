@@ -38,6 +38,27 @@ stages:
     vars: {}
     {{- end}}
     {{- end}}
+    {{- if .Stage.EnableMcp}}
+    mcp_servers:
+      {{- range .Stage.McpServerConfigs}}
+      - name: "{{.Name}}"
+        description: "{{.Description}}"
+        is_public: {{.IsPublic}}
+        status: {{.Status}}
+        labels:
+          {{- range .Labels}}
+          - "{{.}}"
+          {{- end}}
+        tools:
+          {{- range .Tools}}
+          - "{{.}}"
+          {{- end}}
+        target_app_codes:
+          {{- range .TargetAppCodes}}
+          - "{{.}}"
+          {{- end}}
+      {{- end}}
+    {{- end}}
     backends:
       - name: "default"
         config:
