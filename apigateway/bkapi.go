@@ -270,7 +270,7 @@ func (c *Client) SyncStageMcpServers(opts ...define.OperationOption) define.Oper
 	return c.BkApiClient.NewOperation(bkapi.OperationConfig{
 		Name:   "v2_sync_stage_mcp_servers",
 		Method: "POST",
-		Path:   "/api/v2/sync/gateways/{gateway_name}/stages/{stage_name}/mcp-servers/", // The API endpoint path for the operation
+		Path:   "/api/v2/sync/gateways/{gateway_name}/stages/{stage_name}/mcp-servers/",
 	}, opts...)
 }
 

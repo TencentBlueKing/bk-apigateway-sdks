@@ -20,10 +20,11 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/TencentBlueKing/bk-apigateway-sdks/gin_contrib/model"
-	"github.com/TencentBlueKing/bk-apigateway-sdks/gin_contrib/util"
 	"github.com/gin-gonic/gin"
 	"github.com/go-openapi/spec"
+
+	"github.com/TencentBlueKing/bk-apigateway-sdks/gin_contrib/model"
+	"github.com/TencentBlueKing/bk-apigateway-sdks/gin_contrib/util"
 )
 
 //go:embed definition.tpl
@@ -41,7 +42,7 @@ func GenDefinitionYaml(config *model.APIConfig, docPath string, engine *gin.Engi
 		panic(fmt.Sprintf("gen definition yaml error: %v", err))
 	}
 
-	// 如果开起mcp，则需要根据 route 配置校验tool以及填充tool配置(如果没有指定)
+	// 如果开启mcp，则需要根据 route 配置校验tool以及填充tool配置(如果没有指定)
 	if config.Stage.EnableMcp {
 		// 获取route 网关配置
 		routeConfigMap := util.GetRouteConfigMap(engine)
@@ -54,7 +55,6 @@ func GenDefinitionYaml(config *model.APIConfig, docPath string, engine *gin.Engi
 		for _, mcpServer := range config.Stage.McpServerConfigs {
 			mcpServer.Tools = util.GetMcpToolAndValidate(swagger, routeConfigMap, mcpServer.Tools)
 		}
-
 	}
 
 	// 渲染输出

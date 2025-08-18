@@ -47,6 +47,7 @@ type StageConfig struct {
 	EnableMcp        bool              // 是否启用同步mcp
 	McpServerConfigs []*McpServer      // mcp配置
 }
+
 type McpServer struct {
 	Name           string
 	Description    string
@@ -74,7 +75,8 @@ type APIGatewayResourceConfig struct {
 	PluginConfigs       []*PluginConfig `json:"pluginConfigs,omitempty" yaml:"pluginConfigs,omitempty"` // 插件配置
 	AuthConfig          AuthConfig      `json:"authConfig" yaml:"authConfig"`                           // 认证配置
 	EnableMcp           bool            `json:"-" yaml:"-"`                                             // 是否启用同步mcp
-	NonSchema           bool            `json:"nonSchema,omitempty" yaml:"nonSchema,omitempty"`         // 如果接口没有任何参数，则开启mcp需要设置为true
+	// nolint: lll
+	NonSchema bool `json:"nonSchema,omitempty" yaml:"nonSchema,omitempty"` // 如果接口没有任何参数，则开启mcp需要设置为true
 }
 
 type ResourceBasicConfig struct {

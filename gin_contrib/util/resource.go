@@ -107,6 +107,7 @@ func GetMcpToolAndValidate(swagger spec.Swagger, routeMap map[string]*RouteConfi
 				if operation.ID == "" {
 					operation.ID = c.OperationID
 				}
+				allToolMap[operation.ID] = struct{}{}
 				_, ok := toolMap[operation.ID]
 				// 如果指定了tool,不在指定的tool中,则跳过校验
 				if isSpecified && !ok {
@@ -124,7 +125,7 @@ func GetMcpToolAndValidate(swagger spec.Swagger, routeMap map[string]*RouteConfi
 				}
 				// 如果没有参数,开启mcp,则校验 nonSchema 是否设置
 				if !c.Config.NonSchema {
-					log.Fatalf("tool: %s  enable mcp, but not set nonSchema", operation.ID)
+					log.Fatalf("tool: %s enables mcp, but nonSchema is not set", operation.ID)
 					return []string{}
 				}
 				// 如果没有指定tool,则可以作为mcp  tool
@@ -133,7 +134,6 @@ func GetMcpToolAndValidate(swagger spec.Swagger, routeMap map[string]*RouteConfi
 				} else {
 					canUseToolMap[operation.ID] = struct{}{}
 				}
-
 			}
 		}
 	}
@@ -143,13 +143,19 @@ func GetMcpToolAndValidate(swagger spec.Swagger, routeMap map[string]*RouteConfi
 			// 判断是否在所有的tool中
 			_, ok := allToolMap[tool]
 			if !ok {
-				log.Fatalf("tool: %s not found in all resouces", tool)
+				log.Fatalf("tool: %s not found in all resources", tool)
 				return []string{}
 			}
 			// 判断是否在canUseToolMap,不在则报错
 			_, ok = canUseToolMap[tool]
 			if !ok {
-				log.Fatalf("tool: %s not found in can used resouces,please check noneSchema or mcp enabled", tool)
+				log.Fatalf("tool: %s not found in all resources", tool)
+				return []string{}
+			}
+			// 判断是否在canUseToolMap,不在则报错
+			_, ok = canUseToolMap[tool]
+			if !ok {
+				log.Fatalf("tool: %s not found in can used resources, please check nonSchema or mcp enabled", tool)
 				return []string{}
 			}
 		}
