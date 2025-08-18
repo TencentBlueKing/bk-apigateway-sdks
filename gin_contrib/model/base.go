@@ -1,9 +1,20 @@
+/**
+ * TencentBlueKing is pleased to support the open source community by
+ * making 蓝鲸智云-蓝鲸 PaaS 平台(BlueKing-PaaS) available.
+ * Copyright (C) 2025 Tencent. All rights reserved.
+ * Licensed under the MIT License (the "License"); you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at http://opensource.org/licenses/MIT
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+
 package model
 
 type APIConfig struct {
 	Release          ReleaseConfig
 	APIGateway       GatewayConfig
-	Stage            StageConfig
+	Stage            *StageConfig
 	GrantPermissions GrantPermissionConfig
 	RelatedApps      []string
 	ResourceDocs     ResourceDocConfig
@@ -25,14 +36,26 @@ type GatewayConfig struct {
 }
 
 type StageConfig struct {
-	Name           string            // 环境名称
-	Description    string            // 环境描述
-	DescriptionEn  string            // 环境描述英文
-	BackendSubPath string            // 后端服务前缀路径
-	BackendTimeout int               // 后端服务超时时间
-	BackendHost    string            // 后端服务地址
-	PluginConfigs  []*PluginConfig   // 插件配置
-	EnvVars        map[string]string // 环境变量
+	Name             string            // 环境名称
+	Description      string            // 环境描述
+	DescriptionEn    string            // 环境描述英文
+	BackendSubPath   string            // 后端服务前缀路径
+	BackendTimeout   int               // 后端服务超时时间
+	BackendHost      string            // 后端服务地址
+	PluginConfigs    []*PluginConfig   // 插件配置
+	EnvVars          map[string]string // 环境变量
+	EnableMcpServers bool              // 是否启用同步mcp
+	McpServerConfigs []*McpServer      // mcp配置
+}
+
+type McpServer struct {
+	Name           string
+	Description    string
+	IsPublic       bool
+	Status         int
+	Labels         []string
+	Tools          []string
+	TargetAppCodes []string
 }
 
 type GrantPermissionConfig struct {
@@ -51,10 +74,14 @@ type APIGatewayResourceConfig struct {
 	Backend             BackendConfig   `json:"backend" yaml:"backend"`                                 // 后端配置
 	PluginConfigs       []*PluginConfig `json:"pluginConfigs,omitempty" yaml:"pluginConfigs,omitempty"` // 插件配置
 	AuthConfig          AuthConfig      `json:"authConfig" yaml:"authConfig"`                           // 认证配置
+	EnableMcp           bool            `json:"-" yaml:"-"`                                             // 是否启用同步mcp
+	// nolint: lll
+	NonSchema bool `json:"nonSchema,omitempty" yaml:"nonSchema,omitempty"` // 如果接口没有任何参数，则开启mcp需要设置为true
 }
 
 type ResourceBasicConfig struct {
-	IsPublic             bool `json:"isPublic" yaml:"isPublic"`                         // 是否公开
+	IsPublic bool `json:"isPublic" yaml:"isPublic"` // 是
+	// 否公开
 	AllowApplyPermission bool `json:"allowApplyPermission" yaml:"allowApplyPermission"` // 是否允许申请权限
 	MatchSubpath         bool `json:"matchSubpath" yaml:"matchSubpath"`                 // 是否匹配子路径
 	EnableWebsocket      bool `json:"enableWebsocket" yaml:"enableWebsocket"`           // 是否启用 websocket
@@ -126,6 +153,20 @@ func (c *ResourceBasicConfig) WithPluginConfig(pluginConfigs ...*PluginConfig) O
 func (c *ResourceBasicConfig) WithAuthConfig(authConfig AuthConfig) Option {
 	return func(config *APIGatewayResourceConfig) {
 		config.AuthConfig = authConfig
+	}
+}
+
+// WithMcpEnable 设置资源同步mcp配置
+func (c *ResourceBasicConfig) WithMcpEnable(enableMcpServers bool) Option {
+	return func(config *APIGatewayResourceConfig) {
+		config.EnableMcp = enableMcpServers
+	}
+}
+
+// WithNonSchema 设置资源是否有参数
+func (c *ResourceBasicConfig) WithNonSchema(nonSchema bool) Option {
+	return func(config *APIGatewayResourceConfig) {
+		config.NonSchema = nonSchema
 	}
 }
 

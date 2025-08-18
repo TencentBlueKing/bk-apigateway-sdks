@@ -53,6 +53,13 @@ func (m *Manager) requestWithBody(
 	return m.request(operation.SetBody(body))
 }
 
+func (m *Manager) requestWithBodyV2(
+	operation define.Operation,
+	body map[string]interface{},
+) (map[string]interface{}, error) {
+	return m.requestV2(operation.SetBody(body))
+}
+
 func (m *Manager) requestWithFile(
 	operation define.Operation,
 	name string,
@@ -66,6 +73,30 @@ func (m *Manager) request(operation define.Operation) (map[string]interface{}, e
 	_, err := operation.
 		SetPathParams(map[string]string{
 			"api_name": m.apiName,
+		}).
+		SetResult(&result).
+		Request()
+	if err != nil {
+		return nil, errors.Wrapf(err, "request to %v failed", operation)
+	}
+
+	if result.Code == 0 {
+		return result.Data, nil
+	}
+
+	return result.Data, errors.Wrapf(
+		ErrApigatewayRequest,
+		"code: %d, message: %s",
+		result.Code,
+		result.Message,
+	)
+}
+
+func (m *Manager) requestV2(operation define.Operation) (map[string]interface{}, error) {
+	var result apiGatewayResult
+	_, err := operation.
+		SetPathParams(map[string]string{
+			"gateway_name": m.apiName,
 		}).
 		SetResult(&result).
 		Request()
@@ -157,6 +188,24 @@ func (m *Manager) SyncStagesConfig() (map[string]interface{}, error) {
 	resultMap := make(map[string]interface{})
 	for _, stage := range stages {
 		result, err := m.requestWithBody(m.client.SyncStage(), stage)
+		if err != nil {
+			return nil, errors.WithMessagef(err, "failed to get %s", stagesNamespace)
+		}
+		resultMap[fmt.Sprintf("%v", stage["name"])] = result
+	}
+	return resultMap, nil
+}
+
+// SyncStageMcpConfig sync mcp config from definition under the namespace to apigw.
+func (m *Manager) SyncStageMcpConfig() (map[string]interface{}, error) {
+	stages, err := m.definition.GetArray(stagesNamespace)
+	if err != nil {
+		return nil, errors.WithMessagef(err, "failed to get %s", stagesNamespace)
+	}
+	resultMap := make(map[string]interface{})
+	for _, stage := range stages {
+		result, err := m.requestWithBodyV2(m.client.SyncStageMcpServers().SetPathParams(
+			map[string]string{"stage_name": fmt.Sprintf("%v", stage["name"])}), stage)
 		if err != nil {
 			return nil, errors.WithMessagef(err, "failed to get %s", stagesNamespace)
 		}

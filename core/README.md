@@ -49,8 +49,10 @@ type QueryUserDemoResponse struct {
 func clientExample() {
 
 	// 初始化client
-
 	client, err := bkapi.NewBkApiClient("demo", bkapi.ClientConfig{
+		// 不设置默认从环境变量中获取
+		AppCode:     "app_code",
+		AppSecret:   "app_secret",
 		Endpoint: "http://special-api.example.com/prod",// 具体某个网关地址
 		ClientOptions: []define.BkApiClientOption{
 			// 设置一些通用的client配置,eg: 

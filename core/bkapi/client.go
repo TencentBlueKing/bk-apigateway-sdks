@@ -19,7 +19,7 @@ import (
 	"strings"
 
 	"github.com/TencentBlueKing/gopkg/logging"
-	"gopkg.in/h2non/gentleman.v2"
+	gentleman "gopkg.in/h2non/gentleman.v2"
 
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/core/internal"

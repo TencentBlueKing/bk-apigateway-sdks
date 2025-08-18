@@ -30,6 +30,8 @@ func New() *gin.Engine {
 				Path:   "/testapi/update-product/{product_id}",
 				Method: "post",
 			}),
+			// 开启mcp功能
+			basicConfig.WithMcpEnable(true),
 			basicConfig.WithPluginConfig(
 				headerWriterPlugin,
 			)),
