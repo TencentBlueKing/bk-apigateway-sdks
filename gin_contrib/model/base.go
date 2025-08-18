@@ -71,16 +71,17 @@ type ResourceDocConfig struct {
 // APIGatewayResourceConfig resource 配置结构体定义
 type APIGatewayResourceConfig struct {
 	ResourceBasicConfig                 // 资源基础配置
-	Backend             BackendConfig   `json:"backend" yaml:"backend"`                                 // 后端配置
+	Backend             BackendConfig   `json:"backend" yaml:"backend"` // 后端配置
 	PluginConfigs       []*PluginConfig `json:"pluginConfigs,omitempty" yaml:"pluginConfigs,omitempty"` // 插件配置
-	AuthConfig          AuthConfig      `json:"authConfig" yaml:"authConfig"`                           // 认证配置
-	EnableMcp           bool            `json:"-" yaml:"-"`                                             // 是否启用同步mcp
+	AuthConfig          AuthConfig      `json:"authConfig" yaml:"authConfig"` // 认证配置
+	EnableMcpServers    bool            `json:"-" yaml:"-"` // 是否启用同步mcp
 	// nolint: lll
 	NonSchema bool `json:"nonSchema,omitempty" yaml:"nonSchema,omitempty"` // 如果接口没有任何参数，则开启mcp需要设置为true
 }
 
 type ResourceBasicConfig struct {
-	IsPublic             bool `json:"isPublic" yaml:"isPublic"`                         // 是否公开
+	IsPublic bool `json:"isPublic" yaml:"isPublic"` // 是
+	// 否公开
 	AllowApplyPermission bool `json:"allowApplyPermission" yaml:"allowApplyPermission"` // 是否允许申请权限
 	MatchSubpath         bool `json:"matchSubpath" yaml:"matchSubpath"`                 // 是否匹配子路径
 	EnableWebsocket      bool `json:"enableWebsocket" yaml:"enableWebsocket"`           // 是否启用 websocket
@@ -156,9 +157,9 @@ func (c *ResourceBasicConfig) WithAuthConfig(authConfig AuthConfig) Option {
 }
 
 // WithMcpEnable 设置资源同步mcp配置
-func (c *ResourceBasicConfig) WithMcpEnable(enableMcp bool) Option {
+func (c *ResourceBasicConfig) WithMcpEnable(enableMcpServers bool) Option {
 	return func(config *APIGatewayResourceConfig) {
-		config.EnableMcp = enableMcp
+		config.EnableMcpServers = enableMcpServers
 	}
 }
 
