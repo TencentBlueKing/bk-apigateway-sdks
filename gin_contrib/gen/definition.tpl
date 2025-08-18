@@ -38,7 +38,7 @@ stages:
     vars: {}
     {{- end}}
     {{- end}}
-    {{- if .Stage.EnableMcp}}
+    {{- if .Stage.EnableMcpServers}}
     mcp_servers:
       {{- range .Stage.McpServerConfigs}}
       - name: "{{.Name}}"

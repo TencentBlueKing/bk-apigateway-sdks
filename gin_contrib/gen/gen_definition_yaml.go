@@ -43,7 +43,7 @@ func GenDefinitionYaml(config *model.APIConfig, docPath string, engine *gin.Engi
 	}
 
 	// 如果开启mcp，则需要根据 route 配置校验tool以及填充tool配置(如果没有指定)
-	if config.Stage.EnableMcp {
+	if config.Stage.EnableMcpServers {
 		// 获取route 网关配置
 		routeConfigMap := util.GetRouteConfigMap(engine)
 		// 解析 Swagger 文件

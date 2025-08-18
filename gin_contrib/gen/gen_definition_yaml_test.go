@@ -109,7 +109,7 @@ func TestGenDefinitionConfigWithMcpServer(t *testing.T) {
 			EnvVars: map[string]string{
 				"foo": "bar",
 			},
-			EnableMcp: true,
+			EnableMcpServers: true,
 			McpServerConfigs: []*model.McpServer{
 				{
 					Name:           "mcp-server-1",

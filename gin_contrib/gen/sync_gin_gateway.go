@@ -119,7 +119,7 @@ func SyncGinGateway(baseDir string, apiGatewayName string, config *model.APIConf
 		log.Printf("release gateway resource version success, result:%v\n", result)
 	}
 
-	if config.Stage.EnableMcp {
+	if config.Stage.EnableMcpServers {
 		// 同步网关stage MCP Server 配置
 		result, err = defaultManager.SyncStageMcpConfig()
 		if err != nil {

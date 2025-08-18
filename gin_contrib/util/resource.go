@@ -87,7 +87,7 @@ func GetMcpToolAndValidate(swagger spec.Swagger, routeMap map[string]*RouteConfi
 			return []string{}
 		}
 		// 判断是否有开启mcp
-		if !routeConfig.Config.EnableMcpServers {
+		if !routeConfig.Config.EnableMcp {
 			log.Fatalf("tool: %s not enable mcp", tool)
 			return []string{}
 		}
@@ -102,7 +102,7 @@ func GetMcpToolAndValidate(swagger spec.Swagger, routeMap map[string]*RouteConfi
 			// 构造匹配键
 			key := fmt.Sprintf("%s:%s", path, method)
 			// 如果配置了mcp,则校验
-			if c, exists := routeMap[key]; exists && c.Config != nil && c.Config.EnableMcpServers {
+			if c, exists := routeMap[key]; exists && c.Config != nil && c.Config.EnableMcp {
 				// 如果指定了operationID,则使用指定的
 				if operation.ID == "" {
 					operation.ID = c.OperationID
