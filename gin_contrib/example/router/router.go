@@ -26,6 +26,7 @@ func New() *gin.Engine {
 	util.RegisterBkAPIGatewayRoute(r, "POST", "/testapi/update-product/:product_id",
 		model.NewAPIGatewayResourceConfig(
 			basicConfig,
+			basicConfig.WithOperationID("update_product_set"),
 			basicConfig.WithBackend(model.BackendConfig{
 				Path:   "/testapi/update-product/{product_id}",
 				Method: "post",

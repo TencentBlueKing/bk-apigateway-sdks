@@ -36,6 +36,9 @@ func MergeSwaggerConfig(swagger spec.Swagger, routeMap map[string]*RouteConfig) 
 					if c.Config.Backend.Method == "" {
 						c.Config.Backend.Method = strings.ToLower(method)
 					}
+					if c.Config.OperationID != "" {
+						operation.ID = c.Config.OperationID
+					}
 					if operation.Extensions == nil {
 						operation.Extensions = spec.Extensions{}
 					}
@@ -80,17 +83,8 @@ func GetMcpToolAndValidate(swagger spec.Swagger, routeMap map[string]*RouteConfi
 	toolMap := make(map[string]struct{})       // 指定的tool的资源
 	canUseToolMap := make(map[string]struct{}) // 可以作为mcp tool 的资源
 	allToolMap := make(map[string]struct{})    // 所有资源
+
 	for _, tool := range tools {
-		routeConfig, ok := routeMap[tool]
-		if !ok {
-			log.Fatalf("tool: %s not found in route configs", tool)
-			return []string{}
-		}
-		// 判断是否有开启mcp
-		if !routeConfig.Config.EnableMcp {
-			log.Fatalf("tool: %s not enable mcp", tool)
-			return []string{}
-		}
 		toolMap[tool] = struct{}{}
 	}
 
@@ -104,6 +98,10 @@ func GetMcpToolAndValidate(swagger spec.Swagger, routeMap map[string]*RouteConfi
 			// 如果配置了mcp,则校验
 			if c, exists := routeMap[key]; exists && c.Config != nil && c.Config.EnableMcp {
 				// 如果指定了operationID,则使用指定的
+				if c.Config.OperationID != "" {
+					operation.ID = c.Config.OperationID
+				}
+				// 如果没有指定operationID,则使用自动生成的
 				if operation.ID == "" {
 					operation.ID = c.OperationID
 				}
@@ -137,13 +135,14 @@ func GetMcpToolAndValidate(swagger spec.Swagger, routeMap map[string]*RouteConfi
 			}
 		}
 	}
+
 	if isSpecified {
 		// 如果指定了tool,则校验是否都在canUseToolMap中
 		for tool := range toolMap {
 			// 判断是否在所有的tool中
 			_, ok := allToolMap[tool]
 			if !ok {
-				log.Fatalf("tool: %s not found in all resources", tool)
+				log.Fatalf("tool: %s not found in all enabled mcp resources", tool)
 				return []string{}
 			}
 			// 判断是否在canUseToolMap,不在则报错
