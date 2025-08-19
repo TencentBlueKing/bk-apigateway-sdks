@@ -71,11 +71,11 @@ type ResourceDocConfig struct {
 // APIGatewayResourceConfig resource 配置结构体定义
 type APIGatewayResourceConfig struct {
 	ResourceBasicConfig                 // 资源基础配置
-	Backend             BackendConfig   `json:"backend" yaml:"backend"` // 后端配置
+	Backend             BackendConfig   `json:"backend" yaml:"backend"`                                 // 后端配置
 	PluginConfigs       []*PluginConfig `json:"pluginConfigs,omitempty" yaml:"pluginConfigs,omitempty"` // 插件配置
-	AuthConfig          AuthConfig      `json:"authConfig" yaml:"authConfig"` // 认证配置
-	EnableMcp           bool            `json:"-" yaml:"-"` // 是否启用同步mcp
-	OperationID         string          `json:"-" yaml:"-"` // 资源name
+	AuthConfig          AuthConfig      `json:"authConfig" yaml:"authConfig"`                           // 认证配置
+	EnableMcp           bool            `json:"-" yaml:"-"`                                             // 是否启用同步mcp
+	OperationID         string          `json:"-" yaml:"-"`                                             // 资源name
 	// nolint: lll
 	NonSchema bool `json:"nonSchema,omitempty" yaml:"nonSchema,omitempty"` // 如果接口没有任何参数，则开启mcp需要设置为true
 }
@@ -172,9 +172,9 @@ func (c *ResourceBasicConfig) WithNonSchema(nonSchema bool) Option {
 }
 
 // WithOperationID 设置资源name
-func (c *ResourceBasicConfig) WithOperationID(OperationID string) Option {
+func (c *ResourceBasicConfig) WithOperationID(operationID string) Option {
 	return func(config *APIGatewayResourceConfig) {
-		config.OperationID = OperationID
+		config.OperationID = operationID
 	}
 }
 
