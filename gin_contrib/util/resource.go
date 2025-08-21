@@ -142,7 +142,11 @@ func GetMcpToolAndValidate(swagger spec.Swagger, routeMap map[string]*RouteConfi
 			// 判断是否在所有的tool中
 			_, ok := allToolMap[tool]
 			if !ok {
-				log.Fatalf("tool: %s not found in any resource with EnableMcp=true. Please ensure the tool is configured with EnableMcp=true in its resource configuration.", tool)
+				log.Fatalf(
+					"tool: %s not found in any resource with EnableMcp=true. "+
+						"Please ensure the tool is configured with EnableMcp=true in its resource configuration.",
+					tool,
+				)
 				return []string{}
 			}
 			// 判断是否在canUseToolMap,不在则报错
