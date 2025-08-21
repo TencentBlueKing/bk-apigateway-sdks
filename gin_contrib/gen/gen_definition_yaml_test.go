@@ -118,6 +118,7 @@ func TestGenDefinitionConfigWithMcpServer(t *testing.T) {
 					Status:         1,
 					Labels:         []string{"label1", "label2"},
 					TargetAppCodes: []string{"app1", "app2"},
+					Tools:          []string{"update_product_set"},
 				},
 			},
 		},

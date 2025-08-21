@@ -75,6 +75,7 @@ type APIGatewayResourceConfig struct {
 	PluginConfigs       []*PluginConfig `json:"pluginConfigs,omitempty" yaml:"pluginConfigs,omitempty"` // 插件配置
 	AuthConfig          AuthConfig      `json:"authConfig" yaml:"authConfig"`                           // 认证配置
 	EnableMcp           bool            `json:"-" yaml:"-"`                                             // 是否启用同步mcp
+	OperationID         string          `json:"-" yaml:"-"`                                             // 资源name
 	// nolint: lll
 	NonSchema bool `json:"nonSchema,omitempty" yaml:"nonSchema,omitempty"` // 如果接口没有任何参数，则开启mcp需要设置为true
 }
@@ -167,6 +168,13 @@ func (c *ResourceBasicConfig) WithMcpEnable(enableMcpServers bool) Option {
 func (c *ResourceBasicConfig) WithNonSchema(nonSchema bool) Option {
 	return func(config *APIGatewayResourceConfig) {
 		config.NonSchema = nonSchema
+	}
+}
+
+// WithOperationID 设置资源name
+func (c *ResourceBasicConfig) WithOperationID(operationID string) Option {
+	return func(config *APIGatewayResourceConfig) {
+		config.OperationID = operationID
 	}
 }
 
