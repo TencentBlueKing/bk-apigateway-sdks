@@ -11,6 +11,13 @@
 
 package model
 
+type MCPServerProtocol string
+
+const (
+	MCPServerProtocolSSE            MCPServerProtocol = "sse"
+	MCPServerProtocolStreamableHTTP MCPServerProtocol = "streamable_http"
+)
+
 type APIConfig struct {
 	Release          ReleaseConfig
 	APIGateway       GatewayConfig
@@ -50,8 +57,10 @@ type StageConfig struct {
 
 type McpServer struct {
 	Name           string
+	Title          string // 中文名
 	Description    string
 	IsPublic       bool
+	ProtocolType   MCPServerProtocol // MCP 协议类型：sse,streamable_http
 	Status         int
 	Labels         []string
 	Tools          []string
