@@ -58,7 +58,7 @@ stages:
           {{- end}}
         {{- end}}
         resource_names:
-          {{- range .Tools}}
+          {{- range .ResourceNames}}
           - "{{.}}"
           {{- end}}
         {{- if .ToolNames}}
