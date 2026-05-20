@@ -42,21 +42,49 @@ stages:
     mcp_servers:
       {{- range .Stage.McpServerConfigs}}
       - name: "{{.Name}}"
+        {{- if .Title}}
+        title: "{{.Title}}"
+        {{- end}}
         description: "{{.Description}}"
         is_public: {{.IsPublic}}
         status: {{.Status}}
+        {{- if .ProtocolType}}
+        protocol_type: "{{.ProtocolType}}"
+        {{- end}}
+        {{- if .Labels}}
         labels:
           {{- range .Labels}}
           - "{{.}}"
           {{- end}}
-        tools:
+        {{- end}}
+        resource_names:
           {{- range .Tools}}
           - "{{.}}"
           {{- end}}
+        {{- if .ToolNames}}
+        tool_names:
+          {{- range .ToolNames}}
+          - "{{.}}"
+          {{- end}}
+        {{- end}}
+        {{- if .TargetAppCodes}}
         target_app_codes:
           {{- range .TargetAppCodes}}
           - "{{.}}"
           {{- end}}
+        {{- end}}
+        {{- if .Oauth2PublicClientEnabled}}
+        oauth2_public_client_enabled: {{.Oauth2PublicClientEnabled}}
+        {{- end}}
+        {{- if .RawResponseEnabled}}
+        raw_response_enabled: {{.RawResponseEnabled}}
+        {{- end}}
+        {{- if .CategoryNames}}
+        category_names:
+          {{- range .CategoryNames}}
+          - "{{.}}"
+          {{- end}}
+        {{- end}}
       {{- end}}
     {{- end}}
     backends:
