@@ -53,7 +53,7 @@ func GenDefinitionYaml(config *model.APIConfig, docPath string, engine *gin.Engi
 			log.Fatal(err)
 		}
 		for _, mcpServer := range config.Stage.McpServerConfigs {
-			mcpServer.Tools = util.GetMcpToolAndValidate(swagger, routeConfigMap, mcpServer.Tools)
+			mcpServer.ResourceNames = util.GetMcpToolAndValidate(swagger, routeConfigMap, mcpServer.ResourceNames)
 		}
 	}
 

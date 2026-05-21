@@ -56,15 +56,19 @@ type StageConfig struct {
 }
 
 type McpServer struct {
-	Name           string
-	Title          string // 中文名
-	Description    string
-	IsPublic       bool
-	ProtocolType   MCPServerProtocol // MCP 协议类型：sse,streamable_http
-	Status         int
-	Labels         []string
-	Tools          []string
-	TargetAppCodes []string
+	Name                     string
+	Title                    string            // 中文名/显示名称
+	Description              string
+	IsPublic                 bool
+	ProtocolType             MCPServerProtocol // MCP 协议类型：sse,streamable_http
+	Status                   int
+	Labels                   []string
+	ResourceNames            []string // 资源名称列表（对应 Python SDK 的 resource_names）
+	ToolNames                []string // 工具名称列表，默认等于 ResourceNames；如需重命名可设置此字段，长度必须与 ResourceNames 一致且不能重复
+	TargetAppCodes           []string
+	Oauth2PublicClientEnabled bool // 是否开启 OAuth2 公开客户端模式，开启后将对 bk_app_code=public 的应用授权，默认不开启
+	RawResponseEnabled       bool   // 是否返回原始响应，开启后 mcp-proxy 将直接返回 API 响应结果，不添加 request_id 等额外信息，默认不开启
+	CategoryNames            []string // MCP Server 分类名称列表，不传则不更新分类
 }
 
 type GrantPermissionConfig struct {
