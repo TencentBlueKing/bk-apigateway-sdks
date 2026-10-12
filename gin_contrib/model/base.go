@@ -38,24 +38,11 @@ type GatewayConfig struct {
 	Description   string
 	DescriptionEn string
 	IsPublic      bool
-	// 网关类型：1 官方网关，10 普通网关；为空时不修改。推荐使用 IsOfficial
-	APIType string
 	// 是否为官方网关，官方网关的名称需要以 bk- 开头
 	IsOfficial  bool
 	Maintainers []string
-	// 网关类别：normal（默认）、ai，只在创建网关时生效
+	// 创建 AI 网关时设置为 ai
 	Kind string
-	// 创建网关时绑定的数据面，默认为 default
-	DataPlanes []string
-	// 文档维护人，在 API 文档中展示
-	DocMaintainers *DocMaintainers
-}
-
-type DocMaintainers struct {
-	Type               string   // 联系人类型：user 用户，service_account 服务号
-	Contacts           []string // 联系人
-	ServiceAccountName string   // 服务号名称
-	ServiceAccountLink string   // 服务号链接
 }
 
 type StageConfig struct {

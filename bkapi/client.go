@@ -143,13 +143,7 @@ func logResponse(logger *slog.Logger, ctx *context.Context) {
 		}
 		// the body is already in memory, see errorBodyTransport
 		apiErr := newError(res, readBody(res))
-		attrs = append(attrs,
-			slog.String("error_code", apiErr.Code),
-			slog.String("error_message", apiErr.Message),
-		)
-		if len(apiErr.Details) > 0 {
-			attrs = append(attrs, slog.String("error_details", string(apiErr.Details)))
-		}
+		attrs = append(attrs, slog.Any("error", apiErr.Data))
 	}
 	if traceparent := ctx.Request.Header.Get("Traceparent"); traceparent != "" {
 		attrs = append(attrs, slog.String("traceparent", traceparent))

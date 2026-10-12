@@ -42,7 +42,7 @@ func TestSyncGinGateway(t *testing.T) {
 			Description:   "示例网关",
 			DescriptionEn: "Example Gateway",
 			IsPublic:      true,
-			APIType:       "10",
+			IsOfficial:    false,
 			Maintainers:   []string{"handryhan"},
 		},
 		Stage: &model.StageConfig{

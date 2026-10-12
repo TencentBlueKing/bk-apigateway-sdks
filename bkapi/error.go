@@ -18,97 +18,45 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 
 	"gopkg.in/h2non/gentleman.v2/context"
 	"gopkg.in/h2non/gentleman.v2/plugin"
 )
 
 // Error is returned when the API responds with a non-2xx status.
-//
-// The fields follow the BlueKing error response, which is like {"error": {"code": ..., "message": ...}}.
 type Error struct {
 	StatusCode int
-	// Code is the category of the error, such as INVALID_ARGUMENT, for the caller to branch on.
-	Code string
-	// Message describes the error to users.
-	Message string
-	// System is the system that raises the error, such as bk-apigateway. It is optional.
-	System string
-	// Details is the JSON array of the sub errors for developers to locate the problem, such as the invalid
-	// fields. Each has a code and a message, and other fields that vary with the system. It is nil if empty.
-	Details json.RawMessage
-	// Data is the JSON object for the caller to handle the error, such as the permissions to apply for
-	// IAM_NO_PERMISSION. It is nil if empty.
-	Data json.RawMessage
+	// Data contains the response's error value. Its fields and types are defined by the API.
+	Data any
 	// RequestID identifies the request in the logs of the gateway.
 	RequestID string
 }
 
 func (e *Error) Error() string {
-	var b strings.Builder
-	fmt.Fprintf(&b, "bkapi: status=%d code=%s message=%q", e.StatusCode, e.Code, e.Message)
-	if e.System != "" {
-		fmt.Fprintf(&b, " system=%s", e.System)
-	}
-	if len(e.Details) > 0 {
-		fmt.Fprintf(&b, " details=%s", e.Details)
-	}
-	fmt.Fprintf(&b, " request_id=%s", e.RequestID)
-	return b.String()
+	return fmt.Sprintf("bkapi: status=%d error=%v request_id=%s", e.StatusCode, e.Data, e.RequestID)
 }
 
-// newError creates the Error of a non-2xx response from its body.
-//
-// The responses that do not follow the BlueKing error response fall back to:
-//   - the legacy body like {"code": 1640301, "code_name": "APP_NO_PERMISSION", "message": ...}, such as the
-//     requests rejected by the gateway and the APIs not migrated yet
-//   - the X-Bkapi-Error-Code and X-Bkapi-Error-Message headers set by the gateway
-//   - the text of the status, when the body is not JSON
+// newError preserves the error value without assuming its structure. Older JSON responses
+// are kept as a whole; non-JSON responses fall back to gateway headers and the HTTP status.
 func newError(res *http.Response, body []byte) *Error {
-	var payload struct {
-		Error struct {
-			Code    string          `json:"code"`
-			Message string          `json:"message"`
-			System  string          `json:"system"`
-			Details json.RawMessage `json:"details"`
-			Data    json.RawMessage `json:"data"`
-		} `json:"error"`
-		Code     json.RawMessage `json:"code"` // a number or a string
-		CodeName string          `json:"code_name"`
-		Message  string          `json:"message"`
-	}
-	// Unmarshal keeps the fields it can decode, so the error is ignored
-	_ = json.Unmarshal(body, &payload)
-
-	return &Error{
+	result := &Error{
 		StatusCode: res.StatusCode,
-		Code: cmp.Or(
-			payload.Error.Code,
-			payload.CodeName,
-			strings.Trim(string(payload.Code), `"`),
-			res.Header.Get("X-Bkapi-Error-Code"),
-		),
-		Message: cmp.Or(
-			payload.Error.Message,
-			payload.Message,
-			res.Header.Get("X-Bkapi-Error-Message"),
-			http.StatusText(res.StatusCode),
-		),
-		System:    payload.Error.System,
-		Details:   nonEmpty(payload.Error.Details),
-		Data:      nonEmpty(payload.Error.Data),
-		RequestID: cmp.Or(res.Header.Get("X-Bkapi-Request-Id"), res.Header.Get("X-Request-Id")),
+		RequestID:  cmp.Or(res.Header.Get("X-Bkapi-Request-Id"), res.Header.Get("X-Request-Id")),
 	}
-}
-
-// nonEmpty returns nil for the JSON values without content, which servers send for the unset optional fields.
-func nonEmpty(raw json.RawMessage) json.RawMessage {
-	switch string(raw) {
-	case "null", "[]", "{}":
-		return nil
+	var payload map[string]any
+	if err := json.Unmarshal(body, &payload); err == nil && payload != nil {
+		if data, ok := payload["error"]; ok {
+			result.Data = data
+		} else {
+			result.Data = payload
+		}
+		return result
 	}
-	return raw
+	result.Data = map[string]any{
+		"code":    res.Header.Get("X-Bkapi-Error-Code"),
+		"message": cmp.Or(res.Header.Get("X-Bkapi-Error-Message"), http.StatusText(res.StatusCode)),
+	}
+	return result
 }
 
 // readBody reads the body of the response, and leaves it to be read again.

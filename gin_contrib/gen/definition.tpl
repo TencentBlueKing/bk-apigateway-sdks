@@ -8,35 +8,9 @@ apigateway:
   description: "{{.APIGateway.Description}}"
   description_en: "{{.APIGateway.DescriptionEn}}"
   is_public: {{.APIGateway.IsPublic}}
-  {{- if .APIGateway.APIType}}
-  api_type: {{.APIGateway.APIType}}
-  {{- end}}
-  {{- if .APIGateway.IsOfficial}}
-  is_official: true
-  {{- end}}
+  api_type: {{if .APIGateway.IsOfficial}}1{{else}}10{{end}}
   {{- if .APIGateway.Kind}}
   kind: "{{.APIGateway.Kind}}"
-  {{- end}}
-  {{- if .APIGateway.DataPlanes}}
-  data_planes:
-    {{- range .APIGateway.DataPlanes}}
-    - "{{.}}"
-    {{- end}}
-  {{- end}}
-  {{- with .APIGateway.DocMaintainers}}
-  doc_maintainers:
-    type: "{{.Type}}"
-    {{- if .Contacts}}
-    contacts:
-      {{- range .Contacts}}
-      - "{{.}}"
-      {{- end}}
-    {{- end}}
-    {{- if or .ServiceAccountName .ServiceAccountLink}}
-    service_account:
-      name: "{{.ServiceAccountName}}"
-      link: "{{.ServiceAccountLink}}"
-    {{- end}}
   {{- end}}
   maintainers:{{if .APIGateway.Maintainers}}
     {{- range .APIGateway.Maintainers}}

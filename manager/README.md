@@ -149,4 +149,4 @@ log.Println(claims.GatewayName, claims.App.AppCode, claims.User.Username)
 
 ## 错误处理
 
-调用网关接口失败时返回 `*bkapi.Error`，包含状态码、错误码、错误信息和请求 ID，详见 [bkapi](../bkapi#错误处理)。
+调用网关接口失败时返回 `*bkapi.Error`，包含状态码、服务端错误内容和请求 ID，详见 [bkapi](../bkapi#错误处理)。

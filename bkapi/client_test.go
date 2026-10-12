@@ -135,69 +135,47 @@ var _ = Describe("Client", func() {
 		})
 	})
 
-	DescribeTable("should return the error of a non-2xx response",
-		func(status int, header http.Header, body string, want bkapi.Error) {
+	DescribeTable("should preserve the error of a non-2xx response",
+		func(status int, header http.Header, body, wantData, requestID string) {
 			c := newClient(bkapi.Config{Endpoint: serve(status, header, body)})
 			_, err := c.Get().Send()
 
 			var apiErr *bkapi.Error
 			Expect(errors.As(err, &apiErr)).To(BeTrue())
-			Expect(*apiErr).To(Equal(want))
+			var data any
+			Expect(json.Unmarshal([]byte(wantData), &data)).To(Succeed())
+			Expect(*apiErr).To(Equal(bkapi.Error{StatusCode: status, Data: data, RequestID: requestID}))
 		},
 		Entry("from the response body", 400,
 			http.Header{"X-Bkapi-Request-Id": {"request-1"}},
 			`{"error": {"code": "INVALID_ARGUMENT", "message": "invalid version", "details": [], "data": {}}}`,
-			bkapi.Error{
-				StatusCode: 400,
-				Code:       "INVALID_ARGUMENT",
-				Message:    "invalid version",
-				RequestID:  "request-1",
-			}),
-		Entry("with the system, details and data", 403,
+			`{"code": "INVALID_ARGUMENT", "message": "invalid version", "details": [], "data": {}}`, "request-1"),
+		Entry("with fields defined by the API", 403,
 			http.Header{"X-Request-Id": {"request-3"}},
-			`{"error": {"code": "IAM_NO_PERMISSION", "message": "no permission", "system": "bk-job",
-				"details": [{"code": "ACTION_DENIED", "message": "denied"}], "data": {"system": "bk_job"}}}`,
-			bkapi.Error{
-				StatusCode: 403,
-				Code:       "IAM_NO_PERMISSION",
-				Message:    "no permission",
-				System:     "bk-job",
-				Details:    json.RawMessage(`[{"code": "ACTION_DENIED", "message": "denied"}]`),
-				Data:       json.RawMessage(`{"system": "bk_job"}`),
-				RequestID:  "request-3",
-			}),
+			`{"error": {"code": 403, "message": ["denied"], "system": "bk-job",
+    "details": {"action": "read"}, "data": {"system": "bk_job"}, "retryable": false}}`,
+			`{"code": 403, "message": ["denied"], "system": "bk-job",
+    "details": {"action": "read"}, "data": {"system": "bk_job"}, "retryable": false}`, "request-3"),
+		Entry("without code or message", 400, nil,
+			`{"error": {"reason": "invalid name", "field": "name"}}`,
+			`{"reason": "invalid name", "field": "name"}`, ""),
+		Entry("with an empty object", 400, nil, `{"error": {}}`, `{}`, ""),
+		Entry("with a null error", 400, nil, `{"error": null}`, `null`, ""),
+		Entry("with a string error", 400, nil, `{"error": "invalid name"}`, `"invalid name"`, ""),
+		Entry("with a list error", 400, nil, `{"error": [{"field": "name"}]}`, `[{"field": "name"}]`, ""),
 		Entry("from the legacy body of the gateway", 403,
-			http.Header{
-				"X-Bkapi-Request-Id":    {"request-2"},
-				"X-Bkapi-Error-Code":    {"1640301"},
-				"X-Bkapi-Error-Message": {"App has no permission to the resource"},
-			},
+			http.Header{"X-Bkapi-Request-Id": {"request-2"}, "X-Bkapi-Error-Code": {"1640301"}},
 			`{"code": 1640301, "code_name": "APP_NO_PERMISSION", "message": "App has no permission"}`,
-			bkapi.Error{
-				StatusCode: 403,
-				Code:       "APP_NO_PERMISSION",
-				Message:    "App has no permission",
-				RequestID:  "request-2",
-			}),
-		Entry("from the legacy body with a numeric code", 400,
-			nil,
+			`{"code": 1640301, "code_name": "APP_NO_PERMISSION", "message": "App has no permission"}`, "request-2"),
+		Entry("from the legacy body with a numeric code", 400, nil,
 			`{"result": false, "code": 40000, "message": "invalid params", "data": null}`,
-			bkapi.Error{StatusCode: 400, Code: "40000", Message: "invalid params"}),
+			`{"result": false, "code": 40000, "message": "invalid params", "data": null}`, ""),
 		Entry("from the headers of the gateway", 401,
-			http.Header{
-				"X-Bkapi-Error-Code":    {"1640001"},
-				"X-Bkapi-Error-Message": {"App authentication failed"},
-			},
-			``,
-			bkapi.Error{StatusCode: 401, Code: "1640001", Message: "App authentication failed"}),
-		Entry("from the status", 502,
-			nil,
-			`<html>502 Bad Gateway</html>`,
-			bkapi.Error{StatusCode: 502, Message: "Bad Gateway"}),
-		Entry("of a redirect", 302,
-			nil,
-			``,
-			bkapi.Error{StatusCode: 302, Message: "Found"}),
+			http.Header{"X-Bkapi-Error-Code": {"1640001"}, "X-Bkapi-Error-Message": {"App authentication failed"}},
+			``, `{"code": "1640001", "message": "App authentication failed"}`, ""),
+		Entry("from the status", 502, nil, `<html>502 Bad Gateway</html>`,
+			`{"code": "", "message": "Bad Gateway"}`, ""),
+		Entry("of a redirect", 302, nil, ``, `{"code": "", "message": "Found"}`, ""),
 	)
 
 	Context("Server not responding", func() {
@@ -323,24 +301,24 @@ var _ = Describe("Client", func() {
 		})
 		_, err := c.Get().Send()
 		Expect(err).To(HaveOccurred())
-		Expect(logs.String()).To(ContainSubstring("error_code=APP_NO_PERMISSION"))
+		Expect(logs.String()).To(ContainSubstring("APP_NO_PERMISSION"))
 	})
 
-	It("should log the details of the error and the traceparent", func() {
+	It("should log the complete error object and the traceparent", func() {
 		var logs bytes.Buffer
 		c := newClient(bkapi.Config{
-			Endpoint: serve(400, nil, `{"error": {"code": "INVALID_ARGUMENT", "message": "invalid",
-				"details": [{"code": "REQUIRED", "message": "name is required"}]}}`),
-			Logger: slog.New(slog.NewTextHandler(&logs, nil)),
+			Endpoint: serve(400, nil, `{"error": {"reason": "invalid", "details": {"name": "required"}}}`),
+			Logger:   slog.New(slog.NewJSONHandler(&logs, nil)),
 		})
 		_, err := c.Get().SetHeader("traceparent", "00-trace-span-01").Send()
 
-		Expect(err).To(MatchError(ContainSubstring(`details=[{"code": "REQUIRED", "message": "name is required"}]`)))
-		Expect(logs.String()).To(And(
-			ContainSubstring("error_code=INVALID_ARGUMENT"),
-			ContainSubstring("name is required"),
-			ContainSubstring("traceparent=00-trace-span-01"),
-		))
+		Expect(err).To(MatchError(ContainSubstring("required")))
+		var entry map[string]any
+		Expect(json.Unmarshal(logs.Bytes(), &entry)).To(Succeed())
+		Expect(entry["error"]).To(Equal(map[string]any{
+			"reason": "invalid", "details": map[string]any{"name": "required"},
+		}))
+		Expect(entry["traceparent"]).To(Equal("00-trace-span-01"))
 	})
 
 	It("should not log the errors without a response", func() {

@@ -35,13 +35,6 @@ func TestGenDefinitionConfig(t *testing.T) {
 			IsPublic:      true,
 			IsOfficial:    true,
 			Maintainers:   []string{"user1", "user2"},
-			Kind:          "ai",
-			DataPlanes:    []string{"default"},
-			DocMaintainers: &model.DocMaintainers{
-				Type:               "service_account",
-				ServiceAccountName: "helper",
-				ServiceAccountLink: "https://example.com",
-			},
 		},
 		Stage: &model.StageConfig{
 			Name:           "prod",
@@ -101,16 +94,9 @@ func TestGenDefinitionConfig(t *testing.T) {
 		"description":    "示例网关",
 		"description_en": "Example Gateway",
 		"is_public":      true,
-		"is_official":    true,
+		"api_type":       1,
 		"maintainers":    []any{"user1", "user2"},
-		"kind":           "ai",
-		"data_planes":    []any{"default"},
-		"doc_maintainers": map[string]any{
-			"type":            "service_account",
-			"service_account": map[string]any{"name": "helper", "link": "https://example.com"},
-		},
 	}
-	// api_type is not rendered when it is empty, as the api rejects null
 	if !reflect.DeepEqual(parsed.Gateway, wantGateway) {
 		t.Errorf("gateway = %v, want %v", parsed.Gateway, wantGateway)
 	}
@@ -128,7 +114,7 @@ func TestGenDefinitionConfigWithMcpServer(t *testing.T) {
 			Description:   "示例网关",
 			DescriptionEn: "Example Gateway",
 			IsPublic:      true,
-			APIType:       "10",
+			IsOfficial:    false,
 			Maintainers:   []string{"user1", "user2"},
 		},
 		Stage: &model.StageConfig{
