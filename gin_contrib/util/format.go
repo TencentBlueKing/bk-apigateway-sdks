@@ -19,7 +19,7 @@ import (
 )
 
 func JsonToYAML(jsonData []byte) ([]byte, error) {
-	var jsonObj interface{}
+	var jsonObj any
 	if err := json.Unmarshal(jsonData, &jsonObj); err != nil {
 		return nil, err
 	}

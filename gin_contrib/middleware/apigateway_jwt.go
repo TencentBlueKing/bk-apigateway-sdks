@@ -17,30 +17,25 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi"
-	"github.com/TencentBlueKing/bk-apigateway-sdks/gin_contrib/util"
-	"github.com/TencentBlueKing/bk-apigateway-sdks/manager"
-)
-
-var (
-	once              sync.Once
-	publicMemoryCache *manager.PublicKeyMemoryCache
+	"github.com/TencentBlueKing/bk-apigateway-sdks/v2/gin_contrib/util"
+	"github.com/TencentBlueKing/bk-apigateway-sdks/v2/manager"
 )
 
 const (
 	BkGatewayJWTHeaderKey = "X-Bkapi-Jwt"
 )
 
-func init() {
-	once.Do(func() {
-		config := bkapi.ClientConfig{}
-		publicMemoryCache = manager.NewDefaultPublicKeyMemoryCache(config)
-	})
-}
+// 所有中间件共用一份公钥缓存，第一次创建中间件时才读取环境变量
+var publicKeyCache = sync.OnceValue(func() *manager.PublicKeyMemoryCache {
+	return manager.NewDefaultPublicKeyMemoryCache(manager.ConfigFromEnv())
+})
 
-// GatewayJWTAuthMiddleware 网关JWT鉴权中间件: 用于校验网关JWT,会进行应用、用户认证结构校验，需要使用网关
-// RegisterBkAPIGatewayRoute 或者 RegisterBkAPIGatewayRouteWithGroup 注册路由
+// GatewayJWTAuthMiddleware 校验请求头中的网关 JWT，并检查应用和用户是否通过认证。
+// 路由需要用 RegisterBkAPIGatewayRoute 或 RegisterBkAPIGatewayRouteWithGroup 注册。
+//
+// 请在环境变量加载之后再调用，例如在 main 里读完 .env 之后。
 func GatewayJWTAuthMiddleware() func(c *gin.Context) {
+	parser := manager.NewRsaJwtTokenParser(publicKeyCache())
 	return func(c *gin.Context) {
 		signedToken := c.GetHeader(BkGatewayJWTHeaderKey)
 		if signedToken == "" {
@@ -48,8 +43,6 @@ func GatewayJWTAuthMiddleware() func(c *gin.Context) {
 			c.Abort()
 			return
 		}
-		// get public key
-		parser := manager.NewRsaJwtTokenParser(publicMemoryCache)
 		claims, err := parser.Parse(signedToken)
 		if err != nil {
 			util.UnauthorizedJSONResponse(c, "token is invalid")

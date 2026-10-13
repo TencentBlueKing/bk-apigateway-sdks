@@ -22,7 +22,7 @@ func TestGenerateOperationID(t *testing.T) {
 		// 标准用例
 		{
 			name:     "basic case",
-			input:    "github.com/TencentBlueKing/bk-apigateway-sdks/gin_contrib/example/api.UpdateProduct",
+			input:    "github.com/TencentBlueKing/bk-apigateway-sdks/v2/gin_contrib/example/api.UpdateProduct",
 			expected: "api_update_product",
 		},
 

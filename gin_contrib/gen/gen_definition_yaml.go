@@ -23,8 +23,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-openapi/spec"
 
-	"github.com/TencentBlueKing/bk-apigateway-sdks/gin_contrib/model"
-	"github.com/TencentBlueKing/bk-apigateway-sdks/gin_contrib/util"
+	"github.com/TencentBlueKing/bk-apigateway-sdks/v2/gin_contrib/model"
+	"github.com/TencentBlueKing/bk-apigateway-sdks/v2/gin_contrib/util"
 )
 
 //go:embed definition.tpl

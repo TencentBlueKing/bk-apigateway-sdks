@@ -1,13 +1,59 @@
 package gen
 
 import (
+	"os"
+	"path/filepath"
+	"reflect"
 	"testing"
 
-	"github.com/TencentBlueKing/bk-apigateway-sdks/gin_contrib/example/router"
+	"github.com/gin-gonic/gin"
+	"gopkg.in/yaml.v3"
+
+	"github.com/TencentBlueKing/bk-apigateway-sdks/v2/gin_contrib/example/router"
 )
 
+func TestGenResourceYamlForPlainGinRoute(t *testing.T) {
+	engine := gin.New()
+	engine.GET("/health", func(c *gin.Context) { c.Status(200) })
+	swaggerPath := filepath.Join(t.TempDir(), "swagger.json")
+	if err := os.WriteFile(swaggerPath, []byte(`{"swagger":"2.0","info":{"title":"health","version":"1"},
+		"paths":{"/health":{"get":{"responses":{"200":{"description":"OK"}}}}}}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	for _, subPath := range []string{"", "/stag--default--app", "/stag--default--app/"} {
+		t.Run(subPath, func(t *testing.T) {
+			content := GenResourceYamlFromSwaggerJson(swaggerPath, engine, subPath)
+			var definition struct {
+				Paths map[string]map[string]struct {
+					OperationID string         `yaml:"operationId"`
+					Extension   map[string]any `yaml:"x-bk-apigateway-resource"`
+				} `yaml:"paths"`
+			}
+			if err := yaml.Unmarshal([]byte(content), &definition); err != nil {
+				t.Fatal(err)
+			}
+			operation := definition.Paths["/health"]["get"]
+			if operation.OperationID == "" {
+				t.Fatal("missing operation ID")
+			}
+			if subPath == "" {
+				if operation.Extension != nil {
+					t.Fatalf("unexpected defaults: %v", operation.Extension)
+				}
+				return
+			}
+			want := map[string]any{"backend": map[string]any{
+				"method": "get", "path": "/stag--default--app/health",
+			}}
+			if !reflect.DeepEqual(operation.Extension, want) {
+				t.Fatalf("extension = %v, want %v", operation.Extension, want)
+			}
+		})
+	}
+}
+
 func TestGenResourceYamlFromSwaggerJson(t *testing.T) {
-	GenResourceYamlFromSwaggerJson("../example/docs/swagger.json", router.New())
+	GenResourceYamlFromSwaggerJson("../example/docs/swagger.json", router.New(), "")
 	//`paths:
 	//  /testapi/pet/get-pet-by-id/{pet_id}/:
 	//    get:

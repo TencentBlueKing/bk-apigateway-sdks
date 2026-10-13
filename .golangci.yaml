@@ -40,10 +40,17 @@ formatters:
   enable:
     - gofmt
     - goimports
+    - gofumpt
+    - golines
   settings:
+    golines:
+      max-len: 120
+      reformat-tags: false
+    gofumpt:
+      module-path: github.com/TencentBlueKing/bk-apigateway-sdks/v2
     goimports:
       local-prefixes:
-        - github.com/TencentBlueKing/bk-apigateway-sdks
+        - github.com/TencentBlueKing/bk-apigateway-sdks/v2
   exclusions:
     generated: lax
     paths:

@@ -19,7 +19,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/TencentBlueKing/bk-apigateway-sdks/gin_contrib/model"
+	"github.com/TencentBlueKing/bk-apigateway-sdks/v2/gin_contrib/model"
 )
 
 const (
@@ -82,7 +82,7 @@ func GetRouteConfigMap(engine *gin.Engine) map[string]*RouteConfig {
 }
 
 // GenerateOperationID 从 handler 路径生成蛇形 OperationID
-// 示例输入: "github.com/TencentBlueKing/bk-apigateway-sdks/gin_contrib/example/api.UpdateProduct"
+// 示例输入: "github.com/TencentBlueKing/bk-apigateway-sdks/v2/gin_contrib/example/api.UpdateProduct"
 // 示例输出: "api_update_product"
 func GenerateOperationID(operation string) string {
 	pkgName, funcName := splitPackageAndFunc(operation)

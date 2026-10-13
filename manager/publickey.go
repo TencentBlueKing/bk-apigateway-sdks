@@ -12,6 +12,7 @@
 package manager
 
 import (
+	"context"
 	"math/rand"
 	"time"
 
@@ -19,12 +20,12 @@ import (
 	"github.com/TencentBlueKing/gopkg/cache/memory"
 	"github.com/pkg/errors"
 
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi"
+	"github.com/TencentBlueKing/bk-apigateway-sdks/v2/bkapi"
 )
 
 // PublicKeyProvider is the interface for public key provider.
 type PublicKeyProvider interface {
-	ProvidePublicKey(apiName string) (string, error)
+	ProvidePublicKey(gatewayName string) (string, error)
 }
 
 // PublicKeySimpleProvider provides some predefined public keys.
@@ -33,8 +34,8 @@ type PublicKeySimpleProvider struct {
 }
 
 // ProvidePublicKey returns public key for given api name.
-func (p *PublicKeySimpleProvider) ProvidePublicKey(apiName string) (string, error) {
-	return p.publicKeys[apiName], nil
+func (p *PublicKeySimpleProvider) ProvidePublicKey(gatewayName string) (string, error) {
+	return p.publicKeys[gatewayName], nil
 }
 
 // NewPublicKeySimpleProvider creates a simple public key provider.
@@ -50,30 +51,29 @@ type PublicKeyMemoryCache struct {
 }
 
 // ProvidePublicKey gets public key from cache.
-func (c *PublicKeyMemoryCache) ProvidePublicKey(apiName string) (string, error) {
-	return c.cache.GetString(cache.NewStringKey(apiName))
+func (c *PublicKeyMemoryCache) ProvidePublicKey(gatewayName string) (string, error) {
+	return c.cache.GetString(context.Background(), cache.NewStringKey(gatewayName))
 }
 
 // NewPublicKeyMemoryCache creates a memory cache for public key.
 func NewPublicKeyMemoryCache(
-	config bkapi.ClientConfig,
+	config bkapi.Config,
 	expiration time.Duration,
-	clientFactory func(apiName string, config bkapi.ClientConfig) (*Manager, error),
+	clientFactory func(gatewayName string, config bkapi.Config) (*Manager, error),
 ) *PublicKeyMemoryCache {
 	return &PublicKeyMemoryCache{
 		cache: memory.NewCache(
 			"public-key",
-			false,
-			func(key cache.Key) (interface{}, error) {
-				apiName := key.Key()
-				manager, err := clientFactory(apiName, config)
+			func(ctx context.Context, key cache.Key) (any, error) {
+				gatewayName := key.Key()
+				manager, err := clientFactory(gatewayName, config)
 				if err != nil {
-					return nil, errors.WithMessagef(err, "failed to create manager for %s", apiName)
+					return nil, errors.WithMessagef(err, "failed to create manager for %s", gatewayName)
 				}
 
-				publicKey, err := manager.GetPublicKeyString()
+				publicKey, err := manager.GetPublicKeyString(ctx)
 				if err != nil {
-					return nil, errors.WithMessagef(err, "failed to get public key for %s", apiName)
+					return nil, errors.WithMessagef(err, "failed to get public key for %s", gatewayName)
 				}
 
 				return publicKey, nil
@@ -87,6 +87,6 @@ func NewPublicKeyMemoryCache(
 }
 
 // NewDefaultPublicKeyMemoryCache creates a default memory cache for public key.
-func NewDefaultPublicKeyMemoryCache(config bkapi.ClientConfig) *PublicKeyMemoryCache {
+func NewDefaultPublicKeyMemoryCache(config bkapi.Config) *PublicKeyMemoryCache {
 	return NewPublicKeyMemoryCache(config, 12*time.Hour, NewDefaultManager)
 }

@@ -21,11 +21,11 @@ import (
 
 // Definition represents a definition of a api gateway.
 type Definition struct {
-	definition map[string]interface{}
+	definition map[string]any
 }
 
 // Get sub definition.
-func (d *Definition) Get(namespace string) (map[string]interface{}, error) {
+func (d *Definition) Get(namespace string) (map[string]any, error) {
 	if namespace == "" {
 		return d.definition, nil
 	}
@@ -42,11 +42,11 @@ func (d *Definition) Get(namespace string) (map[string]interface{}, error) {
 		}
 
 		switch realValue := value.(type) {
-		case map[string]interface{}:
+		case map[string]any:
 			current = realValue
-		case map[interface{}]interface{}:
-			// convert map[interface{}]interface{} to map[string]interface{}
-			current = make(map[string]interface{})
+		case map[any]any:
+			// convert map[any]any to map[string]any
+			current = make(map[string]any)
 			for k, v := range realValue {
 				current[fmt.Sprintf("%v", k)] = v
 			}
@@ -60,7 +60,7 @@ func (d *Definition) Get(namespace string) (map[string]interface{}, error) {
 }
 
 // GetArray Get sub array definition.
-func (d *Definition) GetArray(namespace string) ([]map[string]interface{}, error) {
+func (d *Definition) GetArray(namespace string) ([]map[string]any, error) {
 	current := d.definition
 	for _, field := range strings.Split(namespace, ".") {
 		if current == nil {
@@ -71,11 +71,11 @@ func (d *Definition) GetArray(namespace string) ([]map[string]interface{}, error
 			return nil, errors.Wrapf(ErrNotFound, "namespace: %s", namespace)
 		}
 		switch realValue := value.(type) {
-		case []interface{}:
-			// convert []map[interface{}]interface{} to map[string]interface{}
-			result := make([]map[string]interface{}, len(realValue))
+		case []any:
+			// convert []map[any]any to map[string]any
+			result := make([]map[string]any, len(realValue))
 			for i, v := range realValue {
-				result[i] = v.(map[string]interface{})
+				result[i] = v.(map[string]any)
 			}
 			return result, nil
 		default:
@@ -83,11 +83,11 @@ func (d *Definition) GetArray(namespace string) ([]map[string]interface{}, error
 		}
 	}
 
-	return []map[string]interface{}{}, nil
+	return []map[string]any{}, nil
 }
 
 // NewDefinition creates a new definition from the given map.
-func NewDefinition(definition map[string]interface{}) *Definition {
+func NewDefinition(definition map[string]any) *Definition {
 	return &Definition{
 		definition: definition,
 	}
@@ -95,7 +95,7 @@ func NewDefinition(definition map[string]interface{}) *Definition {
 
 // NewDefinitionFromYaml unmarshal the given yaml string to a definition.
 func NewDefinitionFromYaml(content []byte) (*Definition, error) {
-	var definition map[string]interface{}
+	var definition map[string]any
 	err := yaml.Unmarshal(content, &definition)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to unmarshal yaml")

@@ -15,7 +15,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	manager "github.com/TencentBlueKing/bk-apigateway-sdks/manager"
+	manager "github.com/TencentBlueKing/bk-apigateway-sdks/v2/manager"
 )
 
 var _ = Describe("Definition", func() {
@@ -23,10 +23,10 @@ var _ = Describe("Definition", func() {
 		var definition *manager.Definition
 
 		BeforeEach(func() {
-			definition = manager.NewDefinition(map[string]interface{}{
-				"sub": map[string]interface{}{
+			definition = manager.NewDefinition(map[string]any{
+				"sub": map[string]any{
 					"name": "testing",
-					"value": map[string]interface{}{
+					"value": map[string]any{
 						"foo": "bar",
 					},
 				},

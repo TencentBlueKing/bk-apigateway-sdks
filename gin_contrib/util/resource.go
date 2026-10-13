@@ -20,7 +20,10 @@ import (
 	"github.com/go-openapi/spec"
 )
 
-func MergeSwaggerConfig(swagger spec.Swagger, routeMap map[string]*RouteConfig) spec.Swagger {
+// MergeSwaggerConfig merges the route configs into the swagger, and prefixes the backend path
+// with the sub path that the app is deployed under, such as `/stag--default--app`
+func MergeSwaggerConfig(swagger spec.Swagger, routeMap map[string]*RouteConfig, subPath string) spec.Swagger {
+	subPath = strings.TrimRight(subPath, "/")
 	for path, pathItem := range swagger.Paths.Paths {
 		operationMap := GetPathOperationMap(pathItem)
 		for method, operation := range operationMap {
@@ -29,22 +32,30 @@ func MergeSwaggerConfig(swagger spec.Swagger, routeMap map[string]*RouteConfig) 
 			// 合并配置
 			if c, exists := routeMap[key]; exists {
 				if c.Config != nil {
-					c.Config.Backend.Method = strings.ToLower(method)
-					if c.Config.Backend.Path == "" {
-						c.Config.Backend.Path = path
+					// the route configs are shared, copy it to keep merging idempotent
+					config := *c.Config
+					config.Backend.Method = strings.ToLower(method)
+					if config.Backend.Path == "" {
+						config.Backend.Path = path
 					}
-					if c.Config.Backend.Method == "" {
-						c.Config.Backend.Method = strings.ToLower(method)
+					config.Backend.Path = subPath + config.Backend.Path
+					if config.Backend.Method == "" {
+						config.Backend.Method = strings.ToLower(method)
 					}
-					if c.Config.OperationID != "" {
-						operation.ID = c.Config.OperationID
+					if config.OperationID != "" {
+						operation.ID = config.OperationID
 					}
 					if operation.Extensions == nil {
 						operation.Extensions = spec.Extensions{}
 					}
 					// 保持一致
-					c.Config.Backend.MatchSubpath = c.Config.MatchSubpath
-					operation.Extensions.Add("x-bk-apigateway-resource", c.Config)
+					config.Backend.MatchSubpath = config.MatchSubpath
+					operation.Extensions.Add("x-bk-apigateway-resource", &config)
+				} else if subPath != "" && operation.Extensions["x-bk-apigateway-resource"] == nil {
+					// 没有网关配置的路由，网关默认把路由路径当作后端路径，这里只补上部署子路径
+					operation.AddExtension("x-bk-apigateway-resource", map[string]any{
+						"backend": map[string]any{"method": method, "path": subPath + path},
+					})
 				}
 				// 使用生成的OperationID作为路由ID
 				if operation.ID == "" {

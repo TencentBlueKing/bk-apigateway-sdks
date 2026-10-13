@@ -8,7 +8,10 @@ apigateway:
   description: "{{.APIGateway.Description}}"
   description_en: "{{.APIGateway.DescriptionEn}}"
   is_public: {{.APIGateway.IsPublic}}
-  api_type: {{.APIGateway.APIType}}
+  api_type: {{if .APIGateway.IsOfficial}}1{{else}}10{{end}}
+  {{- if .APIGateway.Kind}}
+  kind: "{{.APIGateway.Kind}}"
+  {{- end}}
   maintainers:{{if .APIGateway.Maintainers}}
     {{- range .APIGateway.Maintainers}}
     - "{{.}}"
@@ -76,6 +79,9 @@ stages:
         {{- if .Oauth2PublicClientEnabled}}
         oauth2_public_client_enabled: {{.Oauth2PublicClientEnabled}}
         {{- end}}
+        {{- if .Oauth2PersonalClientEnabled}}
+        oauth2_personal_client_enabled: {{.Oauth2PersonalClientEnabled}}
+        {{- end}}
         {{- if .RawResponseEnabled}}
         raw_response_enabled: {{.RawResponseEnabled}}
         {{- end}}
@@ -106,11 +112,11 @@ stages:
   {{- if or .GrantPermissions.GatewayApps .GrantPermissions.ResourceApps}}
 grant_permissions:
   {{- range .GrantPermissions.GatewayApps}}
-  - bk_app_code: "{{.}}"
-    grant_dimension: "api"
+  - target_app_code: "{{.}}"
+    grant_dimension: "gateway"
   {{- end}}
   {{- range $app_code, $resource_names := .GrantPermissions.ResourceApps}}
-  - bk_app_code: "{{$app_code}}"
+  - target_app_code: "{{$app_code}}"
     grant_dimension: "resource"
     resource_names:
       {{- range $resource_names}}
@@ -119,8 +125,8 @@ grant_permissions:
   {{- end}}
   {{- end}}
 related_apps:
-  {{- if .RelatedApps}}
-- "{{index .RelatedApps 0}}"
+  {{- range .RelatedApps}}
+  - "{{.}}"
   {{- end}}
 resource_docs:
   {{- if .ResourceDocs.BaseDir}}

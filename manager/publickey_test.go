@@ -19,33 +19,25 @@ import (
 	. "github.com/onsi/gomega"
 	gock "gopkg.in/h2non/gock.v1"
 
-	apigateway "github.com/TencentBlueKing/bk-apigateway-sdks/apigateway"
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/bkapi"
-	"github.com/TencentBlueKing/bk-apigateway-sdks/core/define"
-	manager "github.com/TencentBlueKing/bk-apigateway-sdks/manager"
+	"github.com/TencentBlueKing/bk-apigateway-sdks/v2/bkapi"
+	manager "github.com/TencentBlueKing/bk-apigateway-sdks/v2/manager"
 )
 
 var _ = Describe("Publickey", func() {
 	var (
-		config   bkapi.ClientConfig
+		config   bkapi.Config
 		provider *manager.PublicKeyMemoryCache
 	)
 
 	BeforeEach(func() {
-		config = bkapi.ClientConfig{
-			Endpoint: "http://example.com",
-		}
+		config = bkapi.Config{Endpoint: "http://example.com", Transport: gock.NewTransport()}
 		provider = manager.NewPublicKeyMemoryCache(
 			config, time.Hour,
-			func(apiName string, config bkapi.ClientConfig) (*manager.Manager, error) {
+			func(gatewayName string, config bkapi.Config) (*manager.Manager, error) {
 				return manager.NewManager(
-					apiName,
+					gatewayName,
 					config,
 					nil,
-					func(configProvider define.ClientConfigProvider, opts ...define.BkApiClientOption) (*apigateway.Client, error) {
-						opts = append(opts, bkapi.OptTransport(gock.NewTransport()))
-						return apigateway.New(configProvider, opts...)
-					},
 				)
 			},
 		)
@@ -54,15 +46,14 @@ var _ = Describe("Publickey", func() {
 	It("should cache the public key", func() {
 		count := 0
 		gock.New(config.Endpoint).
-			Get("/api/v1/apis/testing/public_key/").
+			Get("/api/v2/sync/gateways/testing/public_key/").
 			AddMatcher(func(_ *http.Request, _ *gock.Request) (bool, error) {
 				count++
 				return true, nil
 			}).
 			Reply(200).
-			JSON(map[string]interface{}{
-				"code": 0,
-				"data": map[string]interface{}{
+			JSON(map[string]any{
+				"data": map[string]any{
 					"public_key": "public_key",
 				},
 			})

@@ -35,9 +35,9 @@ type ApigatewayJwtUser struct {
 // ApigatewayJwtClaims is the jwt token payload, which carries the information of the request.
 type ApigatewayJwtClaims struct {
 	jwt.StandardClaims
-	ApiName string             `json:"-"`
-	App     *ApigatewayJwtApp  `json:"app,omitempty"`
-	User    *ApigatewayJwtUser `json:"user,omitempty"`
+	GatewayName string             `json:"-"`
+	App         *ApigatewayJwtApp  `json:"app,omitempty"`
+	User        *ApigatewayJwtUser `json:"user,omitempty"`
 }
 
 // RsaJwtTokenParser can parse jwt token by rsa algorithm.
@@ -48,25 +48,25 @@ type RsaJwtTokenParser struct {
 // Parse the jwt token.
 func (p *RsaJwtTokenParser) Parse(tokenString string) (ApigatewayJwtClaims, error) {
 	var claims ApigatewayJwtClaims
-	token, err := jwt.ParseWithClaims(tokenString, &claims, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &claims, func(token *jwt.Token) (any, error) {
 		kid, ok := token.Header["kid"]
 		if !ok {
 			return "", errors.Wrapf(ErrKidInvalid, "kid is not found in jwt header")
 		}
 
-		apiName, ok := kid.(string)
+		gatewayName, ok := kid.(string)
 		if !ok {
-			return "", errors.Wrapf(ErrKidInvalid, "expected kid to be %T but got %T", apiName, kid)
+			return "", errors.Wrapf(ErrKidInvalid, "expected kid to be %T but got %T", gatewayName, kid)
 		}
 
-		publicKey, err := p.provider.ProvidePublicKey(apiName)
+		publicKey, err := p.provider.ProvidePublicKey(gatewayName)
 		if err != nil {
-			return "", errors.Wrapf(err, "failed to get public key for %s", apiName)
+			return "", errors.Wrapf(err, "failed to get public key for %s", gatewayName)
 		}
 
 		pubKey, err := jwt.ParseRSAPublicKeyFromPEM([]byte(publicKey))
 		if err != nil {
-			return pubKey, errors.Wrapf(err, "failed to parse rsa public key for %s", apiName)
+			return pubKey, errors.Wrapf(err, "failed to parse rsa public key for %s", gatewayName)
 		}
 
 		return pubKey, nil
@@ -75,7 +75,7 @@ func (p *RsaJwtTokenParser) Parse(tokenString string) (ApigatewayJwtClaims, erro
 		return claims, errors.Wrapf(err, "failed to parse jwt token")
 	}
 
-	claims.ApiName = token.Header["kid"].(string)
+	claims.GatewayName = token.Header["kid"].(string)
 	return claims, err
 }
 

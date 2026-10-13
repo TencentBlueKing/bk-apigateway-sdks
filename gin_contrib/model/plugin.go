@@ -112,10 +112,10 @@ type APIBreakerConfig struct {
 
 // RequestValidationConfig #################### 请求校验插件 ####################
 type RequestValidationConfig struct {
-	BodySchema   map[string]interface{} `yaml:"body_schema,omitempty"`
-	HeaderSchema map[string]interface{} `yaml:"header_schema,omitempty"`
-	RejectedCode int                    `yaml:"rejected_code" validate:"min=200,max=599"`
-	RejectedMsg  string                 `yaml:"rejected_msg,omitempty" validate:"omitempty,max=256"`
+	BodySchema   map[string]any `yaml:"body_schema,omitempty"`
+	HeaderSchema map[string]any `yaml:"header_schema,omitempty"`
+	RejectedCode int            `yaml:"rejected_code" validate:"min=200,max=599"`
+	RejectedMsg  string         `yaml:"rejected_msg,omitempty" validate:"omitempty,max=256"`
 }
 
 // FaultInjectionConfig #################### 故障注入插件 ####################
@@ -134,7 +134,7 @@ type FaultInjectionConfig struct {
 }
 
 // BuildResourcePluginConfigWithType 创建插件配置（带自动校验和格式处理）
-func BuildResourcePluginConfigWithType(pluginType PluginType, config interface{}) *PluginConfig {
+func BuildResourcePluginConfigWithType(pluginType PluginType, config any) *PluginConfig {
 	// 配置校验
 	if err := validateConfig(config); err != nil {
 		log.Printf("plugin config validate error: %v\n", err)
@@ -154,7 +154,7 @@ func BuildResourcePluginConfigWithType(pluginType PluginType, config interface{}
 	}
 }
 
-func BuildStagePluginConfigWithType(pluginType PluginType, config interface{}) *PluginConfig {
+func BuildStagePluginConfigWithType(pluginType PluginType, config any) *PluginConfig {
 	// 配置校验
 	if err := validateConfig(config); err != nil {
 		log.Printf("plugin config validate error: %v\n", err)
@@ -175,7 +175,7 @@ func BuildStagePluginConfigWithType(pluginType PluginType, config interface{}) *
 }
 
 // validateConfig 配置校验
-func validateConfig(config interface{}) error {
+func validateConfig(config any) error {
 	if reflect.ValueOf(config).IsZero() {
 		return nil
 	}
