@@ -19,22 +19,18 @@ import (
 
 // ConfigFromEnv returns the Config of an app deployed on BlueKing PaaS, which calls the stage of the gateway.
 //
-//   - Endpoint: BK_API_URL_TMPL, the URL of a gateway such as http://bkapi.example.com/api/{api_name}/,
-//     followed by stageName. Without it, BK_API_STAGE_URL_TMPL, the URL of a stage such as
-//     http://{stage}-{api_name}.example.com/. {api_name} or {gateway_name} is replaced by gatewayName,
-//     and {stage} by stageName.
+//   - Endpoint: BK_API_URL_TMPL, such as http://bkapi.example.com/api/{api_name}/, where {api_name} or
+//     {gateway_name} is replaced by gatewayName, followed by stageName
 //   - AppCode: BK_APP_CODE, BKPAAS_APP_ID or APP_CODE
 //   - AppSecret: BK_APP_SECRET, BKPAAS_APP_SECRET or SECRET_KEY
 //   - TenantID: BKPAAS_APP_TENANT_ID, which is empty for global tenant apps that belong to the system tenant,
 //     or BK_APP_TENANT_ID for apps not deployed on PaaS
 func ConfigFromEnv(gatewayName, stageName string) Config {
-	tmpl := os.Getenv("BK_API_STAGE_URL_TMPL")
-	if gatewayTmpl := os.Getenv("BK_API_URL_TMPL"); gatewayTmpl != "" {
-		tmpl = strings.TrimRight(gatewayTmpl, "/") + "/{stage}"
+	var endpoint string
+	if tmpl := os.Getenv("BK_API_URL_TMPL"); tmpl != "" {
+		endpoint = strings.NewReplacer("{api_name}", gatewayName, "{gateway_name}", gatewayName).Replace(tmpl)
+		endpoint = strings.TrimSuffix(endpoint, "/") + "/" + stageName
 	}
-	endpoint := strings.NewReplacer(
-		"{api_name}", gatewayName, "{gateway_name}", gatewayName, "{stage}", stageName,
-	).Replace(tmpl)
 
 	tenantID, ok := os.LookupEnv("BKPAAS_APP_TENANT_ID")
 	if ok {

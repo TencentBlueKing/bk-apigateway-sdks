@@ -72,7 +72,7 @@ err = res.JSON(&result)
 
 `ClientConfig` 改为 `bkapi.Config`，`New` 不再读取环境变量：
 
-- 部署在 PaaS 上的应用用 `bkapi.ConfigFromEnv(gatewayName, stageName)` 生成配置，`BK_API_URL_TMPL`、`BK_API_STAGE_URL_TMPL` 的含义和 v1 相同。
+- 部署在 PaaS 上的应用用 `bkapi.ConfigFromEnv(gatewayName, stageName)` 生成配置，`BK_API_URL_TMPL` 的含义和 v1 相同。不再读取 `BK_API_STAGE_URL_TMPL`。
 - 也可以自己填 `Endpoint`，它是网关环境的完整地址，如 `http://bkapi.example.com/api/my-gateway/prod`。
 - `AppTenantID` 改名为 `TenantID`。
 - `Logger` 改为 `*slog.Logger`，默认 `slog.Default()`。

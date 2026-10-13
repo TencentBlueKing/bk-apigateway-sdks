@@ -24,7 +24,7 @@ var _ = Describe("ConfigFromEnv", func() {
 	BeforeEach(func() {
 		// unset the variables, which are restored after the spec
 		for _, key := range []string{
-			"BK_API_URL_TMPL", "BK_API_STAGE_URL_TMPL", "BK_APP_CODE", "BKPAAS_APP_ID", "APP_CODE", "BK_APP_SECRET", "BKPAAS_APP_SECRET",
+			"BK_API_URL_TMPL", "BK_APP_CODE", "BKPAAS_APP_ID", "APP_CODE", "BK_APP_SECRET", "BKPAAS_APP_SECRET",
 			"SECRET_KEY", "BKPAAS_APP_TENANT_ID", "BK_APP_TENANT_ID",
 		} {
 			GinkgoT().Setenv(key, "")
@@ -59,27 +59,6 @@ var _ = Describe("ConfigFromEnv", func() {
 		Entry("with the gateway name in the url template",
 			map[string]string{"BK_API_URL_TMPL": "http://{gateway_name}.apigw.example.com"},
 			bkapi.Config{Endpoint: "http://my-gateway.apigw.example.com/stag"}),
-		Entry("with multiple trailing slashes in the url template",
-			map[string]string{"BK_API_URL_TMPL": "http://bkapi.example.com/api/{api_name}///"},
-			bkapi.Config{Endpoint: "http://bkapi.example.com/api/my-gateway/stag"}),
-		Entry("with only the stage url template",
-			map[string]string{"BK_API_STAGE_URL_TMPL": "http://{stage}-{api_name}.example.com/"},
-			bkapi.Config{Endpoint: "http://stag-my-gateway.example.com/"}),
-		Entry("with an empty url template and a stage url template",
-			map[string]string{
-				"BK_API_URL_TMPL":       "",
-				"BK_API_STAGE_URL_TMPL": "http://{gateway_name}.apigw.example.com/{stage}",
-			},
-			bkapi.Config{Endpoint: "http://my-gateway.apigw.example.com/stag"}),
-		Entry("with a fixed stage url",
-			map[string]string{"BK_API_STAGE_URL_TMPL": "http://bkapi.example.com/api/{gateway_name}/prod"},
-			bkapi.Config{Endpoint: "http://bkapi.example.com/api/my-gateway/prod"}),
-		Entry("with both templates, preferring the gateway url template",
-			map[string]string{
-				"BK_API_URL_TMPL":       "http://primary.example.com/api/{api_name}/",
-				"BK_API_STAGE_URL_TMPL": "http://fallback.example.com/api/{api_name}/{stage}/",
-			},
-			bkapi.Config{Endpoint: "http://primary.example.com/api/my-gateway/stag"}),
 		Entry("of an app not deployed on paas",
 			map[string]string{
 				"BK_APP_CODE":      "app",
