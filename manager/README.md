@@ -4,6 +4,10 @@
 
 它通过 [bkapi](../bkapi) 调用 bk-apigateway 的 v2 接口（`/api/v2/sync/`、`/api/v2/open/`）。
 
+## 从 v1 升级
+
+完整变更见 [v2 迁移指南](../MIGRATION_V2.md)。
+
 ## 安装
 
 ```bash

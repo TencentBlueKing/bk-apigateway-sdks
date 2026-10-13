@@ -4,6 +4,10 @@
 
 `bkapi.New` 返回一个 [gentleman](https://github.com/h2non/gentleman) 客户端，已经配置好网关认证、租户、超时、错误处理和日志。请求的构造和响应的读取都使用 gentleman 的 API。
 
+## 从 v1 升级
+
+完整变更见 [v2 迁移指南](../MIGRATION_V2.md)。
+
 ## 安装
 
 ```bash
@@ -120,10 +124,17 @@ client, err := bkapi.New(bkapi.Config{
 
 | 字段 | 环境变量 |
 | --- | --- |
-| `Endpoint` | `BK_API_URL_TMPL`，其中的 `{api_name}` 或 `{gateway_name}` 替换为网关名，并追加环境名 |
+| `Endpoint` | `BK_API_URL_TMPL`，为空时使用 `BK_API_STAGE_URL_TMPL` |
 | `AppCode` | `BK_APP_CODE`、`BKPAAS_APP_ID`、`APP_CODE`，取第一个非空值 |
 | `AppSecret` | `BK_APP_SECRET`、`BKPAAS_APP_SECRET`、`SECRET_KEY`，取第一个非空值 |
 | `TenantID` | `BKPAAS_APP_TENANT_ID`，为空时使用 `system`；未设置时使用 `BK_APP_TENANT_ID` |
+
+`BK_API_URL_TMPL` 是网关的地址，会在末尾追加环境名；`BK_API_STAGE_URL_TMPL` 是环境的地址，用 `{stage}` 表示环境名。两者的 `{api_name}` 或 `{gateway_name}` 都替换为网关名。例如调用 `ConfigFromEnv("my-gateway", "prod")`：
+
+| 环境变量 | 模板 | 生成地址 |
+| --- | --- | --- |
+| `BK_API_URL_TMPL` | `https://example.com/api/{api_name}/` | `https://example.com/api/my-gateway/prod` |
+| `BK_API_STAGE_URL_TMPL` | `https://{stage}-{api_name}.example.com/` | `https://prod-my-gateway.example.com/` |
 
 ## 错误处理
 

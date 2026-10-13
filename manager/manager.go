@@ -13,6 +13,7 @@ package manager
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"maps"
 	"os"
@@ -60,7 +61,8 @@ func send[T any](ctx context.Context, req *gentleman.Request) (T, error) {
 	if err != nil {
 		return body.Data, err
 	}
-	if err := res.JSON(&body); err != nil {
+	// res.JSON takes an empty body as a success
+	if err := json.Unmarshal(res.Bytes(), &body); err != nil {
 		return body.Data, errors.Wrap(err, "failed to decode response")
 	}
 	return body.Data, nil
@@ -281,7 +283,12 @@ func (m *Manager) GrantPermissions(ctx context.Context) error {
 
 	for _, definedPermission := range permissions {
 		permission := maps.Clone(definedPermission)
-		if permission["grant_dimension"] == nil {
+		// v1 的配置用 bk_app_code 表示被授权的应用，用 api 表示按网关授权
+		if _, ok := permission["target_app_code"]; !ok {
+			permission["target_app_code"] = permission["bk_app_code"]
+		}
+		delete(permission, "bk_app_code")
+		if dimension := permission["grant_dimension"]; dimension == nil || dimension == "api" {
 			permission["grant_dimension"] = "gateway"
 		}
 		_, err := send[any](ctx, m.client.Post().
@@ -297,12 +304,20 @@ func (m *Manager) GrantPermissions(ctx context.Context) error {
 
 // AddRelatedApps add the apps defined in related_apps as the related apps of the gateway.
 func (m *Manager) AddRelatedApps(ctx context.Context) error {
-	relatedApps, ok := m.definition.definition[relatedAppsNamespace].([]any)
-	if !ok || len(relatedApps) == 0 {
+	// related_apps 可能是 YAML 解析出的 []any，也可能是代码里构造的 []string
+	var relatedApps []string
+	raw, err := json.Marshal(m.definition.definition[relatedAppsNamespace])
+	if err == nil {
+		err = json.Unmarshal(raw, &relatedApps)
+	}
+	if err != nil {
+		return errors.Wrapf(err, "%s must be a list of app codes", relatedAppsNamespace)
+	}
+	if len(relatedApps) == 0 {
 		return nil
 	}
 
-	_, err := send[any](ctx, m.client.Post().
+	_, err = send[any](ctx, m.client.Post().
 		AddPath("/api/v2/sync/gateways/:gateway_name/related-apps/").
 		Param("gateway_name", m.gatewayName).
 		JSON(map[string]any{"related_app_codes": relatedApps}))

@@ -41,7 +41,7 @@ type GatewayConfig struct {
 	// 是否为官方网关，官方网关的名称需要以 bk- 开头
 	IsOfficial  bool
 	Maintainers []string
-	// 创建 AI 网关时设置为 ai
+	// 网关类别：normal（默认）、ai，只在创建网关时生效
 	Kind string
 }
 

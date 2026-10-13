@@ -9,6 +9,9 @@
 - [bkapi](bkapi)：网关 API 调用客户端，处理认证、响应、状态码、日志等公共逻辑
 - [gin_contrib](gin_contrib)：基于gin的网关编程框架
 
+## 从 v1 升级
+
+v2 包含不兼容变更，升级前请阅读 [v2 迁移指南](MIGRATION_V2.md)，覆盖模块路径、客户端调用、manager、权限配置和 Gin 集成。
 
 ## 蓝鲸社区
 

@@ -51,6 +51,11 @@ func MergeSwaggerConfig(swagger spec.Swagger, routeMap map[string]*RouteConfig, 
 					// 保持一致
 					config.Backend.MatchSubpath = config.MatchSubpath
 					operation.Extensions.Add("x-bk-apigateway-resource", &config)
+				} else if subPath != "" && operation.Extensions["x-bk-apigateway-resource"] == nil {
+					// 没有网关配置的路由，网关默认把路由路径当作后端路径，这里只补上部署子路径
+					operation.AddExtension("x-bk-apigateway-resource", map[string]any{
+						"backend": map[string]any{"method": method, "path": subPath + path},
+					})
 				}
 				// 使用生成的OperationID作为路由ID
 				if operation.ID == "" {

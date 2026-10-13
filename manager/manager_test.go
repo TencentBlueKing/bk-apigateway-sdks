@@ -15,6 +15,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"maps"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -101,6 +102,30 @@ var _ = Describe("Manager", func() {
 		Expect(result).To(Equal(map[string]any{"version": "1.0.0+prod"}))
 	})
 
+	DescribeTable("should reject an empty successful JSON response",
+		func(body string) {
+			gock.New(endpoint).Get("/api/v2/sync/gateways/testing/resource_versions/latest/").
+				Reply(200).BodyString(body)
+			gock.New(endpoint).Get("/api/v2/sync/gateways/testing/resource_versions/").
+				Reply(200).BodyString(body)
+
+			_, err := mgr.GetLatestResourceVersion(ctx)
+			Expect(err).To(MatchError(ContainSubstring("failed to decode response")))
+			_, err = mgr.ResourceVersionExists(ctx, "1.0.0")
+			Expect(err).To(MatchError(ContainSubstring("failed to decode response")))
+		},
+		Entry("empty body", ""),
+		Entry("whitespace only", " \n\t"),
+	)
+
+	It("should accept an explicit null data value", func() {
+		gock.New(endpoint).Get("/api/v2/sync/gateways/testing/resource_versions/latest/").
+			Reply(200).BodyString(`{"data":null}`)
+		result, err := mgr.GetLatestResourceVersion(ctx)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(result).To(BeNil())
+	})
+
 	It("should return the error of a v2 error response", func() {
 		gock.New(endpoint).
 			Post("/api/v2/sync/gateways/testing/resource_versions/").
@@ -184,6 +209,51 @@ var _ = Describe("Manager", func() {
 		}))
 	})
 
+	It("should normalize the api grant dimension without changing the definition", func() {
+		permission := map[string]any{"target_app_code": "app1", "grant_dimension": "api"}
+		mgr = newManager(map[string]any{"grant_permissions": []any{permission}})
+		gock.New(endpoint).
+			Post("/api/v2/sync/gateways/testing/permissions/grant/").
+			AddMatcher(captureBody).
+			Reply(201).
+			JSON(map[string]any{"data": nil})
+
+		Expect(mgr.GrantPermissions(ctx)).To(Succeed())
+		Expect(bodies).To(Equal([]map[string]any{
+			{"target_app_code": "app1", "grant_dimension": "gateway"},
+		}))
+		Expect(permission["grant_dimension"]).To(Equal("api"))
+	})
+
+	DescribeTable("should use bk_app_code only as a fallback when granting permissions",
+		func(permission map[string]any, targetAppCode string) {
+			original := maps.Clone(permission)
+			mgr = newManager(map[string]any{"grant_permissions": []any{permission}})
+			gock.New(endpoint).
+				Post("/api/v2/sync/gateways/testing/permissions/grant/").
+				AddMatcher(captureBody).
+				Reply(201).
+				JSON(map[string]any{"data": nil})
+
+			Expect(mgr.GrantPermissions(ctx)).To(Succeed())
+			Expect(bodies).To(Equal([]map[string]any{
+				{"target_app_code": targetAppCode, "grant_dimension": "gateway"},
+			}))
+			Expect(permission).To(Equal(original))
+		},
+		Entry("only the old field is present",
+			map[string]any{"bk_app_code": "old-app", "grant_dimension": "api"}, "old-app"),
+		Entry(
+			"the new field takes precedence",
+			map[string]any{
+				"bk_app_code":     "old-app",
+				"target_app_code": "new-app",
+				"grant_dimension": "api",
+			},
+			"new-app",
+		),
+	)
+
 	It("should apply permissions to the defined gateway with defaults", func() {
 		gock.New(endpoint).
 			Post("/api/v2/open/gateways/other-gateway/permissions/apply/").
@@ -216,6 +286,38 @@ var _ = Describe("Manager", func() {
 		// gock fails the request if one is sent
 		Expect(newManager(map[string]any{"related_apps": nil}).AddRelatedApps(ctx)).To(Succeed())
 	})
+
+	DescribeTable("should accept related apps from an in-memory definition",
+		func(apps any) {
+			mgr = newManager(map[string]any{"related_apps": apps})
+			gock.New(endpoint).Post("/api/v2/sync/gateways/testing/related-apps/").
+				AddMatcher(captureBody).Reply(201).BodyString(`{"data":null}`)
+			Expect(mgr.AddRelatedApps(ctx)).To(Succeed())
+			Expect(bodies).To(Equal([]map[string]any{
+				{"related_app_codes": []any{"app1", "app2"}},
+			}))
+		},
+		Entry("string slice", []string{"app1", "app2"}),
+		Entry("YAML slice", []any{"app1", "app2"}),
+	)
+
+	DescribeTable("should reject invalid related apps before sending a request",
+		func(apps any, message string) {
+			mgr = newManager(map[string]any{"related_apps": apps})
+			Expect(mgr.AddRelatedApps(ctx)).To(MatchError(ContainSubstring(message)))
+		},
+		Entry("string", "app1", "related_apps must be a list of app codes"),
+		Entry("object", map[string]any{"app": "app1"}, "related_apps must be a list of app codes"),
+		Entry("non-string element", []any{"app1", 2}, "related_apps must be a list of app codes"),
+	)
+
+	DescribeTable("should skip empty related app lists",
+		func(apps any) {
+			Expect(newManager(map[string]any{"related_apps": apps}).AddRelatedApps(ctx)).To(Succeed())
+		},
+		Entry("string slice", []string{}),
+		Entry("YAML slice", []any{}),
+	)
 
 	It("should sync the basic info, stages and resources", func() {
 		mgr = newManager(map[string]any{

@@ -12,6 +12,8 @@
 package util
 
 import (
+	"encoding/json"
+	"reflect"
 	"testing"
 
 	"github.com/go-openapi/spec"
@@ -77,5 +79,24 @@ func TestMergeSwaggerConfig(t *testing.T) {
 
 	if routeMap["/api/users/list:get"].Config.Backend.Path != "" {
 		t.Errorf("the shared route config should not be modified: %+v", routeMap["/api/users/list:get"].Config)
+	}
+}
+
+func TestMergePlainRouteKeepsSwaggerExtension(t *testing.T) {
+	var swagger spec.Swagger
+	if err := json.Unmarshal([]byte(`{"paths":{"/health":{"get":{
+		"x-bk-apigateway-resource":{"backend":{"method":"get","path":"/custom/health"}}
+	}}}}`), &swagger); err != nil {
+		t.Fatal(err)
+	}
+	MergeSwaggerConfig(swagger, map[string]*RouteConfig{"/health:get": {OperationID: "generated"}}, "/app")
+
+	operation := swagger.Paths.Paths["/health"].Get
+	want := map[string]any{"backend": map[string]any{"method": "get", "path": "/custom/health"}}
+	if got := operation.Extensions["x-bk-apigateway-resource"]; !reflect.DeepEqual(got, want) {
+		t.Fatalf("resource = %v, want %v", got, want)
+	}
+	if operation.ID != "generated" {
+		t.Fatalf("operation id = %q", operation.ID)
 	}
 }

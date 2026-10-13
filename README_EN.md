@@ -8,6 +8,11 @@ This repository contains the SDKs and tools for the Blueking API Gateway, simpli
 - [manager](manager)：Gateway management toolset
 - [bkapi](bkapi): a thin client to call the APIs through Blueking API Gateway, handling authentication, responses, status codes and logging
 - [gin_contrib](gin_contrib): A gateway programming framework based on gin
+
+## Upgrading from v1
+
+v2 introduces breaking changes. See the [v2 migration guide (Chinese)](MIGRATION_V2.md) for module paths, client calls, manager APIs, permission configuration, and Gin integration.
+
 ## BlueKing Community
 
 - [BK-CI](https://github.com/Tencent/bk-ci)：a continuous integration and continuous delivery system that can easily present your R & D process to you.
