@@ -153,7 +153,6 @@ apply_permissions:
 
 `SyncGinGateway` 的签名不变，失败时仍然 `log.Fatal`。同步流程有几处变化：
 
-- 添加 `related_apps` 里的全部应用。
 - 同步资源时带上 `ResourceDocs.Language`。
 - 发布时带上 `Release.Comment`。
 - 版本号已存在时，用时间戳替换 build 部分，如 `1.0.0+prod` 变成 `1.0.0+20261012193000`。
