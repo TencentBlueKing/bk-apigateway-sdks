@@ -211,9 +211,11 @@ func TestSyncGinGatewayWithV2Apis(t *testing.T) {
 				t.Errorf("unexpected resources sync body: %v", resources)
 			}
 
-			related := gateway.find(t, http.MethodPost, "/related-apps/")[0].Body
-			if !reflect.DeepEqual(related["related_app_codes"], []any{"app1", "app2"}) {
-				t.Errorf("unexpected related apps body: %v", related)
+			// 和 apigw-manager 一样，同步流程不添加关联应用
+			for _, req := range gateway.requests {
+				if strings.HasSuffix(req.Path, "/related-apps/") {
+					t.Errorf("unexpected request to add related apps: %+v", req)
+				}
 			}
 
 			grant := gateway.find(t, http.MethodPost, "/permissions/grant/")[0].Body

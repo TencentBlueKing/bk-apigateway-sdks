@@ -46,11 +46,6 @@ func SyncGinGateway(baseDir, gatewayName string, config *model.APIConfig, delete
 	}
 	log.Printf("syncing gateway basic info success, info:%v\n", info)
 
-	// 添加网关关联应用，只会新增，不会移除已有的关联应用
-	if err := defaultManager.AddRelatedApps(ctx); err != nil {
-		log.Fatalf("add related apps: %v", err)
-	}
-
 	// 同步网关环境信息
 	result, err := defaultManager.SyncStagesConfig(ctx)
 	if err != nil {
