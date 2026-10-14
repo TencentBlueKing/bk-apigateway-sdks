@@ -22,7 +22,9 @@ func TestPlugin(t *testing.T) {
 		MaxAge:          3600,
 		AllowCredential: true,
 	}
-	BuildResourcePluginConfigWithType(PluginTypeBKCors, corsConfig)
+	if plugin := BuildResourcePluginConfigWithType(PluginTypeBKCors, corsConfig); plugin.Type != PluginTypeBKCors {
+		t.Errorf("unexpected plugin: %+v", plugin)
+	}
 	// 熔断插件配置示例
 	breakerConfig := APIBreakerConfig{
 		BreakResponseCode: 503,
@@ -42,5 +44,17 @@ func TestPlugin(t *testing.T) {
 			Successes:    3,
 		},
 	}
-	BuildResourcePluginConfigWithType(PluginTypeAPIBreaker, breakerConfig)
+	if plugin := BuildResourcePluginConfigWithType(PluginTypeAPIBreaker, breakerConfig); plugin.YAML == "" {
+		t.Errorf("unexpected plugin: %+v", plugin)
+	}
+}
+
+func TestInvalidPluginConfig(t *testing.T) {
+	defer func() {
+		if recover() == nil {
+			t.Error("an invalid plugin config should panic")
+		}
+	}()
+	// allow_origins is required
+	BuildResourcePluginConfigWithType(PluginTypeBKCors, CorsConfig{MaxAge: 1})
 }
