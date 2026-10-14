@@ -29,7 +29,10 @@ func GenResourceYamlFromSwaggerJson(docPath string, engine *gin.Engine, subPath 
 	// 获取 route 网关配置
 	routeConfigMap := util.GetRouteConfigMap(engine)
 	// 解析 Swagger 文件
-	data, _ := os.ReadFile(docPath)
+	data, err := os.ReadFile(docPath)
+	if err != nil {
+		log.Fatal(err)
+	}
 	var swagger spec.Swagger
 	if err := json.Unmarshal(data, &swagger); err != nil {
 		log.Fatal(err)
