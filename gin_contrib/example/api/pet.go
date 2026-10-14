@@ -37,7 +37,7 @@ type Pet struct {
 //	@Accept			json
 //	@Produce		json
 //	@Param			id	path		int	true	"pet id"
-//	@Success		200	{string}	Pet
+//	@Success		200	{object}	Pet
 //	@Router			/pets/{id}/ [get]
 func GetPetByID(c *gin.Context) {
 	pet := Pet{
@@ -53,7 +53,5 @@ func GetPetByID(c *gin.Context) {
 		PhotoUrls: []string{"123"},
 		Status:    "available",
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"data": pet,
-	})
+	c.JSON(http.StatusOK, pet)
 }

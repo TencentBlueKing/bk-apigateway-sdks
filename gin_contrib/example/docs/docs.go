@@ -48,7 +48,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/api.Pet"
                         }
                     }
                 }
@@ -84,6 +84,37 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "api.Pet": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "integer"
+                        },
+                        "name": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "photoUrls": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
         "api.ProductUpdates": {
             "type": "object",
             "properties": {
