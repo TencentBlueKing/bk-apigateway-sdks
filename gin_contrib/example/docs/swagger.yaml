@@ -57,7 +57,7 @@ paths:
           description: OK
           schema:
             type: string
-      summary: get a  pet
+      summary: get a pet
   /update-product/{product_id}:
     post:
       consumes:

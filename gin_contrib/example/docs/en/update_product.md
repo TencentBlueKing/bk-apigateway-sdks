@@ -21,3 +21,4 @@ Update product attributes (supports partial field updates)
 "stock": 150,
 "type": "electronics"
 }
+```

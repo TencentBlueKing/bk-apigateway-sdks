@@ -88,7 +88,7 @@ func TestSyncGinGateway(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// 生成resource配置
+	// 生成 resource 配置
 	resourcesFilePath := filepath.Join("./example", "resources.yaml")
 	resourcesYaml := GenResourceYamlFromSwaggerJson("../example/docs/swagger.json", router.New(), "")
 	err = os.WriteFile(resourcesFilePath, []byte(resourcesYaml), 0o644)

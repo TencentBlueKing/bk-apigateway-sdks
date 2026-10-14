@@ -117,7 +117,7 @@ func SyncGinGateway(baseDir, gatewayName string, config *model.APIConfig, delete
 	}
 
 	if config.Stage != nil && config.Stage.EnableMcpServers {
-		// 同步网关stage MCP Server 配置
+		// 同步网关 stage MCP Server 配置
 		result, err = defaultManager.SyncStageMcpConfig(ctx)
 		if err != nil {
 			log.Fatalf("sync stage mcp servers: %v", err)

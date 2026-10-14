@@ -54,8 +54,8 @@ type StageConfig struct {
 	BackendHost      string            // 后端服务地址
 	PluginConfigs    []*PluginConfig   // 插件配置
 	EnvVars          map[string]string // 环境变量
-	EnableMcpServers bool              // 是否启用同步mcp
-	McpServerConfigs []*McpServer      // mcp配置
+	EnableMcpServers bool              // 是否启用同步 mcp
+	McpServerConfigs []*McpServer      // mcp 配置
 }
 
 type McpServer struct {
@@ -91,15 +91,14 @@ type APIGatewayResourceConfig struct {
 	Backend             BackendConfig   `json:"backend" yaml:"backend"`                                 // 后端配置
 	PluginConfigs       []*PluginConfig `json:"pluginConfigs,omitempty" yaml:"pluginConfigs,omitempty"` // 插件配置
 	AuthConfig          AuthConfig      `json:"authConfig" yaml:"authConfig"`                           // 认证配置
-	EnableMcp           bool            `json:"-" yaml:"-"`                                             // 是否启用同步mcp
-	OperationID         string          `json:"-" yaml:"-"`                                             // 资源name
+	EnableMcp           bool            `json:"-" yaml:"-"`                                             // 是否启用同步 mcp
+	OperationID         string          `json:"-" yaml:"-"`                                             // 资源 name
 	// nolint: lll
-	NonSchema bool `json:"noneSchema,omitempty" yaml:"noneSchema,omitempty"` // 如果接口没有任何参数，则开启mcp需要设置为true
+	NoneSchema bool `json:"noneSchema,omitempty" yaml:"noneSchema,omitempty"` // 如果接口没有任何参数，则开启 mcp 需要设置为 true
 }
 
 type ResourceBasicConfig struct {
-	IsPublic bool `json:"isPublic" yaml:"isPublic"` // 是
-	// 否公开
+	IsPublic             bool `json:"isPublic" yaml:"isPublic"`                         // 是否公开
 	AllowApplyPermission bool `json:"allowApplyPermission" yaml:"allowApplyPermission"` // 是否允许申请权限
 	MatchSubpath         bool `json:"matchSubpath" yaml:"matchSubpath"`                 // 是否匹配子路径
 	EnableWebsocket      bool `json:"enableWebsocket" yaml:"enableWebsocket"`           // 是否启用 websocket
@@ -174,21 +173,21 @@ func (c *ResourceBasicConfig) WithAuthConfig(authConfig AuthConfig) Option {
 	}
 }
 
-// WithMcpEnable 设置资源同步mcp配置
+// WithMcpEnable 设置资源同步 mcp 配置
 func (c *ResourceBasicConfig) WithMcpEnable(enableMcpServers bool) Option {
 	return func(config *APIGatewayResourceConfig) {
 		config.EnableMcp = enableMcpServers
 	}
 }
 
-// WithNonSchema 设置资源是否有参数
-func (c *ResourceBasicConfig) WithNonSchema(nonSchema bool) Option {
+// WithNoneSchema 设置资源是否有参数
+func (c *ResourceBasicConfig) WithNoneSchema(noneSchema bool) Option {
 	return func(config *APIGatewayResourceConfig) {
-		config.NonSchema = nonSchema
+		config.NoneSchema = noneSchema
 	}
 }
 
-// WithOperationID 设置资源name
+// WithOperationID 设置资源 name
 func (c *ResourceBasicConfig) WithOperationID(operationID string) Option {
 	return func(config *APIGatewayResourceConfig) {
 		config.OperationID = operationID

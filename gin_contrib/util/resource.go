@@ -70,7 +70,7 @@ func MergeSwaggerConfig(swagger spec.Swagger, routeMap map[string]*RouteConfig, 
 }
 
 // OutputResourceConfig 输出配置
-// 支持json和yaml格式
+// 支持 json 和 yaml 格式
 func OutputResourceConfig(doc *spec.Swagger, format string) ([]byte, error) {
 	var data []byte
 	var err error
@@ -89,12 +89,12 @@ func OutputResourceConfig(doc *spec.Swagger, format string) ([]byte, error) {
 	return data, nil
 }
 
-// GetMcpToolAndValidate 获取mcp工具并校验
+// GetMcpToolAndValidate 获取 mcp 工具并校验
 func GetMcpToolAndValidate(swagger spec.Swagger, routeMap map[string]*RouteConfig, tools []string) []string {
-	// 是否有指定tool
+	// 是否有指定 tool
 	isSpecified := len(tools) > 0
-	toolMap := make(map[string]struct{})       // 指定的tool的资源
-	canUseToolMap := make(map[string]struct{}) // 可以作为mcp tool 的资源
+	toolMap := make(map[string]struct{})       // 指定的 tool 的资源
+	canUseToolMap := make(map[string]struct{}) // 可以作为 mcp tool 的资源
 	allToolMap := make(map[string]struct{})    // 所有资源
 
 	for _, tool := range tools {
@@ -106,26 +106,26 @@ func GetMcpToolAndValidate(swagger spec.Swagger, routeMap map[string]*RouteConfi
 		operationMap := GetPathOperationMap(pathItem)
 		// Process each operation in the operation map
 		for method, operation := range operationMap {
-			// 如果配置了mcp,则校验
+			// 如果配置了 mcp，则校验
 			c := routeMap[joinPaths(swagger.BasePath, path)+":"+method]
 			if c != nil && c.Config != nil && c.Config.EnableMcp {
-				// 如果指定了operationID,则使用指定的
+				// 如果指定了 operationID，则使用指定的
 				if c.Config.OperationID != "" {
 					operation.ID = c.Config.OperationID
 				}
-				// 如果没有指定operationID,则使用自动生成的
+				// 如果没有指定 operationID，则使用自动生成的
 				if operation.ID == "" {
 					operation.ID = c.OperationID
 				}
 				allToolMap[operation.ID] = struct{}{}
 				_, ok := toolMap[operation.ID]
-				// 如果指定了tool,不在指定的tool中,则跳过校验
+				// 如果指定了 tool，不在指定的 tool 中，则跳过校验
 				if isSpecified && !ok {
 					continue
 				}
 
 				if len(operation.Parameters) > 0 {
-					// 如果没有指定tool,则可以作为mcp tool
+					// 如果没有指定 tool，则可以作为 mcp tool
 					if !isSpecified {
 						tools = append(tools, operation.ID)
 					} else {
@@ -133,12 +133,12 @@ func GetMcpToolAndValidate(swagger spec.Swagger, routeMap map[string]*RouteConfi
 					}
 					continue
 				}
-				// 如果没有参数,开启mcp,则校验 nonSchema 是否设置
-				if !c.Config.NonSchema {
-					log.Fatalf("tool: %s enables mcp, but nonSchema is not set", operation.ID)
+				// 如果没有参数，开启 mcp，则校验 noneSchema 是否设置
+				if !c.Config.NoneSchema {
+					log.Fatalf("tool: %s enables mcp, but noneSchema is not set", operation.ID)
 					return []string{}
 				}
-				// 如果没有指定tool,则可以作为mcp  tool
+				// 如果没有指定 tool，则可以作为 mcp tool
 				if !isSpecified {
 					tools = append(tools, operation.ID)
 				} else {
@@ -149,9 +149,9 @@ func GetMcpToolAndValidate(swagger spec.Swagger, routeMap map[string]*RouteConfi
 	}
 
 	if isSpecified {
-		// 如果指定了tool,则校验是否都在canUseToolMap中
+		// 如果指定了 tool，则校验是否都在 canUseToolMap 中
 		for tool := range toolMap {
-			// 判断是否在所有的tool中
+			// 判断是否在所有的 tool 中
 			_, ok := allToolMap[tool]
 			if !ok {
 				log.Fatalf(
@@ -161,16 +161,16 @@ func GetMcpToolAndValidate(swagger spec.Swagger, routeMap map[string]*RouteConfi
 				)
 				return []string{}
 			}
-			// 判断是否在canUseToolMap,不在则报错
+			// 判断是否在 canUseToolMap，不在则报错
 			_, ok = canUseToolMap[tool]
 			if !ok {
 				log.Fatalf("tool: %s not found in all resources", tool)
 				return []string{}
 			}
-			// 判断是否在canUseToolMap,不在则报错
+			// 判断是否在 canUseToolMap，不在则报错
 			_, ok = canUseToolMap[tool]
 			if !ok {
-				log.Fatalf("tool: %s not found in can used resources, please check nonSchema or mcp enabled", tool)
+				log.Fatalf("tool: %s not found in can used resources, please check noneSchema or mcp enabled", tool)
 				return []string{}
 			}
 		}
@@ -178,7 +178,7 @@ func GetMcpToolAndValidate(swagger spec.Swagger, routeMap map[string]*RouteConfi
 	return tools
 }
 
-// GetPathOperationMap 获取path的operation map
+// GetPathOperationMap 获取 path 的 operation map
 func GetPathOperationMap(pathItem spec.PathItem) map[string]*spec.Operation {
 	operationMap := make(map[string]*spec.Operation)
 	// Populate the operation map with all available HTTP methods

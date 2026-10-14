@@ -147,9 +147,9 @@ apply_permissions:
 - `GatewayConfig.APIType` 改为 `IsOfficial bool`。
 - `GatewayConfig` 新增 `Kind`，可选 `normal`（默认）和 `ai`，只在创建网关时生效。
 - `McpServer` 新增 `Oauth2PersonalClientEnabled`。
-- `WithNonSchema(true)` 生成的字段改为网关识别的 `noneSchema`。
+- `NonSchema` / `WithNonSchema` 改名为 `NoneSchema` / `WithNoneSchema`，生成的字段改为网关识别的 `noneSchema`。
 - `GenResourceYamlFromSwaggerJson` 和 `MergeSwaggerConfig` 新增 `subPath` 参数，同 `Stage.BackendSubPath`（如 `/my-app`），不需要的话传 `""`。不为空时，默认后端的路径以环境变量开头，如 `{env.api_sub_path}/api/users`，`WithBackend` 配置的路径也一样。
-- `WithBackend` 配置的 `Method` 不再被覆盖。
+- `WithBackend` 中配置的后端请求方法 `Method` 会生效，之前总是被路由的请求方法覆盖；未配置时仍使用路由的请求方法。
 - swagger 有 `basePath` 时，按 `basePath + 路径` 匹配路由。
 - `ApigatewayJwtClaims.ApiName` 改名为 `GatewayName`。
 - JWT 中间件在第一次调用 `GatewayJWTAuthMiddleware()` 时读取环境变量，不再在 `init` 时读取。请在加载完 `.env` 之后再创建中间件。

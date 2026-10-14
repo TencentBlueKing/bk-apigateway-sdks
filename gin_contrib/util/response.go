@@ -17,7 +17,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// BadRequestError ...
+// 错误响应的错误码
 const (
 	BadRequestError   = "BadRequest"
 	UnauthorizedError = "Unauthorized"
@@ -31,16 +31,17 @@ type Error struct {
 	System  string `json:"system"` // 错误来源系统
 }
 
-// ErrorResponse  ...
+// ErrorResponse ...
 type ErrorResponse struct {
 	Error Error `json:"error"`
 }
 
-// BadRequestErrorJSONResponse ...
+// UnauthorizedJSONResponse 返回 401 错误响应
 var (
 	UnauthorizedJSONResponse = NewErrorJSONResponse(UnauthorizedError, http.StatusUnauthorized)
 )
 
+// NewErrorJSONResponse 创建返回指定错误码和状态码的错误响应函数
 func NewErrorJSONResponse(
 	errorCode string,
 	statusCode int,

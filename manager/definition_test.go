@@ -51,7 +51,7 @@ var _ = Describe("Definition", func() {
 		})
 	})
 
-	It("should new definition from yaml", func() {
+	It("should create a definition from yaml", func() {
 		definition, err := manager.NewDefinitionFromYaml([]byte("sub:\n  name: testing"))
 		Expect(err).To(BeNil())
 		sub, err := definition.Get("sub")

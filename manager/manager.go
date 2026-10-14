@@ -40,7 +40,7 @@ func ConfigFromEnv() bkapi.Config {
 	return bkapi.ConfigFromEnv("bk-apigateway", "prod")
 }
 
-// Manager is the manager of apigw, it helps to sync apigw configs and get apigw infomations.
+// Manager is the manager of apigw, it helps to sync apigw configs and get apigw information.
 // It calls the v2 apis of bk-apigateway.
 type Manager struct {
 	gatewayName string
@@ -68,7 +68,7 @@ func send[T any](ctx context.Context, req *gentleman.Request) (T, error) {
 	return body.Data, nil
 }
 
-// LoadDefinition will load the definition from the file.
+// LoadDefinition loads the definition from the file.
 func (m *Manager) LoadDefinition(path string) error {
 	rendered, err := os.ReadFile(path)
 	if err != nil {
@@ -83,19 +83,19 @@ func (m *Manager) LoadDefinition(path string) error {
 	return nil
 }
 
-// GetDefinition return the definition.
+// GetDefinition returns the definition.
 func (m *Manager) GetDefinition() *Definition {
 	return m.definition
 }
 
-// GetPublicKey fetch the public key info from apigw.
+// GetPublicKey fetches the public key info from apigw.
 func (m *Manager) GetPublicKey(ctx context.Context) (map[string]any, error) {
 	return send[map[string]any](ctx, m.client.Get().
 		AddPath("/api/v2/sync/gateways/:gateway_name/public_key/").
 		Param("gateway_name", m.gatewayName))
 }
 
-// GetPublicKeyString fetch the public key from apigw.
+// GetPublicKeyString fetches the public key from apigw.
 func (m *Manager) GetPublicKeyString(ctx context.Context) (string, error) {
 	info, err := m.GetPublicKey(ctx)
 	if err != nil {
@@ -118,14 +118,14 @@ func (m *Manager) GetPublicKeyString(ctx context.Context) (string, error) {
 	return publicKey, nil
 }
 
-// GetLatestResourceVersion get the latest resource version from apigw.
+// GetLatestResourceVersion gets the latest resource version from apigw.
 func (m *Manager) GetLatestResourceVersion(ctx context.Context) (map[string]any, error) {
 	return send[map[string]any](ctx, m.client.Get().
 		AddPath("/api/v2/sync/gateways/:gateway_name/resource_versions/latest/").
 		Param("gateway_name", m.gatewayName))
 }
 
-// ResourceVersionExists check whether the resource version exists in apigw.
+// ResourceVersionExists checks whether the resource version exists in apigw.
 func (m *Manager) ResourceVersionExists(ctx context.Context, version string) (bool, error) {
 	result, err := send[struct {
 		Count int `json:"count"`
@@ -136,7 +136,7 @@ func (m *Manager) ResourceVersionExists(ctx context.Context, version string) (bo
 	return result.Count > 0, err
 }
 
-// SyncBasicInfo sync the basic info from definition under the namespace to apigw.
+// SyncBasicInfo syncs the basic info from definition under the namespace to apigw.
 func (m *Manager) SyncBasicInfo(ctx context.Context) (map[string]any, error) {
 	data, err := m.definition.Get(apiGatewayNamespace)
 	if err != nil {
@@ -148,7 +148,7 @@ func (m *Manager) SyncBasicInfo(ctx context.Context) (map[string]any, error) {
 		JSON(data))
 }
 
-// SyncStagesConfig sync the stages config from definition under the namespace to apigw.
+// SyncStagesConfig syncs the stages config from definition under the namespace to apigw.
 func (m *Manager) SyncStagesConfig(ctx context.Context) (map[string]any, error) {
 	stages, err := m.definition.GetArray(stagesNamespace)
 	if err != nil {
@@ -168,7 +168,7 @@ func (m *Manager) SyncStagesConfig(ctx context.Context) (map[string]any, error) 
 	return results, nil
 }
 
-// SyncStageMcpConfig sync the mcp servers of the stages from definition to apigw.
+// SyncStageMcpConfig syncs the mcp servers of the stages from definition to apigw.
 // The stages without mcp_servers are skipped, as the api requires it.
 func (m *Manager) SyncStageMcpConfig(ctx context.Context) (map[string]any, error) {
 	stages, err := m.definition.GetArray(stagesNamespace)
@@ -194,7 +194,7 @@ func (m *Manager) SyncStageMcpConfig(ctx context.Context) (map[string]any, error
 	return results, nil
 }
 
-// SyncResourcesConfig sync the resources config to apigw.
+// SyncResourcesConfig syncs the resources config to apigw.
 func (m *Manager) SyncResourcesConfig(ctx context.Context, resources map[string]any) (map[string]any, error) {
 	return send[map[string]any](ctx, m.client.Post().
 		AddPath("/api/v2/sync/gateways/:gateway_name/resources/").
@@ -202,7 +202,7 @@ func (m *Manager) SyncResourcesConfig(ctx context.Context, resources map[string]
 		JSON(resources))
 }
 
-// SyncResourceDocByArchive sync the resource doc from archive to apigw.
+// SyncResourceDocByArchive zips the markdown docs under resource_docs.basedir, and uploads them to apigw.
 func (m *Manager) SyncResourceDocByArchive(ctx context.Context) error {
 	data, err := m.definition.Get(resourceDocsNamespace)
 	if err != nil {
@@ -246,7 +246,7 @@ func (m *Manager) targetGateway(permission map[string]any) string {
 	return fmt.Sprint(name)
 }
 
-// ApplyPermissions apply for the permissions defined in apply_permissions, which can be of other gateways.
+// ApplyPermissions applies for the permissions defined in apply_permissions, which can be of other gateways.
 func (m *Manager) ApplyPermissions(ctx context.Context) (map[string]any, error) {
 	if m.definition.definition[applyPermissionsNamespace] == nil {
 		return nil, nil
@@ -281,7 +281,7 @@ func (m *Manager) ApplyPermissions(ctx context.Context) (map[string]any, error) 
 	return results, nil
 }
 
-// GrantPermissions grant the permissions defined in grant_permissions to apps.
+// GrantPermissions grants the permissions defined in grant_permissions to apps.
 func (m *Manager) GrantPermissions(ctx context.Context) error {
 	if m.definition.definition[grantPermissionsNamespace] == nil {
 		return nil
@@ -312,7 +312,7 @@ func (m *Manager) GrantPermissions(ctx context.Context) error {
 	return nil
 }
 
-// AddRelatedApps add the apps defined in related_apps as the related apps of the gateway.
+// AddRelatedApps adds the apps defined in related_apps as the related apps of the gateway.
 func (m *Manager) AddRelatedApps(ctx context.Context) error {
 	// related_apps 可能是 YAML 解析出的 []any，也可能是代码里构造的 []string
 	var relatedApps []string
@@ -334,7 +334,7 @@ func (m *Manager) AddRelatedApps(ctx context.Context) error {
 	return err
 }
 
-// CreateResourceVersion create a resource version.
+// CreateResourceVersion creates a resource version.
 func (m *Manager) CreateResourceVersion(ctx context.Context, version, comment string) (map[string]any, error) {
 	data := map[string]any{
 		"version": version,
@@ -346,7 +346,7 @@ func (m *Manager) CreateResourceVersion(ctx context.Context, version, comment st
 		JSON(data))
 }
 
-// Release release the resource version to the stages defined in the definition.
+// Release releases the resource version to the stages defined in the definition.
 func (m *Manager) Release(ctx context.Context, version, comment string) (map[string]any, error) {
 	stages, err := m.definition.GetArray(stagesNamespace)
 	if err != nil {
@@ -367,7 +367,7 @@ func (m *Manager) Release(ctx context.Context, version, comment string) (map[str
 		JSON(data))
 }
 
-// NewManager create a new manager, the config is used to call bk-apigateway, see ConfigFromEnv.
+// NewManager creates a new manager, the config is used to call bk-apigateway, see ConfigFromEnv.
 func NewManager(gatewayName string, config bkapi.Config, definition *Definition) (*Manager, error) {
 	client, err := bkapi.New(config)
 	if err != nil {
@@ -382,12 +382,12 @@ func NewManager(gatewayName string, config bkapi.Config, definition *Definition)
 	}, nil
 }
 
-// NewDefaultManager create a new default manager.
+// NewDefaultManager creates a new manager without a definition.
 func NewDefaultManager(gatewayName string, config bkapi.Config) (*Manager, error) {
 	return NewManager(gatewayName, config, nil)
 }
 
-// NewManagerFrom file will create a new manager from the file.
+// NewManagerFrom creates a new manager with the definition loaded from the file.
 func NewManagerFrom(gatewayName string, config bkapi.Config, path string) (*Manager, error) {
 	manager, err := NewDefaultManager(gatewayName, config)
 	if err != nil {

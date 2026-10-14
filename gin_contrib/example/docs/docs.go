@@ -33,7 +33,7 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "summary": "get a  pet",
+                "summary": "get a pet",
                 "operationId": "get_pet_by_id",
                 "parameters": [
                     {

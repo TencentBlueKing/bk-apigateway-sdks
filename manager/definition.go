@@ -19,12 +19,12 @@ import (
 	yaml "gopkg.in/yaml.v3"
 )
 
-// Definition represents a definition of a api gateway.
+// Definition represents a definition of an api gateway.
 type Definition struct {
 	definition map[string]any
 }
 
-// Get sub definition.
+// Get gets the sub definition under the namespace, such as "apigateway" or "a.b".
 func (d *Definition) Get(namespace string) (map[string]any, error) {
 	if namespace == "" {
 		return d.definition, nil
@@ -36,8 +36,8 @@ func (d *Definition) Get(namespace string) (map[string]any, error) {
 			return nil, errors.Wrapf(ErrNotFound, "namespace: %s", namespace)
 		}
 
-		value, fond := current[field]
-		if !fond {
+		value, found := current[field]
+		if !found {
 			return nil, errors.Wrapf(ErrNotFound, "namespace: %s", namespace)
 		}
 
@@ -59,10 +59,10 @@ func (d *Definition) Get(namespace string) (map[string]any, error) {
 	return current, nil
 }
 
-// GetArray Get sub array definition.
+// GetArray gets the array of objects under the namespace.
 func (d *Definition) GetArray(namespace string) ([]map[string]any, error) {
 	current := d.definition
-	for _, field := range strings.Split(namespace, ".") {
+	for field := range strings.SplitSeq(namespace, ".") {
 		if current == nil {
 			return nil, errors.Wrapf(ErrNotFound, "namespace: %s", namespace)
 		}
@@ -72,7 +72,7 @@ func (d *Definition) GetArray(namespace string) ([]map[string]any, error) {
 		}
 		switch realValue := value.(type) {
 		case []any:
-			// convert []map[any]any to map[string]any
+			// convert []any to []map[string]any
 			result := make([]map[string]any, len(realValue))
 			for i, v := range realValue {
 				result[i] = v.(map[string]any)
@@ -93,7 +93,7 @@ func NewDefinition(definition map[string]any) *Definition {
 	}
 }
 
-// NewDefinitionFromYaml unmarshal the given yaml string to a definition.
+// NewDefinitionFromYaml unmarshals the given yaml to a definition.
 func NewDefinitionFromYaml(content []byte) (*Definition, error) {
 	var definition map[string]any
 	err := yaml.Unmarshal(content, &definition)

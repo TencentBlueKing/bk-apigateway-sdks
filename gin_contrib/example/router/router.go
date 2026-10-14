@@ -1,3 +1,14 @@
+/**
+ * TencentBlueKing is pleased to support the open source community by
+ * making 蓝鲸智云-蓝鲸 PaaS 平台(BlueKing-PaaS) available.
+ * Copyright (C) 2025 Tencent. All rights reserved.
+ * Licensed under the MIT License (the "License"); you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at http://opensource.org/licenses/MIT
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+
 package router
 
 import (
@@ -9,6 +20,7 @@ import (
 	"github.com/TencentBlueKing/bk-apigateway-sdks/v2/gin_contrib/util"
 )
 
+// New creates the example router, whose routes are registered with the gateway resource configs.
 func New() *gin.Engine {
 	r := gin.Default()
 	basicConfig := model.ResourceBasicConfig{
@@ -31,7 +43,7 @@ func New() *gin.Engine {
 				Path:   "/testapi/update-product/{product_id}",
 				Method: "post",
 			}),
-			// 开启mcp功能
+			// 开启 mcp 功能
 			basicConfig.WithMcpEnable(true),
 			basicConfig.WithPluginConfig(
 				headerWriterPlugin,
@@ -60,7 +72,7 @@ func New() *gin.Engine {
 					MaxAge:          0,
 					AllowCredential: false,
 				}))),
-		// 网关jwt中间件，校验用户和应用是否合法
+		// 网关 jwt 中间件，校验用户和应用是否合法
 		middleware.GatewayJWTAuthMiddleware(),
 		api.GetPetByID)
 	return r

@@ -1,3 +1,14 @@
+/**
+ * TencentBlueKing is pleased to support the open source community by
+ * making 蓝鲸智云-蓝鲸 PaaS 平台(BlueKing-PaaS) available.
+ * Copyright (C) 2025 Tencent. All rights reserved.
+ * Licensed under the MIT License (the "License"); you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at http://opensource.org/licenses/MIT
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+
 package gen
 
 import (
@@ -66,7 +77,7 @@ func TestGenResourceYamlForMcpWithoutParameters(t *testing.T) {
 	engine := gin.New()
 	basic := model.ResourceBasicConfig{}
 	util.RegisterBkAPIGatewayRoute(engine, "GET", "/mcp-ping",
-		model.NewAPIGatewayResourceConfig(basic, basic.WithMcpEnable(true), basic.WithNonSchema(true)),
+		model.NewAPIGatewayResourceConfig(basic, basic.WithMcpEnable(true), basic.WithNoneSchema(true)),
 		func(c *gin.Context) { c.Status(200) })
 	swaggerPath := filepath.Join(t.TempDir(), "swagger.json")
 	if err := os.WriteFile(swaggerPath, []byte(`{"swagger":"2.0","info":{"title":"ping","version":"1"},
@@ -89,7 +100,7 @@ func TestGenResourceYamlForMcpWithoutParameters(t *testing.T) {
 		t.Fatal(err)
 	}
 	extension := resources.Paths["/mcp-ping"]["get"].Extension
-	if extension["noneSchema"] != true || extension["nonSchema"] != nil {
+	if extension["noneSchema"] != true {
 		t.Fatalf("expected the gateway's noneSchema field: %v", extension)
 	}
 }
@@ -116,7 +127,7 @@ func TestGenResourceYamlFromSwaggerJson(t *testing.T) {
 	//          description: OK
 	//          schema:
 	//            type: string
-	//      summary: get a  pet
+	//      summary: get a pet
 	//      x-bk-apigateway-resource:
 	//        allowApplyPermission: true
 	//        authConfig:

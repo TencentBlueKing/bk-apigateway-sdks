@@ -18,6 +18,7 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
+// JsonToYAML 将 JSON 转换为 YAML
 func JsonToYAML(jsonData []byte) ([]byte, error) {
 	var jsonObj any
 	if err := json.Unmarshal(jsonData, &jsonObj); err != nil {
@@ -26,7 +27,7 @@ func JsonToYAML(jsonData []byte) ([]byte, error) {
 	return yaml.Marshal(jsonObj)
 }
 
-// ConvertExpressPathToSwagger 将 /api/:id 转换为 Swagger 风格 的路径 /api/{id}
+// ConvertExpressPathToSwagger 将 /api/:id 转换为 Swagger 风格的路径 /api/{id}
 func ConvertExpressPathToSwagger(path string) string {
 	segments := strings.Split(path, "/")
 	for i, seg := range segments {

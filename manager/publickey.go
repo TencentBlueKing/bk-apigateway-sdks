@@ -33,7 +33,7 @@ type PublicKeySimpleProvider struct {
 	publicKeys map[string]string
 }
 
-// ProvidePublicKey returns public key for given api name.
+// ProvidePublicKey returns the public key of the given gateway.
 func (p *PublicKeySimpleProvider) ProvidePublicKey(gatewayName string) (string, error) {
 	return p.publicKeys[gatewayName], nil
 }

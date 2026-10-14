@@ -54,7 +54,7 @@ func GatewayJWTAuthMiddleware() func(c *gin.Context) {
 		app := cmp.Or(claims.App, &manager.ApigatewayJwtApp{})
 		user := cmp.Or(claims.User, &manager.ApigatewayJwtUser{})
 		appCode := cmp.Or(app.BkAppCode, app.AppCode)
-		// 获取route网关配置:默认校验应用是否通过认证
+		// 获取 route 网关配置：默认校验应用是否通过认证
 		config := util.GetRouteConfig(c.FullPath(), c.Request.Method)
 		if (config != nil && config.AuthConfig.AppVerifiedRequired && !app.Verified) || config == nil {
 			util.UnauthorizedJSONResponse(c, fmt.Sprintf("app: %s is not verified", appCode))
