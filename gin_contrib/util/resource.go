@@ -12,6 +12,7 @@
 package util
 
 import (
+	"cmp"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -20,48 +21,49 @@ import (
 	"github.com/go-openapi/spec"
 )
 
-// MergeSwaggerConfig merges the route configs into the swagger, and prefixes the backend path
-// with the sub path that the app is deployed under, such as `/stag--default--app`
+// MergeSwaggerConfig merges the route configs into the swagger, and sets the backend of each operation.
+// If subPath is not empty, the backend paths of the default backend are prefixed with {env.api_sub_path}.
 func MergeSwaggerConfig(swagger spec.Swagger, routeMap map[string]*RouteConfig, subPath string) spec.Swagger {
-	subPath = strings.TrimRight(subPath, "/")
+	if swagger.Paths == nil {
+		return swagger
+	}
+	// 没有子路径时 definition.yaml 不定义 api_sub_path
+	prefix := ""
+	if strings.Trim(subPath, "/") != "" {
+		prefix = "{env.api_sub_path}"
+	}
 	for path, pathItem := range swagger.Paths.Paths {
-		operationMap := GetPathOperationMap(pathItem)
-		for method, operation := range operationMap {
-			// 构造匹配键
-			key := fmt.Sprintf("%s:%s", path, method)
-			// 合并配置
-			if c, exists := routeMap[key]; exists {
-				if c.Config != nil {
-					// the route configs are shared, copy it to keep merging idempotent
-					config := *c.Config
-					config.Backend.Method = strings.ToLower(method)
-					if config.Backend.Path == "" {
-						config.Backend.Path = path
-					}
-					config.Backend.Path = subPath + config.Backend.Path
-					if config.Backend.Method == "" {
-						config.Backend.Method = strings.ToLower(method)
-					}
-					if config.OperationID != "" {
-						operation.ID = config.OperationID
-					}
-					if operation.Extensions == nil {
-						operation.Extensions = spec.Extensions{}
-					}
-					// 保持一致
-					config.Backend.MatchSubpath = config.MatchSubpath
-					operation.Extensions.Add("x-bk-apigateway-resource", &config)
-				} else if subPath != "" && operation.Extensions["x-bk-apigateway-resource"] == nil {
-					// 没有网关配置的路由，网关默认把路由路径当作后端路径，这里只补上部署子路径
-					operation.AddExtension("x-bk-apigateway-resource", map[string]any{
-						"backend": map[string]any{"method": method, "path": subPath + path},
-					})
-				}
-				// 使用生成的OperationID作为路由ID
-				if operation.ID == "" {
-					operation.ID = c.OperationID
-				}
+		for method, operation := range GetPathOperationMap(pathItem) {
+			// 网关的资源路径为 basePath + path
+			routePath := joinPaths(swagger.BasePath, path)
+			route := routeMap[routePath+":"+method]
+			if route != nil && operation.ID == "" {
+				operation.ID = route.OperationID
 			}
+			if route != nil && route.Config != nil {
+				// the route configs are shared, copy it to keep merging idempotent
+				config := *route.Config
+				config.Backend.Method = cmp.Or(config.Backend.Method, method)
+				config.Backend.Path = cmp.Or(config.Backend.Path, routePath)
+				// 其他后端不是当前应用，不加子路径
+				if config.Backend.Name == "" || config.Backend.Name == "default" {
+					config.Backend.Path = prefix + config.Backend.Path
+				}
+				config.Backend.MatchSubpath = config.MatchSubpath
+				operation.ID = cmp.Or(config.OperationID, operation.ID)
+				operation.AddExtension("x-bk-apigateway-resource", &config)
+				continue
+			}
+			// 没有网关配置的接口只补上后端，保留 swagger 中已有的资源配置
+			resource, _ := operation.Extensions["x-bk-apigateway-resource"].(map[string]any)
+			if resource["backend"] != nil {
+				continue
+			}
+			if resource == nil {
+				resource = map[string]any{}
+			}
+			resource["backend"] = map[string]any{"method": method, "path": prefix + routePath}
+			operation.AddExtension("x-bk-apigateway-resource", resource)
 		}
 	}
 	return swagger
@@ -104,10 +106,9 @@ func GetMcpToolAndValidate(swagger spec.Swagger, routeMap map[string]*RouteConfi
 		operationMap := GetPathOperationMap(pathItem)
 		// Process each operation in the operation map
 		for method, operation := range operationMap {
-			// 构造匹配键
-			key := fmt.Sprintf("%s:%s", path, method)
 			// 如果配置了mcp,则校验
-			if c, exists := routeMap[key]; exists && c.Config != nil && c.Config.EnableMcp {
+			c := routeMap[joinPaths(swagger.BasePath, path)+":"+method]
+			if c != nil && c.Config != nil && c.Config.EnableMcp {
 				// 如果指定了operationID,则使用指定的
 				if c.Config.OperationID != "" {
 					operation.ID = c.Config.OperationID

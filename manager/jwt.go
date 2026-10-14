@@ -12,6 +12,8 @@
 package manager
 
 import (
+	"encoding/json"
+
 	jwt "github.com/golang-jwt/jwt/v4"
 	"github.com/pkg/errors"
 )
@@ -30,6 +32,26 @@ type ApigatewayJwtUser struct {
 	Username   string `json:"bk_username"`
 	SourceType string `json:"source_type"`
 	Verified   bool   `json:"verified"`
+}
+
+// UnmarshalJSON falls back to username if bk_username is absent.
+func (u *ApigatewayJwtUser) UnmarshalJSON(data []byte) error {
+	// user has no UnmarshalJSON, to avoid the recursion
+	type user ApigatewayJwtUser
+	var decoded struct {
+		user
+		Username   string  `json:"username"`
+		BkUsername *string `json:"bk_username"`
+	}
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		return err
+	}
+	*u = ApigatewayJwtUser(decoded.user)
+	u.Username = decoded.Username
+	if decoded.BkUsername != nil {
+		u.Username = *decoded.BkUsername
+	}
+	return nil
 }
 
 // ApigatewayJwtClaims is the jwt token payload, which carries the information of the request.

@@ -94,7 +94,7 @@ type APIGatewayResourceConfig struct {
 	EnableMcp           bool            `json:"-" yaml:"-"`                                             // 是否启用同步mcp
 	OperationID         string          `json:"-" yaml:"-"`                                             // 资源name
 	// nolint: lll
-	NonSchema bool `json:"nonSchema,omitempty" yaml:"nonSchema,omitempty"` // 如果接口没有任何参数，则开启mcp需要设置为true
+	NonSchema bool `json:"noneSchema,omitempty" yaml:"noneSchema,omitempty"` // 如果接口没有任何参数，则开启mcp需要设置为true
 }
 
 type ResourceBasicConfig struct {

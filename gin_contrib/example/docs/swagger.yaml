@@ -1,4 +1,4 @@
-basePath: /v2
+basePath: /testapi
 definitions:
   api.ProductUpdates:
     properties:
@@ -25,7 +25,6 @@ definitions:
         description: Valid is true if String is not NULL
         type: boolean
     type: object
-host: petstore.swagger.io
 info:
   contact:
     email: support@swagger.io
@@ -39,7 +38,7 @@ info:
   title: Swagger Example API
   version: "1.0"
 paths:
-  /testapi/pets/{id}/:
+  /pets/{id}/:
     get:
       consumes:
       - application/json
@@ -59,7 +58,7 @@ paths:
           schema:
             type: string
       summary: get a  pet
-  /testapi/update-product/{product_id}:
+  /update-product/{product_id}:
     post:
       consumes:
       - application/json

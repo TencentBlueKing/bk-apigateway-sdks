@@ -15,10 +15,9 @@
         },
         "version": "1.0"
     },
-    "host": "petstore.swagger.io",
-    "basePath": "/v2",
+    "basePath": "/testapi",
     "paths": {
-        "/testapi/pets/{id}/": {
+        "/pets/{id}/": {
             "get": {
                 "description": "get pet by ID",
                 "consumes": [
@@ -48,7 +47,7 @@
                 }
             }
         },
-        "/testapi/update-product/{product_id}": {
+        "/update-product/{product_id}": {
             "post": {
                 "consumes": [
                     "application/json"

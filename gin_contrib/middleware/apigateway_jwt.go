@@ -12,6 +12,7 @@
 package middleware
 
 import (
+	"cmp"
 	"fmt"
 	"sync"
 
@@ -49,29 +50,28 @@ func GatewayJWTAuthMiddleware() func(c *gin.Context) {
 			c.Abort()
 			return
 		}
+		// 没有应用或用户时视为未认证，应用优先取 bk_app_code
+		app := cmp.Or(claims.App, &manager.ApigatewayJwtApp{})
+		user := cmp.Or(claims.User, &manager.ApigatewayJwtUser{})
+		appCode := cmp.Or(app.BkAppCode, app.AppCode)
 		// 获取route网关配置:默认校验应用是否通过认证
 		config := util.GetRouteConfig(c.FullPath(), c.Request.Method)
-		if (config != nil && config.AuthConfig.AppVerifiedRequired && !claims.App.Verified) || config == nil {
-			util.UnauthorizedJSONResponse(c, fmt.Sprintf("app: %s is not verified", claims.App.BkAppCode))
+		if (config != nil && config.AuthConfig.AppVerifiedRequired && !app.Verified) || config == nil {
+			util.UnauthorizedJSONResponse(c, fmt.Sprintf("app: %s is not verified", appCode))
 			c.Abort()
 			return
 		}
-		if config != nil && config.AuthConfig.UserVerifiedRequired && !claims.User.Verified {
-			util.UnauthorizedJSONResponse(c, fmt.Sprintf("user: %s is not verified", claims.User.Username))
+		if config.AuthConfig.UserVerifiedRequired && !user.Verified {
+			util.UnauthorizedJSONResponse(c, fmt.Sprintf("user: %s is not verified", user.Username))
 			c.Abort()
 			return
 		}
 
-		if claims.App != nil && claims.App.BkAppCode != "" {
-			util.SetJwtAppCode(c, claims.App.BkAppCode)
+		if appCode != "" {
+			util.SetJwtAppCode(c, appCode)
 		}
-
-		if claims.App != nil && claims.App.AppCode != "" {
-			util.SetJwtAppCode(c, claims.App.AppCode)
-		}
-
-		if claims.User != nil && claims.User.Username != "" {
-			util.SetJwtUserName(c, claims.User.Username)
+		if user.Username != "" {
+			util.SetJwtUserName(c, user.Username)
 		}
 
 		c.Next()

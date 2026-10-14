@@ -13,7 +13,7 @@ import (
 )
 
 // GenResourceYamlFromSwaggerJson 生成资源配置yaml
-// 从swagger.json文件生成资源配置yaml，资源的后端路径会加上应用部署的子路径前缀 subPath
+// 从 swagger.json文件生成资源配置yaml
 func GenResourceYamlFromSwaggerJson(docPath string, engine *gin.Engine, subPath string) string {
 	// 获取route 网关配置
 	routeConfigMap := util.GetRouteConfigMap(engine)

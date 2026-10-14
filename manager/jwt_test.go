@@ -26,6 +26,7 @@ import (
 
 var _ = Describe("Jwt", func() {
 	var (
+		key       *rsa.PrivateKey
 		token     string
 		provider  *manager.PublicKeySimpleProvider
 		parser    *manager.RsaJwtTokenParser
@@ -44,7 +45,8 @@ var _ = Describe("Jwt", func() {
 				Verified:   true,
 			},
 		}
-		key, err := rsa.GenerateKey(rand.Reader, 2048)
+		var err error
+		key, err = rsa.GenerateKey(rand.Reader, 2048)
 		Expect(err).To(BeNil())
 		publicKeyBytes, err := x509.MarshalPKIXPublicKey(&key.PublicKey)
 		Expect(err).To(BeNil())
@@ -69,4 +71,24 @@ var _ = Describe("Jwt", func() {
 		Expect(claims.App).To(Equal(jwtClaims.App))
 		Expect(claims.User).To(Equal(jwtClaims.User))
 	})
+
+	DescribeTable("should fall back to username if bk_username is absent",
+		func(user map[string]any, username string) {
+			user["verified"] = true
+			user["source_type"] = "default"
+			jwtToken := jwt.NewWithClaims(jwt.SigningMethodRS512, jwt.MapClaims{"user": user})
+			jwtToken.Header["kid"] = "testing"
+			signed, err := jwtToken.SignedString(key)
+			Expect(err).NotTo(HaveOccurred())
+
+			claims, err := parser.Parse(signed)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(claims.User).To(Equal(&manager.ApigatewayJwtUser{
+				Username: username, SourceType: "default", Verified: true,
+			}))
+		},
+		Entry("username", map[string]any{"username": "alice"}, "alice"),
+		Entry("bk_username takes precedence",
+			map[string]any{"bk_username": "alice", "username": "bob"}, "alice"),
+	)
 })

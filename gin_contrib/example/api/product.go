@@ -20,7 +20,7 @@ type ProductUpdates struct {
 //	@Accept		json
 //	@Param		product_id	path	int				true	"Product ID"
 //	@Param		productInfo	body	ProductUpdates	true	" "
-//	@Router		/testapi/update-product/{product_id} [post]
+//	@Router		/update-product/{product_id} [post]
 func UpdateProduct(c *gin.Context) {
 	var pUpdates ProductUpdates
 	if err := c.ShouldBindJSON(&pUpdates); err != nil {

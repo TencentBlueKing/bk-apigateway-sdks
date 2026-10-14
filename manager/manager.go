@@ -231,19 +231,26 @@ func (m *Manager) SyncResourceDocByArchive(ctx context.Context) error {
 	return err
 }
 
-// targetGateway removes the gateway_name from the permission, which is the gateway to apply for or grant,
-// and defaults to the managed gateway.
+// targetGateway removes the gateway_name (or the legacy api_name, which takes precedence) from the permission,
+// which is the gateway to apply for or grant, and defaults to the managed gateway.
 func (m *Manager) targetGateway(permission map[string]any) string {
-	name, ok := permission["gateway_name"]
+	name, ok := permission["api_name"]
 	if !ok {
+		name = permission["gateway_name"]
+	}
+	delete(permission, "api_name")
+	delete(permission, "gateway_name")
+	if name == nil {
 		return m.gatewayName
 	}
-	delete(permission, "gateway_name")
 	return fmt.Sprint(name)
 }
 
 // ApplyPermissions apply for the permissions defined in apply_permissions, which can be of other gateways.
 func (m *Manager) ApplyPermissions(ctx context.Context) (map[string]any, error) {
+	if m.definition.definition[applyPermissionsNamespace] == nil {
+		return nil, nil
+	}
 	permissions, err := m.definition.GetArray(applyPermissionsNamespace)
 	if err != nil {
 		return nil, errors.WithMessagef(err, "failed to get %s", applyPermissionsNamespace)
@@ -276,6 +283,9 @@ func (m *Manager) ApplyPermissions(ctx context.Context) (map[string]any, error) 
 
 // GrantPermissions grant the permissions defined in grant_permissions to apps.
 func (m *Manager) GrantPermissions(ctx context.Context) error {
+	if m.definition.definition[grantPermissionsNamespace] == nil {
+		return nil
+	}
 	permissions, err := m.definition.GetArray(grantPermissionsNamespace)
 	if err != nil {
 		return errors.WithMessagef(err, "failed to get %s", grantPermissionsNamespace)

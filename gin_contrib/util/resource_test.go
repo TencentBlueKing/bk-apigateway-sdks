@@ -46,20 +46,13 @@ func TestMergeSwaggerConfig(t *testing.T) {
 	}
 
 	cases := []struct {
-		name     string
-		subPath  string
-		wantList string
-		wantPost string
+		name, subPath, wantList, wantPost string
 	}{
-		{name: "without sub path", subPath: "", wantList: "/api/users/list", wantPost: "/api/v2/users"},
-		{
-			name:     "with sub path",
-			subPath:  "/stag--default--app/",
-			wantList: "/stag--default--app/api/users/list",
-			wantPost: "/stag--default--app/api/v2/users",
-		},
+		// the stage variable is not defined without the sub path
+		{"without sub path", "", "/api/users/list", "/api/v2/users"},
+		{"root", "/", "/api/users/list", "/api/v2/users"},
+		{"with sub path", "/my-app", "{env.api_sub_path}/api/users/list", "{env.api_sub_path}/api/v2/users"},
 	}
-
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			// merge twice to make sure the sub path is not prefixed repeatedly
@@ -98,5 +91,55 @@ func TestMergePlainRouteKeepsSwaggerExtension(t *testing.T) {
 	}
 	if operation.ID != "generated" {
 		t.Fatalf("operation id = %q", operation.ID)
+	}
+}
+
+func TestMergeSwaggerBackend(t *testing.T) {
+	var swagger spec.Swagger
+	if err := json.Unmarshal([]byte(`{"basePath":"/api","paths":{
+		"/users":{"get":{},"post":{},"put":{}},
+		"/health":{"get":{"x-bk-apigateway-resource":{"isPublic":false}}},
+		"/docs":{"get":{}}
+	}}`), &swagger); err != nil {
+		t.Fatal(err)
+	}
+	routeMap := map[string]*RouteConfig{
+		"/api/users:get": {Config: &model.APIGatewayResourceConfig{}},
+		"/api/users:post": {Config: &model.APIGatewayResourceConfig{
+			Backend: model.BackendConfig{Method: "put", Timeout: 10},
+		}},
+		"/api/users:put": {Config: &model.APIGatewayResourceConfig{
+			Backend: model.BackendConfig{Name: "other", Path: "/users"},
+		}},
+		"/api/health:get": {OperationID: "generated"},
+	}
+	MergeSwaggerConfig(swagger, routeMap, "/my-app")
+
+	users := swagger.Paths.Paths["/users"]
+	if got := backendOf(t, users.Get); got.Path != "{env.api_sub_path}/api/users" || got.Method != "get" {
+		t.Errorf("unexpected get backend: %+v", got)
+	}
+	// the configured method is kept
+	if got := backendOf(t, users.Post); got.Path != "{env.api_sub_path}/api/users" || got.Method != "put" || got.Timeout != 10 {
+		t.Errorf("unexpected post backend: %+v", got)
+	}
+	// the sub path is of the default backend
+	if got := backendOf(t, users.Put); got.Path != "/users" || got.Method != "put" {
+		t.Errorf("unexpected put backend: %+v", got)
+	}
+
+	cases := map[string]map[string]any{
+		// the other configs in the swagger are kept
+		"/health": {"isPublic": false, "backend": map[string]any{"method": "get", "path": "{env.api_sub_path}/api/health"}},
+		// not a gin route, the path of the resource
+		"/docs": {"backend": map[string]any{"method": "get", "path": "{env.api_sub_path}/api/docs"}},
+	}
+	for path, want := range cases {
+		if got := swagger.Paths.Paths[path].Get.Extensions["x-bk-apigateway-resource"]; !reflect.DeepEqual(got, want) {
+			t.Errorf("%s: resource = %v, want %v", path, got, want)
+		}
+	}
+	if id := swagger.Paths.Paths["/health"].Get.ID; id != "generated" {
+		t.Errorf("operation id = %q", id)
 	}
 }
