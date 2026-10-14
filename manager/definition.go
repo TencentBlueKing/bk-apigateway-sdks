@@ -50,7 +50,6 @@ func (d *Definition) Get(namespace string) (map[string]any, error) {
 			for k, v := range realValue {
 				current[fmt.Sprintf("%v", k)] = v
 			}
-			return current, nil
 		default:
 			return nil, errors.Wrapf(ErrNotFound, "namespace: %s", namespace)
 		}
@@ -71,11 +70,17 @@ func (d *Definition) GetArray(namespace string) ([]map[string]any, error) {
 			return nil, errors.Wrapf(ErrNotFound, "namespace: %s", namespace)
 		}
 		switch realValue := value.(type) {
+		case map[string]any:
+			current = realValue
 		case []any:
 			// convert []any to []map[string]any
 			result := make([]map[string]any, len(realValue))
 			for i, v := range realValue {
-				result[i] = v.(map[string]any)
+				item, ok := v.(map[string]any)
+				if !ok {
+					return nil, errors.Wrapf(errors.New("not supported type"), "namespace: %s", namespace)
+				}
+				result[i] = item
 			}
 			return result, nil
 		default:
