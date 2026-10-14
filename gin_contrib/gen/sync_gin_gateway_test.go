@@ -91,10 +91,9 @@ func TestSyncGinGateway(t *testing.T) {
 	// 生成 resource 配置
 	resourcesFilePath := filepath.Join("./example", "resources.yaml")
 	resourcesYaml := GenResourceYamlFromSwaggerJson("../example/docs/swagger.json", router.New(), "")
-	err = os.WriteFile(resourcesFilePath, []byte(resourcesYaml), 0o644)
-	// SyncGinGateway(
-	//	"./example/",
-	//	"custom-gateway-go-demo", config, true)
+	if err := os.WriteFile(resourcesFilePath, []byte(resourcesYaml), 0o644); err != nil {
+		t.Fatal(err)
+	}
 }
 
 type recordedRequest struct {
