@@ -396,6 +396,10 @@ var _ = Describe("Manager", func() {
 
 		Expect(mgr.SyncResourceDocByArchive(ctx)).To(Succeed())
 		Expect(contentType).To(HavePrefix("multipart/form-data"))
+		// the archive is not left in the docs dir
+		entries, err := os.ReadDir(dir)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(entries).To(HaveLen(1))
 	})
 
 	It("should get the public key", func() {

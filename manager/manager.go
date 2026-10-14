@@ -212,7 +212,13 @@ func (m *Manager) SyncResourceDocByArchive(ctx context.Context) error {
 	if baseDir == "" {
 		return errors.Errorf("%s.basedir is required", resourceDocsNamespace)
 	}
-	zipPath := filepath.Join(baseDir, "resources_docs.zip")
+	// 压缩到临时文件，不在文档目录中留下压缩包
+	tempDir, err := os.MkdirTemp("", "resource-docs-")
+	if err != nil {
+		return errors.WithMessage(err, "failed to create a temporary directory")
+	}
+	defer os.RemoveAll(tempDir)
+	zipPath := filepath.Join(tempDir, "resource_docs.zip")
 	err = util.ZipDirectory(baseDir, zipPath, ".md")
 	if err != nil {
 		return errors.WithMessagef(err, "failed to zip %s", baseDir)
