@@ -17,17 +17,12 @@ import (
 	"github.com/TencentBlueKing/bk-apigateway-sdks/v2/gin_contrib/example/router"
 )
 
-//	@title			Swagger Example API
+//	@title			gin_contrib Example API
 //	@version		1.0
-//	@description	This is a sample server Petstore server.
-//	@termsOfService	http://swagger.io/terms/
+//	@description	An example of registering gin routes as the resources of BlueKing API Gateway.
 
-//	@contact.name	API Support
-//	@contact.url	http://www.swagger.io/support
-//	@contact.email	support@swagger.io
-
-//	@license.name	Apache 2.0
-//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
+//	@license.name	MIT
+//	@license.url	https://opensource.org/licenses/MIT
 
 //	@BasePath	/testapi
 
