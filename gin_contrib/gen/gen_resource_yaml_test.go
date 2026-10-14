@@ -105,86 +105,27 @@ func TestGenResourceYamlForMcpWithoutParameters(t *testing.T) {
 	}
 }
 
+// The example swagger has the basePath /testapi, under which the routes are served.
 func TestGenResourceYamlFromSwaggerJson(t *testing.T) {
-	GenResourceYamlFromSwaggerJson("../example/docs/swagger.json", router.New(), "")
-	//`paths:
-	//  /testapi/pet/get-pet-by-id/{pet_id}/:
-	//    get:
-	//      consumes:
-	//      - application/json
-	//      description: get pet by ID
-	//      operationId: get-pet-by-id
-	//      parameters:
-	//      - description: pet id
-	//        in: path
-	//        name: pet_id
-	//        required: true
-	//        type: integer
-	//      produces:
-	//      - application/json
-	//      responses:
-	//        "200":
-	//          description: OK
-	//          schema:
-	//            type: string
-	//      summary: get a pet
-	//      x-bk-apigateway-resource:
-	//        allowApplyPermission: true
-	//        authConfig:
-	//          appVerifiedRequired: false
-	//          resourcePermissionRequired: false
-	//          userVerifiedRequired: false
-	//        backend:
-	//          matchSubpath: false
-	//          method: get
-	//          path: /testapi/get-pet-by-id/{pet_id}/
-	//        enableWebsocket: false
-	//        isPublic: false
-	//        matchSubpath: false
-	//        pluginConfigs:
-	//        - type: bk-cors
-	//          yaml: |
-	//            allow_origins: '*'
-	//            allow_methods: '**'
-	//            allow_headers: '**'
-	//            expose_headers: ''
-	//  /testapi/update-product/{product_id}:
-	//    post:
-	//      consumes:
-	//      - application/json
-	//      operationId: update-product
-	//      parameters:
-	//      - description: Product ID
-	//        in: path
-	//        name: product_id
-	//        required: true
-	//        type: integer
-	//      - description: ' '
-	//        in: body
-	//        name: productInfo
-	//        required: true
-	//        schema:
-	//          $ref: '#/definitions/api.ProductUpdates'
-	//      responses: {}
-	//      summary: Update product attributes
-	//      x-bk-apigateway-resource:
-	//        allowApplyPermission: true
-	//        authConfig:
-	//          appVerifiedRequired: false
-	//          resourcePermissionRequired: false
-	//          userVerifiedRequired: false
-	//        backend:
-	//          matchSubpath: false
-	//          method: POST
-	//          path: /testapi/product/
-	//        enableWebsocket: false
-	//        isPublic: true
-	//        matchSubpath: false
-	//        pluginConfigs:
-	//        - type: bk-header-rewrite
-	//          yaml: |
-	//            set:
-	//                X-Test: test
-	//            remove:
-	//                - X-Test2`
+	var resources struct {
+		Paths map[string]map[string]struct {
+			OperationID string                         `yaml:"operationId"`
+			Extension   model.APIGatewayResourceConfig `yaml:"x-bk-apigateway-resource"`
+		} `yaml:"paths"`
+	}
+	content := GenResourceYamlFromSwaggerJson("../example/docs/swagger.json", router.New(), "")
+	if err := yaml.Unmarshal([]byte(content), &resources); err != nil {
+		t.Fatal(err)
+	}
+
+	pet := resources.Paths["/pets/{id}/"]["get"]
+	if pet.OperationID != "get_pet_by_id" || pet.Extension.IsPublic ||
+		pet.Extension.Backend.Path != "/testapi/pets/{id}/" || len(pet.Extension.PluginConfigs) != 2 {
+		t.Errorf("unexpected pet resource: %+v", pet)
+	}
+	product := resources.Paths["/update-product/{product_id}"]["post"]
+	if product.OperationID != "update_product_set" || !product.Extension.IsPublic ||
+		product.Extension.Backend.Path != "/testapi/update-product/{product_id}" {
+		t.Errorf("unexpected product resource: %+v", product)
+	}
 }

@@ -81,18 +81,18 @@ type GrantPermissionConfig struct {
 }
 
 type ResourceDocConfig struct {
-	BaseDir  string `validate:"required,startswith=/"` // 必须为绝对路径
-	Language string
+	BaseDir  string // 资源文档目录，markdown 文件名为资源名，为空时不同步资源文档
+	Language string // 根据 swagger 生成资源文档的语言：zh、en，使用 BaseDir 时置空
 }
 
 // APIGatewayResourceConfig resource 配置结构体定义
 type APIGatewayResourceConfig struct {
-	ResourceBasicConfig                 // 资源基础配置
-	Backend             BackendConfig   `json:"backend" yaml:"backend"`                                 // 后端配置
-	PluginConfigs       []*PluginConfig `json:"pluginConfigs,omitempty" yaml:"pluginConfigs,omitempty"` // 插件配置
-	AuthConfig          AuthConfig      `json:"authConfig" yaml:"authConfig"`                           // 认证配置
-	EnableMcp           bool            `json:"-" yaml:"-"`                                             // 是否启用同步 mcp
-	OperationID         string          `json:"-" yaml:"-"`                                             // 资源 name
+	ResourceBasicConfig `yaml:",inline"` // 资源基础配置
+	Backend             BackendConfig    `json:"backend" yaml:"backend"`                                 // 后端配置
+	PluginConfigs       []*PluginConfig  `json:"pluginConfigs,omitempty" yaml:"pluginConfigs,omitempty"` // 插件配置
+	AuthConfig          AuthConfig       `json:"authConfig" yaml:"authConfig"`                           // 认证配置
+	EnableMcp           bool             `json:"-" yaml:"-"`                                             // 是否启用同步 mcp
+	OperationID         string           `json:"-" yaml:"-"`                                             // 资源 name
 	// nolint: lll
 	NoneSchema bool `json:"noneSchema,omitempty" yaml:"noneSchema,omitempty"` // 如果接口没有任何参数，则开启 mcp 需要设置为 true
 }
