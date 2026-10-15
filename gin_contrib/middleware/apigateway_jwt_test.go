@@ -27,7 +27,6 @@ import (
 	"github.com/TencentBlueKing/bk-apigateway-sdks/v2/gin_contrib/middleware"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/v2/gin_contrib/model"
 	"github.com/TencentBlueKing/bk-apigateway-sdks/v2/gin_contrib/util"
-	"github.com/TencentBlueKing/bk-apigateway-sdks/v2/manager"
 )
 
 // TestGatewayJWTAuthMiddleware checks that the middleware reads the config when it is created, which is after
@@ -56,14 +55,38 @@ func TestGatewayJWTAuthMiddleware(t *testing.T) {
 			middleware.GatewayJWTAuthMiddleware(), func(c *gin.Context) { c.Status(http.StatusNoContent) })
 	}
 
-	token := signToken(t, key)
-	for _, path := range []string{"/ping", "/pong", "/ping"} {
-		req := httptest.NewRequest(http.MethodGet, path, nil)
-		req.Header.Set(middleware.BkGatewayJWTHeaderKey, token)
+	// bk_app_code takes precedence over app_code
+	util.RegisterBkAPIGatewayRoute(router, http.MethodGet, "/app",
+		model.APIGatewayResourceConfig{AuthConfig: model.AuthConfig{AppVerifiedRequired: true}},
+		middleware.GatewayJWTAuthMiddleware(), func(c *gin.Context) {
+			if appCode := util.GetJwtAppCode(c); appCode != "bk-caller" {
+				t.Errorf("app code = %q, want bk-caller", appCode)
+			}
+			c.Status(http.StatusNoContent)
+		})
+
+	token := signToken(t, key, jwt.MapClaims{"app": map[string]any{"app_code": "caller", "verified": true}})
+	appToken := signToken(t, key, jwt.MapClaims{
+		"app": map[string]any{"bk_app_code": "bk-caller", "app_code": "caller", "verified": true},
+	})
+	noAppToken := signToken(t, key, jwt.MapClaims{})
+	for _, c := range []struct {
+		path, token string
+		code        int
+	}{
+		{"/ping", token, http.StatusNoContent},
+		{"/pong", token, http.StatusNoContent},
+		{"/ping", token, http.StatusNoContent},
+		{"/app", appToken, http.StatusNoContent},
+		// no app, not verified
+		{"/app", noAppToken, http.StatusUnauthorized},
+	} {
+		req := httptest.NewRequest(http.MethodGet, c.path, nil)
+		req.Header.Set(middleware.BkGatewayJWTHeaderKey, c.token)
 		res := httptest.NewRecorder()
 		router.ServeHTTP(res, req)
-		if res.Code != http.StatusNoContent {
-			t.Fatalf("status = %d, want %d, body: %s", res.Code, http.StatusNoContent, res.Body)
+		if res.Code != c.code {
+			t.Fatalf("%s: status = %d, want %d, body: %s", c.path, res.Code, c.code, res.Body)
 		}
 	}
 	if fetches != 1 {
@@ -80,12 +103,10 @@ func publicKeyPEM(t *testing.T, key *rsa.PublicKey) string {
 	return string(pem.EncodeToMemory(&pem.Block{Type: "PUBLIC KEY", Bytes: der}))
 }
 
-// signToken signs a token of the gateway "my-gateway" with a verified app.
-func signToken(t *testing.T, key *rsa.PrivateKey) string {
+// signToken signs a token of the gateway "my-gateway" with the claims.
+func signToken(t *testing.T, key *rsa.PrivateKey, claims jwt.MapClaims) string {
 	t.Helper()
-	token := jwt.NewWithClaims(jwt.SigningMethodRS256, &manager.ApigatewayJwtClaims{
-		App: &manager.ApigatewayJwtApp{AppCode: "caller", Verified: true},
-	})
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	token.Header["kid"] = "my-gateway"
 	signed, err := token.SignedString(key)
 	if err != nil {

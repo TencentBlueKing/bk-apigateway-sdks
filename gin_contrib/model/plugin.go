@@ -13,7 +13,6 @@ package model
 
 import (
 	"fmt"
-	"log"
 	"reflect"
 	"strings"
 
@@ -133,45 +132,33 @@ type FaultInjectionConfig struct {
 	} `yaml:"delay,omitempty"`
 }
 
-// BuildResourcePluginConfigWithType 创建插件配置（带自动校验和格式处理）
+// BuildResourcePluginConfigWithType 创建资源的插件配置，配置不合法时 panic
 func BuildResourcePluginConfigWithType(pluginType PluginType, config any) *PluginConfig {
-	// 配置校验
-	if err := validateConfig(config); err != nil {
-		log.Printf("plugin config validate error: %v\n", err)
-		return nil
-	}
-
-	// YAML 序列化
-	data, err := yaml.Marshal(config)
-	if err != nil {
-		log.Printf("plugin config marshal error: %v", err)
-		return nil
-	}
-
+	data := marshalPluginConfig(pluginType, config)
 	return &PluginConfig{
 		Type: pluginType,
-		YAML: strings.ReplaceAll(string(data), `""`, `''`), // 处理空字符串
+		YAML: strings.ReplaceAll(data, `""`, `''`), // 处理空字符串
 	}
 }
 
+// BuildStagePluginConfigWithType 创建环境的插件配置，配置不合法时 panic
 func BuildStagePluginConfigWithType(pluginType PluginType, config any) *PluginConfig {
-	// 配置校验
-	if err := validateConfig(config); err != nil {
-		log.Printf("plugin config validate error: %v\n", err)
-		return nil
-	}
-
-	// YAML 序列化
-	data, err := yaml.Marshal(config)
-	if err != nil {
-		log.Printf("plugin config marshal error: %v", err)
-		return nil
-	}
-
 	return &PluginConfig{
 		Type: pluginType,
-		YAML: string(data),
+		YAML: marshalPluginConfig(pluginType, config),
 	}
+}
+
+// marshalPluginConfig 校验插件配置并序列化为 YAML
+func marshalPluginConfig(pluginType PluginType, config any) string {
+	if err := validateConfig(config); err != nil {
+		panic(fmt.Sprintf("invalid %s plugin config: %v", pluginType, err))
+	}
+	data, err := yaml.Marshal(config)
+	if err != nil {
+		panic(fmt.Sprintf("marshal %s plugin config: %v", pluginType, err))
+	}
+	return string(data)
 }
 
 // validateConfig 配置校验

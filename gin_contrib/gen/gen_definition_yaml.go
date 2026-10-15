@@ -30,6 +30,7 @@ import (
 //go:embed definition.tpl
 var configTemplate []byte
 
+// GenDefinitionYaml 生成网关定义 definition.yaml
 func GenDefinitionYaml(config *model.APIConfig, docPath string, engine *gin.Engine) string {
 	// 创建模板
 	tmpl, err := template.New("config").Funcs(template.FuncMap{
@@ -42,12 +43,18 @@ func GenDefinitionYaml(config *model.APIConfig, docPath string, engine *gin.Engi
 		panic(fmt.Sprintf("gen definition yaml error: %v", err))
 	}
 
-	// 如果开启mcp，则需要根据 route 配置校验tool以及填充tool配置(如果没有指定)
+	// 资源的后端路径为 {env.api_sub_path}/path，去掉子路径末尾的 /
+	config.Stage.BackendSubPath = strings.TrimRight(config.Stage.BackendSubPath, "/")
+
+	// 如果开启 mcp，则需要根据 route 配置校验 tool 以及填充 tool 配置(如果没有指定)
 	if config.Stage.EnableMcpServers {
-		// 获取route 网关配置
+		// 获取 route 网关配置
 		routeConfigMap := util.GetRouteConfigMap(engine)
 		// 解析 Swagger 文件
-		data, _ := os.ReadFile(docPath)
+		data, err := os.ReadFile(docPath)
+		if err != nil {
+			log.Fatal(err)
+		}
 		var swagger spec.Swagger
 		if err := json.Unmarshal(data, &swagger); err != nil {
 			log.Fatal(err)

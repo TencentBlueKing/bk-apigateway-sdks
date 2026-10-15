@@ -12,6 +12,7 @@
 package util
 
 import (
+	"cmp"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -20,55 +21,56 @@ import (
 	"github.com/go-openapi/spec"
 )
 
-// MergeSwaggerConfig merges the route configs into the swagger, and prefixes the backend path
-// with the sub path that the app is deployed under, such as `/stag--default--app`
+// MergeSwaggerConfig merges the route configs into the swagger, and sets the backend of each operation.
+// If subPath is not empty, the backend paths of the default backend are prefixed with {env.api_sub_path}.
 func MergeSwaggerConfig(swagger spec.Swagger, routeMap map[string]*RouteConfig, subPath string) spec.Swagger {
-	subPath = strings.TrimRight(subPath, "/")
+	if swagger.Paths == nil {
+		return swagger
+	}
+	// 没有子路径时 definition.yaml 不定义 api_sub_path
+	prefix := ""
+	if strings.Trim(subPath, "/") != "" {
+		prefix = "{env.api_sub_path}"
+	}
 	for path, pathItem := range swagger.Paths.Paths {
-		operationMap := GetPathOperationMap(pathItem)
-		for method, operation := range operationMap {
-			// 构造匹配键
-			key := fmt.Sprintf("%s:%s", path, method)
-			// 合并配置
-			if c, exists := routeMap[key]; exists {
-				if c.Config != nil {
-					// the route configs are shared, copy it to keep merging idempotent
-					config := *c.Config
-					config.Backend.Method = strings.ToLower(method)
-					if config.Backend.Path == "" {
-						config.Backend.Path = path
-					}
-					config.Backend.Path = subPath + config.Backend.Path
-					if config.Backend.Method == "" {
-						config.Backend.Method = strings.ToLower(method)
-					}
-					if config.OperationID != "" {
-						operation.ID = config.OperationID
-					}
-					if operation.Extensions == nil {
-						operation.Extensions = spec.Extensions{}
-					}
-					// 保持一致
-					config.Backend.MatchSubpath = config.MatchSubpath
-					operation.Extensions.Add("x-bk-apigateway-resource", &config)
-				} else if subPath != "" && operation.Extensions["x-bk-apigateway-resource"] == nil {
-					// 没有网关配置的路由，网关默认把路由路径当作后端路径，这里只补上部署子路径
-					operation.AddExtension("x-bk-apigateway-resource", map[string]any{
-						"backend": map[string]any{"method": method, "path": subPath + path},
-					})
-				}
-				// 使用生成的OperationID作为路由ID
-				if operation.ID == "" {
-					operation.ID = c.OperationID
-				}
+		for method, operation := range GetPathOperationMap(pathItem) {
+			// 网关的资源路径为 basePath + path
+			routePath := joinPaths(swagger.BasePath, path)
+			route := routeMap[routePath+":"+method]
+			if route != nil && operation.ID == "" {
+				operation.ID = route.OperationID
 			}
+			if route != nil && route.Config != nil {
+				// the route configs are shared, copy it to keep merging idempotent
+				config := *route.Config
+				config.Backend.Method = cmp.Or(config.Backend.Method, method)
+				config.Backend.Path = cmp.Or(config.Backend.Path, routePath)
+				// 其他后端不是当前应用，不加子路径
+				if config.Backend.Name == "" || config.Backend.Name == "default" {
+					config.Backend.Path = prefix + config.Backend.Path
+				}
+				config.Backend.MatchSubpath = config.MatchSubpath
+				operation.ID = cmp.Or(config.OperationID, operation.ID)
+				operation.AddExtension("x-bk-apigateway-resource", &config)
+				continue
+			}
+			// 没有网关配置的接口只补上后端，保留 swagger 中已有的资源配置
+			resource, _ := operation.Extensions["x-bk-apigateway-resource"].(map[string]any)
+			if resource["backend"] != nil {
+				continue
+			}
+			if resource == nil {
+				resource = map[string]any{}
+			}
+			resource["backend"] = map[string]any{"method": method, "path": prefix + routePath}
+			operation.AddExtension("x-bk-apigateway-resource", resource)
 		}
 	}
 	return swagger
 }
 
 // OutputResourceConfig 输出配置
-// 支持json和yaml格式
+// 支持 json 和 yaml 格式
 func OutputResourceConfig(doc *spec.Swagger, format string) ([]byte, error) {
 	var data []byte
 	var err error
@@ -87,12 +89,12 @@ func OutputResourceConfig(doc *spec.Swagger, format string) ([]byte, error) {
 	return data, nil
 }
 
-// GetMcpToolAndValidate 获取mcp工具并校验
+// GetMcpToolAndValidate 获取 mcp 工具并校验
 func GetMcpToolAndValidate(swagger spec.Swagger, routeMap map[string]*RouteConfig, tools []string) []string {
-	// 是否有指定tool
+	// 是否有指定 tool
 	isSpecified := len(tools) > 0
-	toolMap := make(map[string]struct{})       // 指定的tool的资源
-	canUseToolMap := make(map[string]struct{}) // 可以作为mcp tool 的资源
+	toolMap := make(map[string]struct{})       // 指定的 tool 的资源
+	canUseToolMap := make(map[string]struct{}) // 可以作为 mcp tool 的资源
 	allToolMap := make(map[string]struct{})    // 所有资源
 
 	for _, tool := range tools {
@@ -104,27 +106,26 @@ func GetMcpToolAndValidate(swagger spec.Swagger, routeMap map[string]*RouteConfi
 		operationMap := GetPathOperationMap(pathItem)
 		// Process each operation in the operation map
 		for method, operation := range operationMap {
-			// 构造匹配键
-			key := fmt.Sprintf("%s:%s", path, method)
-			// 如果配置了mcp,则校验
-			if c, exists := routeMap[key]; exists && c.Config != nil && c.Config.EnableMcp {
-				// 如果指定了operationID,则使用指定的
+			// 如果配置了 mcp，则校验
+			c := routeMap[joinPaths(swagger.BasePath, path)+":"+method]
+			if c != nil && c.Config != nil && c.Config.EnableMcp {
+				// 如果指定了 operationID，则使用指定的
 				if c.Config.OperationID != "" {
 					operation.ID = c.Config.OperationID
 				}
-				// 如果没有指定operationID,则使用自动生成的
+				// 如果没有指定 operationID，则使用自动生成的
 				if operation.ID == "" {
 					operation.ID = c.OperationID
 				}
 				allToolMap[operation.ID] = struct{}{}
 				_, ok := toolMap[operation.ID]
-				// 如果指定了tool,不在指定的tool中,则跳过校验
+				// 如果指定了 tool，不在指定的 tool 中，则跳过校验
 				if isSpecified && !ok {
 					continue
 				}
 
 				if len(operation.Parameters) > 0 {
-					// 如果没有指定tool,则可以作为mcp tool
+					// 如果没有指定 tool，则可以作为 mcp tool
 					if !isSpecified {
 						tools = append(tools, operation.ID)
 					} else {
@@ -132,12 +133,12 @@ func GetMcpToolAndValidate(swagger spec.Swagger, routeMap map[string]*RouteConfi
 					}
 					continue
 				}
-				// 如果没有参数,开启mcp,则校验 nonSchema 是否设置
-				if !c.Config.NonSchema {
-					log.Fatalf("tool: %s enables mcp, but nonSchema is not set", operation.ID)
+				// 如果没有参数，开启 mcp，则校验 noneSchema 是否设置
+				if !c.Config.NoneSchema {
+					log.Fatalf("tool: %s enables mcp, but noneSchema is not set", operation.ID)
 					return []string{}
 				}
-				// 如果没有指定tool,则可以作为mcp  tool
+				// 如果没有指定 tool，则可以作为 mcp tool
 				if !isSpecified {
 					tools = append(tools, operation.ID)
 				} else {
@@ -148,9 +149,9 @@ func GetMcpToolAndValidate(swagger spec.Swagger, routeMap map[string]*RouteConfi
 	}
 
 	if isSpecified {
-		// 如果指定了tool,则校验是否都在canUseToolMap中
+		// 如果指定了 tool，则校验是否都在 canUseToolMap 中
 		for tool := range toolMap {
-			// 判断是否在所有的tool中
+			// 判断是否在所有的 tool 中
 			_, ok := allToolMap[tool]
 			if !ok {
 				log.Fatalf(
@@ -160,16 +161,16 @@ func GetMcpToolAndValidate(swagger spec.Swagger, routeMap map[string]*RouteConfi
 				)
 				return []string{}
 			}
-			// 判断是否在canUseToolMap,不在则报错
+			// 判断是否在 canUseToolMap，不在则报错
 			_, ok = canUseToolMap[tool]
 			if !ok {
 				log.Fatalf("tool: %s not found in all resources", tool)
 				return []string{}
 			}
-			// 判断是否在canUseToolMap,不在则报错
+			// 判断是否在 canUseToolMap，不在则报错
 			_, ok = canUseToolMap[tool]
 			if !ok {
-				log.Fatalf("tool: %s not found in can used resources, please check nonSchema or mcp enabled", tool)
+				log.Fatalf("tool: %s not found in can used resources, please check noneSchema or mcp enabled", tool)
 				return []string{}
 			}
 		}
@@ -177,7 +178,7 @@ func GetMcpToolAndValidate(swagger spec.Swagger, routeMap map[string]*RouteConfi
 	return tools
 }
 
-// GetPathOperationMap 获取path的operation map
+// GetPathOperationMap 获取 path 的 operation map
 func GetPathOperationMap(pathItem spec.PathItem) map[string]*spec.Operation {
 	operationMap := make(map[string]*spec.Operation)
 	// Populate the operation map with all available HTTP methods

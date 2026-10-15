@@ -19,9 +19,9 @@ import (
 	"strings"
 )
 
-// ZipDirectory 将指定目录压缩为ZIP文件
+// ZipDirectory 将指定目录中后缀为 includeExt 的文件压缩为 ZIP 文件
 func ZipDirectory(srcDir, dstZip string, includeExt ...string) error {
-	// 转换排除后缀为统一格式（带点的小写）
+	// 转换包含的后缀为统一格式（带点的小写）
 	includeMap := make(map[string]struct{})
 	for _, ext := range includeExt {
 		ext = strings.ToLower(ext)
@@ -31,14 +31,14 @@ func ZipDirectory(srcDir, dstZip string, includeExt ...string) error {
 		includeMap[ext] = struct{}{}
 	}
 
-	// 创建目标ZIP文件
+	// 创建目标 ZIP 文件
 	zipFile, err := os.Create(dstZip)
 	if err != nil {
 		return err
 	}
 	defer zipFile.Close()
 
-	// 创建ZIP写入器
+	// 创建 ZIP 写入器
 	zipWriter := zip.NewWriter(zipFile)
 	defer zipWriter.Close()
 
@@ -54,7 +54,7 @@ func ZipDirectory(srcDir, dstZip string, includeExt ...string) error {
 			return nil // 跳过该文件
 		}
 
-		// 获取相对路径，并转换为ZIP兼容格式
+		// 获取相对路径，并转换为 ZIP 兼容格式
 		relPath, err := filepath.Rel(srcDir, filePath)
 		if err != nil {
 			return err
@@ -66,14 +66,14 @@ func ZipDirectory(srcDir, dstZip string, includeExt ...string) error {
 			return nil
 		}
 
-		// 创建ZIP文件头
+		// 创建 ZIP 文件头
 		header, err := zip.FileInfoHeader(info)
 		if err != nil {
 			return err
 		}
 		header.Name = relPath
 
-		// 处理目录：添加斜杠后缀并使用Store压缩方式
+		// 处理目录：添加斜杠后缀并使用 Store 压缩方式
 		if info.IsDir() {
 			header.Name += "/"
 			header.Method = zip.Store

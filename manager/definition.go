@@ -19,12 +19,12 @@ import (
 	yaml "gopkg.in/yaml.v3"
 )
 
-// Definition represents a definition of a api gateway.
+// Definition represents a definition of an api gateway.
 type Definition struct {
 	definition map[string]any
 }
 
-// Get sub definition.
+// Get gets the sub definition under the namespace, such as "apigateway" or "a.b".
 func (d *Definition) Get(namespace string) (map[string]any, error) {
 	if namespace == "" {
 		return d.definition, nil
@@ -36,8 +36,8 @@ func (d *Definition) Get(namespace string) (map[string]any, error) {
 			return nil, errors.Wrapf(ErrNotFound, "namespace: %s", namespace)
 		}
 
-		value, fond := current[field]
-		if !fond {
+		value, found := current[field]
+		if !found {
 			return nil, errors.Wrapf(ErrNotFound, "namespace: %s", namespace)
 		}
 
@@ -50,7 +50,6 @@ func (d *Definition) Get(namespace string) (map[string]any, error) {
 			for k, v := range realValue {
 				current[fmt.Sprintf("%v", k)] = v
 			}
-			return current, nil
 		default:
 			return nil, errors.Wrapf(ErrNotFound, "namespace: %s", namespace)
 		}
@@ -59,31 +58,34 @@ func (d *Definition) Get(namespace string) (map[string]any, error) {
 	return current, nil
 }
 
-// GetArray Get sub array definition.
+// GetArray gets the array of objects under the namespace, such as "stages" or "a.b".
 func (d *Definition) GetArray(namespace string) ([]map[string]any, error) {
-	current := d.definition
-	for _, field := range strings.Split(namespace, ".") {
-		if current == nil {
-			return nil, errors.Wrapf(ErrNotFound, "namespace: %s", namespace)
-		}
-		value, found := current[field]
-		if !found {
-			return nil, errors.Wrapf(ErrNotFound, "namespace: %s", namespace)
-		}
-		switch realValue := value.(type) {
-		case []any:
-			// convert []map[any]any to map[string]any
-			result := make([]map[string]any, len(realValue))
-			for i, v := range realValue {
-				result[i] = v.(map[string]any)
-			}
-			return result, nil
-		default:
+	parent, field := "", namespace
+	if i := strings.LastIndex(namespace, "."); i >= 0 {
+		parent, field = namespace[:i], namespace[i+1:]
+	}
+	current, err := d.Get(parent)
+	if err != nil {
+		return nil, errors.Wrapf(ErrNotFound, "namespace: %s", namespace)
+	}
+	value, found := current[field]
+	if !found {
+		return nil, errors.Wrapf(ErrNotFound, "namespace: %s", namespace)
+	}
+	items, ok := value.([]any)
+	if !ok {
+		return nil, errors.Wrapf(errors.New("not supported type"), "namespace: %s", namespace)
+	}
+	// convert []any to []map[string]any
+	result := make([]map[string]any, len(items))
+	for i, v := range items {
+		item, ok := v.(map[string]any)
+		if !ok {
 			return nil, errors.Wrapf(errors.New("not supported type"), "namespace: %s", namespace)
 		}
+		result[i] = item
 	}
-
-	return []map[string]any{}, nil
+	return result, nil
 }
 
 // NewDefinition creates a new definition from the given map.
@@ -93,7 +95,7 @@ func NewDefinition(definition map[string]any) *Definition {
 	}
 }
 
-// NewDefinitionFromYaml unmarshal the given yaml string to a definition.
+// NewDefinitionFromYaml unmarshals the given yaml to a definition.
 func NewDefinitionFromYaml(content []byte) (*Definition, error) {
 	var definition map[string]any
 	err := yaml.Unmarshal(content, &definition)

@@ -1,5 +1,25 @@
-basePath: /v2
+basePath: /testapi
 definitions:
+  api.Pet:
+    properties:
+      category:
+        properties:
+          id:
+            type: integer
+          name:
+            type: string
+        type: object
+      id:
+        type: integer
+      name:
+        type: string
+      photoUrls:
+        items:
+          type: string
+        type: array
+      status:
+        type: string
+    type: object
   api.ProductUpdates:
     properties:
       description:
@@ -25,21 +45,17 @@ definitions:
         description: Valid is true if String is not NULL
         type: boolean
     type: object
-host: petstore.swagger.io
 info:
-  contact:
-    email: support@swagger.io
-    name: API Support
-    url: http://www.swagger.io/support
-  description: This is a sample server Petstore server.
+  contact: {}
+  description: An example of registering gin routes as the resources of BlueKing API
+    Gateway.
   license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
-  termsOfService: http://swagger.io/terms/
-  title: Swagger Example API
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: gin_contrib Example API
   version: "1.0"
 paths:
-  /testapi/pets/{id}/:
+  /pets/{id}/:
     get:
       consumes:
       - application/json
@@ -57,9 +73,9 @@ paths:
         "200":
           description: OK
           schema:
-            type: string
-      summary: get a  pet
-  /testapi/update-product/{product_id}:
+            $ref: '#/definitions/api.Pet'
+      summary: get a pet
+  /update-product/{product_id}:
     post:
       consumes:
       - application/json

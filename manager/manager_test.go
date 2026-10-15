@@ -209,6 +209,45 @@ var _ = Describe("Manager", func() {
 		}))
 	})
 
+	DescribeTable("should skip absent permission definitions",
+		func(definition map[string]any) {
+			mgr = newManager(definition)
+			// no mocked requests, an unexpected request fails
+			Expect(mgr.GrantPermissions(ctx)).To(Succeed())
+			_, err := mgr.ApplyPermissions(ctx)
+			Expect(err).NotTo(HaveOccurred())
+		},
+		Entry("missing", map[string]any{}),
+		Entry("null", map[string]any{"grant_permissions": nil, "apply_permissions": nil}),
+	)
+
+	It("should reject an object where an array is expected", func() {
+		object := map[string]any{"name": "prod", "target_app_code": "app1"}
+		mgr = newManager(map[string]any{"stages": object, "grant_permissions": object, "apply_permissions": object})
+		// no mocked requests, an unexpected request fails
+		_, err := mgr.SyncStagesConfig(ctx)
+		Expect(err).To(HaveOccurred())
+		Expect(mgr.GrantPermissions(ctx)).NotTo(Succeed())
+		_, err = mgr.ApplyPermissions(ctx)
+		Expect(err).To(HaveOccurred())
+	})
+
+	DescribeTable("should grant permissions to the gateway of the legacy api_name",
+		func(permission map[string]any, gateway string) {
+			permission["target_app_code"] = "app1"
+			mgr = newManager(map[string]any{"grant_permissions": []any{permission}})
+			gock.New(endpoint).Post("/api/v2/sync/gateways/" + gateway + "/permissions/grant/").
+				AddMatcher(captureBody).Reply(200).BodyString(`{"data":null}`)
+
+			Expect(mgr.GrantPermissions(ctx)).To(Succeed())
+			Expect(bodies).To(Equal([]map[string]any{{"target_app_code": "app1", "grant_dimension": "gateway"}}))
+		},
+		Entry("api_name", map[string]any{"api_name": "legacy-gateway"}, "legacy-gateway"),
+		Entry("api_name takes precedence",
+			map[string]any{"api_name": "legacy-gateway", "gateway_name": "other-gateway"}, "legacy-gateway"),
+		Entry("null defaults to the managed gateway", map[string]any{"api_name": nil}, "testing"),
+	)
+
 	It("should normalize the api grant dimension without changing the definition", func() {
 		permission := map[string]any{"target_app_code": "app1", "grant_dimension": "api"}
 		mgr = newManager(map[string]any{"grant_permissions": []any{permission}})
@@ -368,6 +407,10 @@ var _ = Describe("Manager", func() {
 
 		Expect(mgr.SyncResourceDocByArchive(ctx)).To(Succeed())
 		Expect(contentType).To(HavePrefix("multipart/form-data"))
+		// the archive is not left in the docs dir
+		entries, err := os.ReadDir(dir)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(entries).To(HaveLen(1))
 	})
 
 	It("should get the public key", func() {

@@ -9,22 +9,17 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "termsOfService": "http://swagger.io/terms/",
-        "contact": {
-            "name": "API Support",
-            "url": "http://www.swagger.io/support",
-            "email": "support@swagger.io"
-        },
+        "contact": {},
         "license": {
-            "name": "Apache 2.0",
-            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
         },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/testapi/pets/{id}/": {
+        "/pets/{id}/": {
             "get": {
                 "description": "get pet by ID",
                 "consumes": [
@@ -33,7 +28,7 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "summary": "get a  pet",
+                "summary": "get a pet",
                 "operationId": "get_pet_by_id",
                 "parameters": [
                     {
@@ -48,13 +43,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/api.Pet"
                         }
                     }
                 }
             }
         },
-        "/testapi/update-product/{product_id}": {
+        "/update-product/{product_id}": {
             "post": {
                 "consumes": [
                     "application/json"
@@ -84,6 +79,37 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "api.Pet": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "integer"
+                        },
+                        "name": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "photoUrls": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
         "api.ProductUpdates": {
             "type": "object",
             "properties": {
@@ -128,11 +154,11 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "petstore.swagger.io",
-	BasePath:         "/v2",
+	Host:             "",
+	BasePath:         "/testapi",
 	Schemes:          []string{},
-	Title:            "Swagger Example API",
-	Description:      "This is a sample server Petstore server.",
+	Title:            "gin_contrib Example API",
+	Description:      "An example of registering gin routes as the resources of BlueKing API Gateway.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

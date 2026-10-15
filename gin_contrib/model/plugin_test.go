@@ -1,3 +1,14 @@
+/**
+ * TencentBlueKing is pleased to support the open source community by
+ * making 蓝鲸智云-蓝鲸 PaaS 平台(BlueKing-PaaS) available.
+ * Copyright (C) 2025 Tencent. All rights reserved.
+ * Licensed under the MIT License (the "License"); you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at http://opensource.org/licenses/MIT
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+
 package model
 
 import "testing"
@@ -11,7 +22,9 @@ func TestPlugin(t *testing.T) {
 		MaxAge:          3600,
 		AllowCredential: true,
 	}
-	BuildResourcePluginConfigWithType(PluginTypeBKCors, corsConfig)
+	if plugin := BuildResourcePluginConfigWithType(PluginTypeBKCors, corsConfig); plugin.Type != PluginTypeBKCors {
+		t.Errorf("unexpected plugin: %+v", plugin)
+	}
 	// 熔断插件配置示例
 	breakerConfig := APIBreakerConfig{
 		BreakResponseCode: 503,
@@ -31,5 +44,17 @@ func TestPlugin(t *testing.T) {
 			Successes:    3,
 		},
 	}
-	BuildResourcePluginConfigWithType(PluginTypeAPIBreaker, breakerConfig)
+	if plugin := BuildResourcePluginConfigWithType(PluginTypeAPIBreaker, breakerConfig); plugin.YAML == "" {
+		t.Errorf("unexpected plugin: %+v", plugin)
+	}
+}
+
+func TestInvalidPluginConfig(t *testing.T) {
+	defer func() {
+		if recover() == nil {
+			t.Error("an invalid plugin config should panic")
+		}
+	}()
+	// allow_origins is required
+	BuildResourcePluginConfigWithType(PluginTypeBKCors, CorsConfig{MaxAge: 1})
 }

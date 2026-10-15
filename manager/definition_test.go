@@ -51,7 +51,41 @@ var _ = Describe("Definition", func() {
 		})
 	})
 
-	It("should new definition from yaml", func() {
+	It("should get through a map[any]any", func() {
+		definition := manager.NewDefinition(map[string]any{
+			"sub": map[any]any{"value": map[string]any{"foo": "bar"}},
+		})
+		sub, err := definition.Get("sub.value")
+		Expect(err).To(BeNil())
+		Expect(sub).To(Equal(map[string]any{"foo": "bar"}))
+	})
+
+	Context("GetArray", func() {
+		It("should return a deep array", func() {
+			definition := manager.NewDefinition(map[string]any{
+				"sub": map[string]any{"items": []any{map[string]any{"name": "a"}}},
+			})
+			items, err := definition.GetArray("sub.items")
+			Expect(err).To(BeNil())
+			Expect(items).To(Equal([]map[string]any{{"name": "a"}}))
+		})
+
+		It("should return an error instead of panicking for a non-object item", func() {
+			definition := manager.NewDefinition(map[string]any{"items": []any{"a"}})
+			_, err := definition.GetArray("items")
+			Expect(err).ToNot(BeNil())
+		})
+
+		It("should return an error for an object", func() {
+			definition := manager.NewDefinition(map[string]any{
+				"sub": map[string]any{"items": map[string]any{"name": "a"}},
+			})
+			_, err := definition.GetArray("sub.items")
+			Expect(err).ToNot(BeNil())
+		})
+	})
+
+	It("should create a definition from yaml", func() {
 		definition, err := manager.NewDefinitionFromYaml([]byte("sub:\n  name: testing"))
 		Expect(err).To(BeNil())
 		sub, err := definition.Get("sub")

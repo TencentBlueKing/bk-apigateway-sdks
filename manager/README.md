@@ -122,6 +122,7 @@ resource_docs:
 
 - `grant_dimension` 默认为 `gateway`。
 - `gateway_name` 默认为当前网关。
+- 兼容旧字段 `api_name`，与 `gateway_name` 同时存在时使用 `api_name`。
 - `apply_permissions` 的 `target_app_code` 默认为当前应用，`applicant` 默认同 `target_app_code`。
 
 资源通过 `SyncResourcesConfig` 单独同步，参数是 `resources.yaml` 的内容，格式见 [示例](../gin_contrib/gen/example/resources.yaml)。
