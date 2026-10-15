@@ -52,6 +52,7 @@ func TestMergeSwaggerConfig(t *testing.T) {
 		{"without sub path", "", "/api/users/list", "/api/v2/users"},
 		{"root", "/", "/api/users/list", "/api/v2/users"},
 		{"with sub path", "/my-app", "{env.api_sub_path}/api/users/list", "{env.api_sub_path}/api/v2/users"},
+		{"trailing slash", "/my-app/", "{env.api_sub_path}/api/users/list", "{env.api_sub_path}/api/v2/users"},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -120,7 +121,8 @@ func TestMergeSwaggerBackend(t *testing.T) {
 		t.Errorf("unexpected get backend: %+v", got)
 	}
 	// the configured method is kept
-	if got := backendOf(t, users.Post); got.Path != "{env.api_sub_path}/api/users" || got.Method != "put" || got.Timeout != 10 {
+	if got := backendOf(t, users.Post); got.Path != "{env.api_sub_path}/api/users" || got.Method != "put" ||
+		got.Timeout != 10 {
 		t.Errorf("unexpected post backend: %+v", got)
 	}
 	// the sub path is of the default backend
@@ -130,7 +132,10 @@ func TestMergeSwaggerBackend(t *testing.T) {
 
 	cases := map[string]map[string]any{
 		// the other configs in the swagger are kept
-		"/health": {"isPublic": false, "backend": map[string]any{"method": "get", "path": "{env.api_sub_path}/api/health"}},
+		"/health": {
+			"isPublic": false,
+			"backend":  map[string]any{"method": "get", "path": "{env.api_sub_path}/api/health"},
+		},
 		// not a gin route, the path of the resource
 		"/docs": {"backend": map[string]any{"method": "get", "path": "{env.api_sub_path}/api/docs"}},
 	}

@@ -43,6 +43,8 @@ func TestGenSubPath(t *testing.T) {
 	}{
 		{"", nil, "/users"},
 		{"/my-app", map[string]string{"api_sub_path": "/my-app"}, "{env.api_sub_path}/users"},
+		{"/my-app/", map[string]string{"api_sub_path": "/my-app"}, "{env.api_sub_path}/users"},
+		{"/", nil, "/users"},
 	} {
 		config := &model.APIConfig{Stage: &model.StageConfig{Name: "prod", BackendSubPath: c.subPath}}
 		var definition struct {
@@ -53,7 +55,8 @@ func TestGenSubPath(t *testing.T) {
 		if err := yaml.Unmarshal([]byte(GenDefinitionYaml(config, swaggerPath, engine)), &definition); err != nil {
 			t.Fatal(err)
 		}
-		if vars := definition.Stages[0].Vars; len(vars) != len(c.vars) || vars["api_sub_path"] != c.vars["api_sub_path"] {
+		if vars := definition.Stages[0].Vars; len(vars) != len(c.vars) ||
+			vars["api_sub_path"] != c.vars["api_sub_path"] {
 			t.Errorf("%q: vars = %v, want %v", c.subPath, vars, c.vars)
 		}
 

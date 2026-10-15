@@ -43,6 +43,9 @@ func GenDefinitionYaml(config *model.APIConfig, docPath string, engine *gin.Engi
 		panic(fmt.Sprintf("gen definition yaml error: %v", err))
 	}
 
+	// 资源的后端路径为 {env.api_sub_path}/path，去掉子路径末尾的 /
+	config.Stage.BackendSubPath = strings.TrimRight(config.Stage.BackendSubPath, "/")
+
 	// 如果开启 mcp，则需要根据 route 配置校验 tool 以及填充 tool 配置(如果没有指定)
 	if config.Stage.EnableMcpServers {
 		// 获取 route 网关配置
