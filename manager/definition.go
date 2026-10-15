@@ -58,37 +58,34 @@ func (d *Definition) Get(namespace string) (map[string]any, error) {
 	return current, nil
 }
 
-// GetArray gets the array of objects under the namespace.
+// GetArray gets the array of objects under the namespace, such as "stages" or "a.b".
 func (d *Definition) GetArray(namespace string) ([]map[string]any, error) {
-	current := d.definition
-	for field := range strings.SplitSeq(namespace, ".") {
-		if current == nil {
-			return nil, errors.Wrapf(ErrNotFound, "namespace: %s", namespace)
-		}
-		value, found := current[field]
-		if !found {
-			return nil, errors.Wrapf(ErrNotFound, "namespace: %s", namespace)
-		}
-		switch realValue := value.(type) {
-		case map[string]any:
-			current = realValue
-		case []any:
-			// convert []any to []map[string]any
-			result := make([]map[string]any, len(realValue))
-			for i, v := range realValue {
-				item, ok := v.(map[string]any)
-				if !ok {
-					return nil, errors.Wrapf(errors.New("not supported type"), "namespace: %s", namespace)
-				}
-				result[i] = item
-			}
-			return result, nil
-		default:
+	parent, field := "", namespace
+	if i := strings.LastIndex(namespace, "."); i >= 0 {
+		parent, field = namespace[:i], namespace[i+1:]
+	}
+	current, err := d.Get(parent)
+	if err != nil {
+		return nil, errors.Wrapf(ErrNotFound, "namespace: %s", namespace)
+	}
+	value, found := current[field]
+	if !found {
+		return nil, errors.Wrapf(ErrNotFound, "namespace: %s", namespace)
+	}
+	items, ok := value.([]any)
+	if !ok {
+		return nil, errors.Wrapf(errors.New("not supported type"), "namespace: %s", namespace)
+	}
+	// convert []any to []map[string]any
+	result := make([]map[string]any, len(items))
+	for i, v := range items {
+		item, ok := v.(map[string]any)
+		if !ok {
 			return nil, errors.Wrapf(errors.New("not supported type"), "namespace: %s", namespace)
 		}
+		result[i] = item
 	}
-
-	return []map[string]any{}, nil
+	return result, nil
 }
 
 // NewDefinition creates a new definition from the given map.

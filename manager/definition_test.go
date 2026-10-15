@@ -75,6 +75,14 @@ var _ = Describe("Definition", func() {
 			_, err := definition.GetArray("items")
 			Expect(err).ToNot(BeNil())
 		})
+
+		It("should return an error for an object", func() {
+			definition := manager.NewDefinition(map[string]any{
+				"sub": map[string]any{"items": map[string]any{"name": "a"}},
+			})
+			_, err := definition.GetArray("sub.items")
+			Expect(err).ToNot(BeNil())
+		})
 	})
 
 	It("should create a definition from yaml", func() {

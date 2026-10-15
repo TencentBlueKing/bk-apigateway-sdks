@@ -221,6 +221,17 @@ var _ = Describe("Manager", func() {
 		Entry("null", map[string]any{"grant_permissions": nil, "apply_permissions": nil}),
 	)
 
+	It("should reject an object where an array is expected", func() {
+		object := map[string]any{"name": "prod", "target_app_code": "app1"}
+		mgr = newManager(map[string]any{"stages": object, "grant_permissions": object, "apply_permissions": object})
+		// no mocked requests, an unexpected request fails
+		_, err := mgr.SyncStagesConfig(ctx)
+		Expect(err).To(HaveOccurred())
+		Expect(mgr.GrantPermissions(ctx)).NotTo(Succeed())
+		_, err = mgr.ApplyPermissions(ctx)
+		Expect(err).To(HaveOccurred())
+	})
+
 	DescribeTable("should grant permissions to the gateway of the legacy api_name",
 		func(permission map[string]any, gateway string) {
 			permission["target_app_code"] = "app1"
